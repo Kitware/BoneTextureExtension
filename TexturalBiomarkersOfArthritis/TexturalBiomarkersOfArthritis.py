@@ -5,34 +5,32 @@ from slicer.ScriptedLoadableModule import *
 import logging
 
 #
-# Textural-Biomarkers-of-Arthritis
+# TexturalBiomarkersOfArthritis
 #
 
-class Textural-Biomarkers-of-Arthritis(ScriptedLoadableModule):
+class TexturalBiomarkersOfArthritis(ScriptedLoadableModule):
   """Uses ScriptedLoadableModule base class, available at:
   https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
   """
 
   def __init__(self, parent):
     ScriptedLoadableModule.__init__(self, parent)
-    self.parent.title = "Textural-Biomarkers-of-Arthritis" # TODO make this more human readable by adding spaces
+    self.parent.title = "Textural Biomarkers Of Arthritis"
     self.parent.categories = ["Examples"]
     self.parent.dependencies = []
-    self.parent.contributors = ["John Doe (AnyWare Corp.)"] # replace with "Firstname Lastname (Organization)"
+    self.parent.contributors = ["Jean-Baptiste VIMORT (Kitware Inc..)"] # replace with "Firstname Lastname (Organization)"
     self.parent.helpText = """
-    This is an example of scripted loadable module bundled in an extension.
-    It performs a simple thresholding on the input volume and optionally captures a screenshot.
+    TODO
     """
     self.parent.acknowledgementText = """
-    This file was originally developed by Jean-Christophe Fillion-Robin, Kitware Inc.
-    and Steve Pieper, Isomics, Inc. and was partially funded by NIH grant 3P41RR013218-12S1.
+    TODO
 """ # replace with organization, grant and thanks.
 
 #
-# Textural-Biomarkers-of-ArthritisWidget
+# Textural Biomarkers of ArthritisWidget
 #
 
-class Textural-Biomarkers-of-ArthritisWidget(ScriptedLoadableModuleWidget):
+class TexturalBiomarkersOfArthritisWidget(ScriptedLoadableModuleWidget):
   """Uses ScriptedLoadableModuleWidget base class, available at:
   https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
   """
@@ -127,16 +125,16 @@ class Textural-Biomarkers-of-ArthritisWidget(ScriptedLoadableModuleWidget):
     self.applyButton.enabled = self.inputSelector.currentNode() and self.outputSelector.currentNode()
 
   def onApplyButton(self):
-    logic = Textural-Biomarkers-of-ArthritisLogic()
+    logic = TexturalBiomarkersOfArthritisLogic()
     enableScreenshotsFlag = self.enableScreenshotsFlagCheckBox.checked
     imageThreshold = self.imageThresholdSliderWidget.value
     logic.run(self.inputSelector.currentNode(), self.outputSelector.currentNode(), imageThreshold, enableScreenshotsFlag)
 
 #
-# Textural-Biomarkers-of-ArthritisLogic
+# TexturalBiomarkersOfArthritisLogic
 #
 
-class Textural-Biomarkers-of-ArthritisLogic(ScriptedLoadableModuleLogic):
+class TexturalBiomarkersOfArthritisLogic(ScriptedLoadableModuleLogic):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -227,14 +225,14 @@ class Textural-Biomarkers-of-ArthritisLogic(ScriptedLoadableModuleLogic):
 
     # Capture screenshot
     if enableScreenshots:
-      self.takeScreenshot('Textural-Biomarkers-of-ArthritisTest-Start','MyScreenshot',-1)
+      self.takeScreenshot('TexturalBiomarkersOfArthritisTestStart','MyScreenshot',-1)
 
     logging.info('Processing completed')
 
     return True
 
 
-class Textural-Biomarkers-of-ArthritisTest(ScriptedLoadableModuleTest):
+class TexturalBiomarkersOfArthritisTest(ScriptedLoadableModuleTest):
   """
   This is the test case for your scripted module.
   Uses ScriptedLoadableModuleTest base class, available at:
@@ -250,9 +248,9 @@ class Textural-Biomarkers-of-ArthritisTest(ScriptedLoadableModuleTest):
     """Run as few or as many tests as needed here.
     """
     self.setUp()
-    self.test_Textural-Biomarkers-of-Arthritis1()
+    self.test_TexturalBiomarkersOfArthritis1()
 
-  def test_Textural-Biomarkers-of-Arthritis1(self):
+  def test_TexturalBiomarkersOfArthritis1(self):
     """ Ideally you should have several levels of tests.  At the lowest level
     tests should exercise the functionality of the logic with different inputs
     (both valid and invalid).  At higher levels your tests should emulate the
@@ -284,6 +282,6 @@ class Textural-Biomarkers-of-ArthritisTest(ScriptedLoadableModuleTest):
     self.delayDisplay('Finished with download and loading')
 
     volumeNode = slicer.util.getNode(pattern="FA")
-    logic = Textural-Biomarkers-of-ArthritisLogic()
+    logic = TexturalBiomarkersOfArthritisLogic()
     self.assertIsNotNone( logic.hasImageData(volumeNode) )
     self.delayDisplay('Test passed!')
