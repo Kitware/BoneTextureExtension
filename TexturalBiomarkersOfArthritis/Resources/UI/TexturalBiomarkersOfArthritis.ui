@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>TexturalBiomarkersOfArtritis</class>
  <widget class="qMRMLWidget" name="TexturalBiomarkersOfArtritis">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>443</width>
-    <height>737</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -22,11 +14,11 @@
      <property name="contentsFrameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
+     <layout class="QVBoxLayout" name="InputDataVerticalLayout">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="ComputationChoiceHorizontalLayout">
         <item>
-         <widget class="QRadioButton" name="radioButton_2">
+         <widget class="QRadioButton" name="SinglComputationRadioButton">
           <property name="text">
            <string>Single computation</string>
           </property>
@@ -36,7 +28,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="radioButton">
+         <widget class="QRadioButton" name="GroupComputatioRadioButton">
           <property name="text">
            <string>Group Computation</string>
           </property>
@@ -53,7 +45,7 @@
          <string/>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="1" column="1">
+         <item row="2" column="1">
           <widget class="qMRMLNodeComboBox" name="InputSegmentationMRMLNodeComboBox">
            <property name="enabled">
             <bool>true</bool>
@@ -67,17 +59,17 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label">
+         <item row="2" column="0">
+          <widget class="QLabel" name="InputSegmentationLabel">
            <property name="text">
-            <string>Input Scan</string>
+            <string>Input Segmentation</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_2">
+         <item row="0" column="0">
+          <widget class="QLabel" name="InputScanLabel">
            <property name="text">
-            <string>Input Segmentation</string>
+            <string>Input Scan</string>
            </property>
           </widget>
          </item>
@@ -89,19 +81,25 @@
         <property name="enabled">
          <bool>true</bool>
         </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="title">
          <string/>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="0" column="0">
-          <widget class="QLabel" name="label_3">
+          <widget class="QLabel" name="InputScansLabel">
            <property name="text">
             <string>Input Scans</string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_4">
+          <widget class="QLabel" name="InputSegmentationsLabel">
            <property name="text">
             <string>Input Segmentations</string>
            </property>
@@ -124,14 +122,11 @@
      <property name="text">
       <string>Computation</string>
      </property>
-     <property name="contentsFrameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_5">
+     <layout class="QVBoxLayout" name="ComputationVerticalLayout">
       <item>
-       <widget class="ctkCollapsibleGroupBox" name="CollapsibleGroupBox">
+       <widget class="ctkCollapsibleGroupBox" name="FeatureChoiceCollapsibleGroupBox">
         <property name="title">
-         <string>Features Choice:</string>
+         <string>Features choice</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="0" column="1">
@@ -362,17 +357,17 @@
            </item>
           </widget>
          </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_5">
+         <item row="1" column="0">
+          <widget class="QLabel" name="GLRLMFeaturesLabel">
            <property name="text">
-            <string>GLCM features</string>
+            <string>GLRLM features</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_6">
+         <item row="0" column="0">
+          <widget class="QLabel" name="GLCMFeaturesLabel">
            <property name="text">
-            <string>GLRLM features</string>
+            <string>GLCM features</string>
            </property>
           </widget>
          </item>
@@ -380,11 +375,14 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QHBoxLayout" name="ComputationHorizontalLayout">
+        <property name="topMargin">
+         <number>0</number>
+        </property>
         <item>
-         <widget class="QPushButton" name="ComputeScanFeaturesPushButton">
+         <widget class="QPushButton" name="ComputeFeaturesPushButton">
           <property name="text">
-           <string>Compute Scan Features</string>
+           <string>Compute Features</string>
           </property>
          </widget>
         </item>
@@ -398,11 +396,18 @@
        </layout>
       </item>
       <item>
-       <widget class="ctkCollapsibleGroupBox" name="CollapsibleGroupBox_2">
+       <widget class="ctkCollapsibleGroupBox" name="AdvancedOptionsCollapsibleGroupBox">
         <property name="title">
          <string>Advanced options</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_7"/>
+        <layout class="QVBoxLayout" name="verticalLayout_7">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetMinimumSize</enum>
+         </property>
+         <property name="topMargin">
+          <number>9</number>
+         </property>
+        </layout>
        </widget>
       </item>
      </layout>
@@ -416,17 +421,81 @@
      <property name="contentsFrameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
-     <zorder>verticalSpacer</zorder>
+     <layout class="QVBoxLayout" name="ResultVerticalLayout">
+      <item>
+       <widget class="ctkCollapsibleGroupBox" name="FeaturesTableCollapsibleGroupBox">
+        <property name="title">
+         <string>Features Table</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_8">
+         <item>
+          <widget class="QTableWidget" name="FeaturesableWidget"/>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="ctkCollapsibleGroupBox" name="DisplayColormapsCollapsibleGroupBox">
+        <property name="title">
+         <string>Display Colormaps</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_9">
+         <item>
+          <widget class="qMRMLTreeView" name="DisplayColormapsMRMLTreeView"/>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+     <zorder>DisplayColormapsCollapsibleGroupBox</zorder>
+     <zorder>FeaturesTableCollapsibleGroupBox</zorder>
     </widget>
    </item>
    <item>
     <widget class="ctkCollapsibleButton" name="ExportationCollapsibleButton">
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
      <property name="text">
       <string>Exportation</string>
      </property>
      <property name="contentsFrameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
+     <layout class="QVBoxLayout" name="ExportationVerticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="OutputPathHorizontalLayout">
+        <item>
+         <widget class="QLabel" name="OutputPathLabel">
+          <property name="text">
+           <string>Result file path</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ctkPathLineEdit" name="OutputPathLineEdit"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="SavingButtonsHorizontalLayout">
+        <item>
+         <widget class="QPushButton" name="SaveFeaturesPushButton">
+          <property name="text">
+           <string>Save Features</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="SaveColormapsPushButton">
+          <property name="text">
+           <string>Save Colormaps</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
@@ -449,6 +518,11 @@
    <class>qMRMLNodeComboBox</class>
    <extends>QWidget</extends>
    <header>qMRMLNodeComboBox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLTreeView</class>
+   <extends>QTreeView</extends>
+   <header>qMRMLTreeView.h</header>
   </customwidget>
   <customwidget>
    <class>qMRMLWidget</class>
