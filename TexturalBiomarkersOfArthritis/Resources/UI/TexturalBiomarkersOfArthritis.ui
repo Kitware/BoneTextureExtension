@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TexturalBiomarkersOfArtritis</class>
+ <widget class="qMRMLWidget" name="TexturalBiomarkersOfArtritis">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>443</width>
+    <height>737</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_4">
+   <item>
+    <widget class="ctkCollapsibleButton" name="InputDataCollapsibleButton">
+     <property name="text">
+      <string>Input data</string>
+     </property>
+     <property name="contentsFrameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QRadioButton" name="radioButton_2">
+          <property name="text">
+           <string>Single computation</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="radioButton">
+          <property name="text">
+           <string>Group Computation</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="SingleComputationgroupBox">
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="1" column="1">
+          <widget class="qMRMLNodeComboBox" name="InputSegmentationMRMLNodeComboBox">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="qMRMLNodeComboBox" name="InputScanMRMLNodeComboBox">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Input Scan</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Input Segmentation</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="GroupComputationgroupBox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Input Scans</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Input Segmentations</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="ctkPathLineEdit" name="InputScansPathLineEdit"/>
+         </item>
+         <item row="1" column="1">
+          <widget class="ctkPathLineEdit" name="InputSegmentationsPathLineEdit"/>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="ctkCollapsibleButton" name="ComputationCollapsibleButton">
+     <property name="text">
+      <string>Computation</string>
+     </property>
+     <property name="contentsFrameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_5">
+      <item>
+       <widget class="ctkCollapsibleGroupBox" name="CollapsibleGroupBox">
+        <property name="title">
+         <string>Features Choice:</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="1">
+          <widget class="ctkCheckableComboBox" name="GLCMFeaturesCheckableComboBox">
+           <item>
+            <property name="text">
+             <string>SumVariance</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Homogeneity1</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Homogeneity2</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ClusterShade</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>MaximumProbability</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Idmn</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>SumVariance2</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Contrast</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>DifferenceEntropy</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>InverseVariance</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Entropy</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Dissimilarity</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>DifferenceVariance</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Idn</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Idm</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Correlation</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Autocorrelation</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>SumEntropy</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>AverageIntensity</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Energy</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>SumSquares</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ClusterProminence</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>SumAverage</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Imc2</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Imc1</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>DifferenceAverage</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Id</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ClusterTendency</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="ctkCheckableComboBox" name="GLRLMFeaturesCheckableComboBox">
+           <item>
+            <property name="text">
+             <string>ShortRunLowGrayLevelEmphasis</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>GrayLevelVariance</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>LowGrayLevelRunEmphasis</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>GrayLevelNonUniformityNormalized</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>RunVariance</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>GrayLevelNonUniformity</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>LongRunEmphasis</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ShortRunHighGrayLevelEmphasis</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>RunLengthNonUniformity</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ShortRunEmphasis</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>LongRunHighGrayLevelEmphasis</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>RunPercentage</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>LongRunLowGrayLevelEmphasis</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>RunEntropy</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>HighGrayLevelRunEmphasis</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>HighGrayLevelRunEmphasis</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>GLCM features</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>GLRLM features</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QPushButton" name="ComputeScanFeaturesPushButton">
+          <property name="text">
+           <string>Compute Scan Features</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ComputeColormapsPushButton">
+          <property name="text">
+           <string>Compute Colormaps</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="ctkCollapsibleGroupBox" name="CollapsibleGroupBox_2">
+        <property name="title">
+         <string>Advanced options</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_7"/>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="ctkCollapsibleButton" name="ResultsCollapsibleButton">
+     <property name="text">
+      <string>Results</string>
+     </property>
+     <property name="contentsFrameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <zorder>verticalSpacer</zorder>
+    </widget>
+   </item>
+   <item>
+    <widget class="ctkCollapsibleButton" name="ExportationCollapsibleButton">
+     <property name="text">
+      <string>Exportation</string>
+     </property>
+     <property name="contentsFrameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>qMRMLNodeComboBox</class>
+   <extends>QWidget</extends>
+   <header>qMRMLNodeComboBox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLWidget</class>
+   <extends>QWidget</extends>
+   <header>qMRMLWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ctkCheckableComboBox</class>
+   <extends>QComboBox</extends>
+   <header>ctkCheckableComboBox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ctkCollapsibleButton</class>
+   <extends>QWidget</extends>
+   <header>ctkCollapsibleButton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ctkCollapsibleGroupBox</class>
+   <extends>QGroupBox</extends>
+   <header>ctkCollapsibleGroupBox.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ctkPathLineEdit</class>
+   <extends>QWidget</extends>
+   <header>ctkPathLineEdit.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
