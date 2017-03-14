@@ -102,11 +102,30 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.saveFeaturesPushButton = self.logic.get("SaveFeaturesPushButton")
         self.saveColormapsPushButton = self.logic.get("SaveColormapsPushButton")
 
+        # -------------------------------------------------------------------- #
+        # ---------------------------- Connections --------------------------- #
+        # -------------------------------------------------------------------- #
+
+        self.singleCaseRadioButton.connect('clicked()', self.onSingleCaseComputationSelected)
+        self.multiCaseRadioButton.connect('clicked()', self.onMultiCaseComputationSelected)
+
+        # -------------------------------------------------------------------- #
+        # -------------------------- Initialisation -------------------------- #
+        # -------------------------------------------------------------------- #
+
+        self.onSingleCaseComputationSelected()
 
         # ******************************************************************** #
         # ----------------------- Algorithm ---------------------------------- #
         # ******************************************************************** #
 
+    def onSingleCaseComputationSelected(self):
+        self.singleCaseGroupBox.show()
+        self.multiCaseGroupBox.hide()
+
+    def onMultiCaseComputationSelected(self):
+        self.multiCaseGroupBox.show()
+        self.singleCaseGroupBox.hide()
 
     def cleanup(self):
         pass
