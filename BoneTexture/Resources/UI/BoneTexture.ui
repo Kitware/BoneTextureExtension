@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TexturalBiomarkersOfArtritis</class>
- <widget class="qMRMLWidget" name="TexturalBiomarkersOfArtritis">
+ <class>BoneTexture</class>
+ <widget class="qMRMLWidget" name="BoneTexture">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>458</width>
+    <height>1129</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -18,9 +26,9 @@
       <item>
        <layout class="QHBoxLayout" name="ComputationChoiceHorizontalLayout">
         <item>
-         <widget class="QRadioButton" name="SinglComputationRadioButton">
+         <widget class="QRadioButton" name="SingleCaseRadioButton">
           <property name="text">
-           <string>Single computation</string>
+           <string>Single case</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -28,9 +36,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="GroupComputatioRadioButton">
+         <widget class="QRadioButton" name="MultiCaseRadioButton">
           <property name="text">
-           <string>Group Computation</string>
+           <string>Multi case</string>
           </property>
           <property name="checked">
            <bool>false</bool>
@@ -40,7 +48,7 @@
        </layout>
       </item>
       <item>
-       <widget class="QGroupBox" name="SingleComputationgroupBox">
+       <widget class="QGroupBox" name="SingleCaseGroupBox">
         <property name="title">
          <string/>
         </property>
@@ -77,7 +85,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="GroupComputationgroupBox">
+       <widget class="QGroupBox" name="GroupCaseGroupBox">
         <property name="enabled">
          <bool>true</bool>
         </property>

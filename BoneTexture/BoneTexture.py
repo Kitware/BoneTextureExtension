@@ -2,20 +2,21 @@ import ctk
 import logging
 import os
 import qt
+import math
 import slicer
 import unittest
 import vtk
 from slicer.ScriptedLoadableModule import *
 
 ################################################################################
-#################  Textural Biomarkers of Arthritis ############################
+############################  Bone Texture #####################################
 ################################################################################
 
 
-class TexturalBiomarkersOfArthritis(ScriptedLoadableModule):
+class BoneTexture(ScriptedLoadableModule):
     def __init__(self, parent):
         ScriptedLoadableModule.__init__(self, parent)
-        self.parent.title = "Textural Biomarkers Of Arthritis"
+        self.parent.title = "Bone Texture"
         self.parent.categories = ["Examples"]
         self.parent.dependencies = []
         self.parent.contributors = ["Jean-Baptiste VIMORT (Kitware Inc..)"]
@@ -27,11 +28,11 @@ class TexturalBiomarkersOfArthritis(ScriptedLoadableModule):
 """
 
 ################################################################################
-################  Textural Biomarkers of Arthritis Widget ######################
+##########################  Bone Texture Widget ################################
 ################################################################################
 
 
-class TexturalBiomarkersOfArthritisWidget(ScriptedLoadableModuleWidget):
+class BoneTextureWidget(ScriptedLoadableModuleWidget):
 
     # ************************************************************************ #
     # -------------------------- Initialisation ------------------------------ #
@@ -39,14 +40,14 @@ class TexturalBiomarkersOfArthritisWidget(ScriptedLoadableModuleWidget):
 
     def setup(self):
         ScriptedLoadableModuleWidget.setup(self)
-        print("-----  Textural Biomarkers of Arthritis widget setup -----")
-        self.moduleName = 'TexturalBiomarkersOfArthritis'
+        print("-----  Bone Texture widget setup -----")
+        self.moduleName = 'BoneTexture'
         scriptedModulesPath = eval('slicer.modules.%s.path' % self.moduleName.lower())
         scriptedModulesPath = os.path.dirname(scriptedModulesPath)
 
-        # - Initialisation of Textural Biomarkers of Arthritis and its logic - #
+        # - Initialisation of Bone Texture and its logic - #
 
-        self.logic = TexturalBiomarkersOfArthritisLogic()
+        self.logic = BoneTextureLogic()
 
         # -------------------------------------------------------------------- #
         # ----------------- Definition of the UI interface ------------------- #
@@ -66,54 +67,55 @@ class TexturalBiomarkersOfArthritisWidget(ScriptedLoadableModuleWidget):
         self.layout.addWidget(widget)
 
         # ******************************************************************** #
-        # ------------------------------ Algorithm --------------------------- #
+        # ----------------------- Algorithm ---------------------------------- #
         # ******************************************************************** #
+
 
     def cleanup(self):
         pass
 
 
 ################################################################################
-#################  Textural Biomarkers Of Arthritis Logic ######################
+############################  Bone Texture Logic ###############################
 ################################################################################
 
 
-class TexturalBiomarkersOfArthritisLogic(ScriptedLoadableModuleLogic):
+class BoneTextureLogic(ScriptedLoadableModuleLogic):
 
     # ************************************************************************ #
-    # -------------------------- Initialisation ------------------------------ #
+    # ----------------------- Initialisation --------------------------------- #
     # ************************************************************************ #
 
     def __init__(self):
-        print "----- Textural Biomarkers of Arthritis logic init -----"
+        print "----- Bone Texture logic init -----"
 
     # ************************************************************************ #
-    # ------------------------------ Algorithm ------------------------------- #
+    # ------------------------ Algorithm ------------------------------------- #
     # ************************************************************************ #
 
 ################################################################################
-#################  Textural Biomarkers Of Arthritis Test #######################
+###########################  Bone Texture Test #################################
 ################################################################################
 
 
-class TexturalBiomarkersOfArthritisTest(ScriptedLoadableModuleTest):
+class BoneTextureTest(ScriptedLoadableModuleTest):
     # ************************************************************************ #
     # -------------------------- Initialisation ------------------------------ #
     # ************************************************************************ #
 
     def setUp(self):
-        print "----- Textural Biomarkers of Arthritis test setup -----"
+        print "----- Bone Texture test setup -----"
         # reset the state - clear scene
         self.delayDisplay("Clear the scene")
         slicer.mrmlScene.Clear(0)
 
         # ******************************************************************** #
-        # ---------- Testing of Textural Biomarkers Of Arthritis ------------- #
+        # -------------------- Testing of Bone Texture ----------------------- #
         # ******************************************************************** #
 
     def runTest(self):
         self.setUp()
-        self.test_TexturalBiomarkersOfArthritis1()
+        self.test_BoneTexture1()
 
-    def test_TexturalBiomarkersOfArthritis1(self):
+    def test_BoneTexture1(self):
         self.delayDisplay("Starting the test")

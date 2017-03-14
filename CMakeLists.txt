@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.9)
 
-project(TexturalBiomarkersOfArthritis)
+project(BoneTextureExtension)
 
 #-----------------------------------------------------------------------------
 # Extension meta-information
@@ -19,7 +19,7 @@ include(${Slicer_USE_FILE})
 
 #-----------------------------------------------------------------------------
 # Extension modules
-add_subdirectory(TexturalBiomarkersOfArthritis)
+add_subdirectory(BoneTexture)
 ## NEXT_MODULE
 
 #-----------------------------------------------------------------------------

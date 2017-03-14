@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-set(MODULE_NAME TexturalBiomarkersOfArthritis)
+set(MODULE_NAME BoneTexture)
 
 #-----------------------------------------------------------------------------
 set(MODULE_PYTHON_SCRIPTS
