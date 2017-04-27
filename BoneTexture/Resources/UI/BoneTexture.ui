@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>458</width>
-    <height>1129</height>
+    <width>922</width>
+    <height>1189</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,11 +58,47 @@
            <property name="enabled">
             <bool>true</bool>
            </property>
+           <property name="nodeTypes">
+            <stringlist>
+             <string>vtkMRMLLabelMapVolumeNode</string>
+            </stringlist>
+           </property>
+           <property name="noneEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="addEnabled">
+            <bool>false</bool>
+           </property>
+           <property name="removeEnabled">
+            <bool>false</bool>
+           </property>
           </widget>
          </item>
          <item row="0" column="1">
           <widget class="qMRMLNodeComboBox" name="InputScanMRMLNodeComboBox">
            <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="nodeTypes">
+            <stringlist>
+             <string>vtkMRMLScalarVolumeNode</string>
+            </stringlist>
+           </property>
+           <property name="hideChildNodeTypes">
+            <stringlist>
+             <string>vtkMRMLLabelMapVolumeNode</string>
+            </stringlist>
+           </property>
+           <property name="noneEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="addEnabled">
+            <bool>false</bool>
+           </property>
+           <property name="removeEnabled">
+            <bool>false</bool>
+           </property>
+           <property name="selectNodeUponCreation">
             <bool>true</bool>
            </property>
           </widget>
@@ -99,15 +135,15 @@
          <string/>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="1">
+          <widget class="ctkDirectoryButton" name="InputScanDirectoryButton"/>
+         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="InputScansLabel">
            <property name="text">
             <string>Input Scans</string>
            </property>
           </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="ctkPathLineEdit" name="InputScansPathLineEdit"/>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="InputSegmentationsLabel">
@@ -117,7 +153,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="ctkPathLineEdit" name="InputSegmentationsPathLineEdit"/>
+          <widget class="ctkDirectoryButton" name="InputSegmentationDirectoryButton"/>
          </item>
         </layout>
        </widget>
@@ -137,232 +173,25 @@
          <string>Features choice</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
-         <item row="0" column="1">
-          <widget class="ctkCheckableComboBox" name="GLCMFeaturesCheckableComboBox">
-           <item>
-            <property name="text">
-             <string>SumVariance</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Homogeneity1</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Homogeneity2</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>ClusterShade</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>MaximumProbability</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Idmn</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>SumVariance2</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Contrast</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>DifferenceEntropy</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>InverseVariance</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Entropy</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Dissimilarity</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>DifferenceVariance</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Idn</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Idm</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Correlation</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Autocorrelation</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>SumEntropy</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>AverageIntensity</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Energy</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>SumSquares</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>ClusterProminence</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>SumAverage</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Imc2</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Imc1</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>DifferenceAverage</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Id</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>ClusterTendency</string>
-            </property>
-           </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="GLCMFeaturesLabel">
+           <property name="text">
+            <string>GLCM features</string>
+           </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="ctkCheckableComboBox" name="GLRLMFeaturesCheckableComboBox">
-           <item>
-            <property name="text">
-             <string>ShortRunLowGrayLevelEmphasis</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>GrayLevelVariance</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>LowGrayLevelRunEmphasis</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>GrayLevelNonUniformityNormalized</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>RunVariance</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>GrayLevelNonUniformity</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>LongRunEmphasis</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>ShortRunHighGrayLevelEmphasis</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>RunLengthNonUniformity</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>ShortRunEmphasis</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>LongRunHighGrayLevelEmphasis</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>RunPercentage</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>LongRunLowGrayLevelEmphasis</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>RunEntropy</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>HighGrayLevelRunEmphasis</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>HighGrayLevelRunEmphasis</string>
-            </property>
-           </item>
+          <widget class="QCheckBox" name="GLRLMFeaturesCheckBox">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="GLCMFeaturesCheckBox">
+           <property name="text">
+            <string/>
+           </property>
           </widget>
          </item>
          <item row="1" column="0">
@@ -372,12 +201,189 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="GLCMFeaturesLabel">
-           <property name="text">
-            <string>GLCM features</string>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="ctkCollapsibleGroupBox" name="ParametersCollapsibleGroupBox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="title">
+         <string>parameters</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_7">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetMinimumSize</enum>
+         </property>
+         <property name="topMargin">
+          <number>9</number>
+         </property>
+         <item>
+          <layout class="QFormLayout" name="formLayout">
+           <property name="fieldGrowthPolicy">
+            <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
            </property>
-          </widget>
+           <item row="0" column="0">
+            <widget class="QLabel" name="MaskInsideValueLabel">
+             <property name="text">
+              <string>Mask &quot;inside&quot; value:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="NumberOfBinsLabel">
+             <property name="text">
+              <string>Number of bins:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="VoxelIntensityRangeLabel">
+             <property name="text">
+              <string>Voxel Intensity Range:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="DistanceRangeLabel">
+             <property name="text">
+              <string>Distance range:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <layout class="QFormLayout" name="formLayout_2">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>min:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>max:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="MaxVoxelIntensitySpinBox">
+               <property name="minimum">
+                <number>-32768</number>
+               </property>
+               <property name="maximum">
+                <number>32768</number>
+               </property>
+               <property name="value">
+                <number>2000</number>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QSpinBox" name="MinVoxelIntensitySpinBox">
+               <property name="minimum">
+                <number>-32768</number>
+               </property>
+               <property name="maximum">
+                <number>32768</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="3" column="1">
+            <layout class="QFormLayout" name="formLayout_3">
+             <property name="fieldGrowthPolicy">
+              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+             </property>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>min:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>max:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="MaxDistanceSpinBox">
+               <property name="maximum">
+                <double>5.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QDoubleSpinBox" name="MinDistanceSpinBox">
+               <property name="maximum">
+                <double>5.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="NumberOfBinsSpinBox">
+             <property name="maximum">
+              <number>255</number>
+             </property>
+             <property name="value">
+              <number>10</number>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QSpinBox" name="InsideMaskValueSpinBox">
+             <property name="maximum">
+              <number>1000</number>
+             </property>
+             <property name="singleStep">
+              <number>1</number>
+             </property>
+             <property name="value">
+              <number>1</number>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="NeighborhoodRadiusLabel">
+             <property name="text">
+              <string>Neighborhood Radius:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QSpinBox" name="NeighborhoodRadiusSpinBox">
+             <property name="maximum">
+              <number>10</number>
+             </property>
+             <property name="value">
+              <number>4</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -402,21 +408,6 @@
          </widget>
         </item>
        </layout>
-      </item>
-      <item>
-       <widget class="ctkCollapsibleGroupBox" name="AdvancedOptionsCollapsibleGroupBox">
-        <property name="title">
-         <string>Advanced options</string>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_7">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
-         <property name="topMargin">
-          <number>9</number>
-         </property>
-        </layout>
-       </widget>
       </item>
      </layout>
     </widget>
@@ -542,11 +533,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ctkCheckableComboBox</class>
-   <extends>QComboBox</extends>
-   <header>ctkCheckableComboBox.h</header>
-  </customwidget>
-  <customwidget>
    <class>ctkCollapsibleButton</class>
    <extends>QWidget</extends>
    <header>ctkCollapsibleButton.h</header>
@@ -557,6 +543,11 @@
    <extends>QGroupBox</extends>
    <header>ctkCollapsibleGroupBox.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ctkDirectoryButton</class>
+   <extends>QWidget</extends>
+   <header>ctkDirectoryButton.h</header>
   </customwidget>
   <customwidget>
    <class>ctkPathLineEdit</class>

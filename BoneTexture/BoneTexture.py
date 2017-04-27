@@ -72,20 +72,29 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.singleCaseGroupBox = self.logic.get("SingleCaseGroupBox")
         self.multiCaseGroupBox = self.logic.get("MultiCaseGroupBox")
         self.inputScanMRMLNodeComboBox = self.logic.get("InputScanMRMLNodeComboBox")
+        self.inputScanMRMLNodeComboBox.setMRMLScene(slicer.mrmlScene)
         self.inputSegmentationMRMLNodeComboBox = self.logic.get("InputSegmentationMRMLNodeComboBox")
-        self.inputScansPathLineEdit = self.logic.get("InputScansPathLineEdit")
-        self.inputSegmentationsPathLineEdit = self.logic.get("InputSegmentationsPathLineEdit")
+        self.inputSegmentationMRMLNodeComboBox.setMRMLScene(slicer.mrmlScene)
+        self.inputScanDirectoryButton = self.logic.get("InputScanDirectoryButton")
+        self.inputSegmentationDirectoryButton = self.logic.get("InputSegmentationsPathLineEdit")
 
 
         # ---------------- Computation Collapsible Button -------------------- #
 
         self.computationCollapsibleButton = self.logic.get("ComputationCollapsibleButton")
         self.featureChoiceCollapsibleGroupBox = self.logic.get("FeatureChoiceCollapsibleGroupBox")
-        self.gLCMFeaturesCheckableComboBox = self.logic.get("GLCMFeaturesCheckableComboBox")
-        self.gLRLMFeaturesCheckableComboBox = self.logic.get("GLRLMFeaturesCheckableComboBox")
+        self.gLCMFeaturesCheckBox = self.logic.get("GLCMFeaturesCheckBox")
+        self.gLRLMFeaturesCheckBox = self.logic.get("GLRLMFeaturesCheckBox")
         self.computeFeaturesPushButton = self.logic.get("ComputeFeaturesPushButton")
         self.computeColormapsPushButton = self.logic.get("ComputeColormapsPushButton")
-        self.advancedOptionsCollapsibleGroupBox = self.logic.get("AdvancedOptionsCollapsibleGroupBox")
+        self.parametersCollapsibleGroupBox = self.logic.get("ParametersCollapsibleGroupBox")
+        self.insideMaskValueSpinBox = self.logic.get("InsideMaskValueSpinBox")
+        self.numberOfBinsSpinBox = self.logic.get("NumberOfBinsSpinBox")
+        self.minVoxelIntensitySpinBox = self.logic.get("MinVoxelIntensitySpinBox")
+        self.maxVoxelIntensitySpinBox = self.logic.get("MaxVoxelIntensitySpinBox")
+        self.minDistanceSpinBox = self.logic.get("MinDistanceSpinBox")
+        self.maxDistanceSpinBox = self.logic.get("MaxDistanceSpinBox")
+        self.neighborhoodRadiusSpinBox = self.logic.get("NeighborhoodRadiusSpinBox")
 
         # ----------------- Results Collapsible Button ----------------------- #
 
@@ -106,8 +115,19 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         # ---------------------------- Connections --------------------------- #
         # -------------------------------------------------------------------- #
 
+        # ---------------- Input Data Collapsible Button --------------------- #
+
         self.singleCaseRadioButton.connect('clicked()', self.onSingleCaseComputationSelected)
         self.multiCaseRadioButton.connect('clicked()', self.onMultiCaseComputationSelected)
+
+        # ---------------- Computation Collapsible Button -------------------- #
+
+        self.computeFeaturesPushButton.connect('clicked()', self.onComputeFeatures)
+        self.computeColormapsPushButton.connect('clicked()', self.onComputeColormaps)
+
+        # ----------------- Results Collapsible Button ----------------------- #
+
+        # ---------------- Exportation Collapsible Button -------------------- #
 
         # -------------------------------------------------------------------- #
         # -------------------------- Initialisation -------------------------- #
@@ -119,6 +139,8 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         # ----------------------- Algorithm ---------------------------------- #
         # ******************************************************************** #
 
+        # ---------------- Input Data Collapsible Button --------------------- #
+
     def onSingleCaseComputationSelected(self):
         self.singleCaseGroupBox.show()
         self.multiCaseGroupBox.hide()
@@ -126,6 +148,22 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
     def onMultiCaseComputationSelected(self):
         self.multiCaseGroupBox.show()
         self.singleCaseGroupBox.hide()
+
+        # ---------------- Computation Collapsible Button -------------------- #
+
+    def onComputeFeatures(self):
+        self.logic.computeFeatures(self.inputScanMRMLNodeComboBox.currentNode(),
+                                   self.inputSegmentationMRMLNodeComboBox.currentNode())
+
+    def onComputeColormaps(self):
+        self.logic.computeColormaps(self.inputScanMRMLNodeComboBox.currentNode(),
+                                    self.inputSegmentationMRMLNodeComboBox.currentNode())
+
+        # ----------------- Results Collapsible Button ----------------------- #
+
+        # ---------------- Exportation Collapsible Button -------------------- #
+
+
 
     def cleanup(self):
         pass
@@ -143,7 +181,7 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
     # ************************************************************************ #
 
     def __init__(self, interface):
-        print "----- Bone Texture logic init -----"
+        print("----- Bone Texture logic init -----")
         self.interface = interface
 
     # ************************************************************************ #
@@ -165,6 +203,24 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
                     return resulting_widget
             return None
 
+    # ------- Test to ensure that the input data exist and are conform ------- #
+
+    def inputDataVerification(self, inputScan, inputSegmentation):
+        if not(inputScan and inputSegmentation):
+            return False
+        else:
+            return True
+
+    # ---------------- Computation of the wanted features---------------------- #
+
+    def UpdateInternalValue(self, widget, internalValue):
+        internalValue = widget.value
+        print(internalValue)
+
+    # --------------- Computation of the wanted colormaps --------------------- #
+
+
+
 ################################################################################
 ###########################  Bone Texture Test #################################
 ################################################################################
@@ -176,7 +232,7 @@ class BoneTextureTest(ScriptedLoadableModuleTest):
     # ************************************************************************ #
 
     def setUp(self):
-        print "----- Bone Texture test setup -----"
+        print("----- Bone Texture test setup -----")
         # reset the state - clear scene
         self.delayDisplay("Clear the scene")
         slicer.mrmlScene.Clear(0)
