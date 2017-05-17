@@ -48,6 +48,15 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         # - Initialisation of Bone Texture and its logic - #
 
         self.logic = BoneTextureLogic(self)
+        self.CFeatures = ["energy", "entropy",
+                          "correlation", "inverseDifferenceMoment",
+                          "inertia", "clusterShade",
+                          "clusterProminence", "haralickCorrelation"]
+        self.RLFeatures = ["shortRunEmphasis", "longRunEmphasis",
+                           "greyLevelNonuniformity", "runLengthNonuniformity",
+                           "lowGreyLevelRunEmphasis" , "highGreyLevelRunEmphasis" ,
+                           "shortRunLowGreyLevelEmphasis", "shortRunHighGreyLevelEmphasis",
+                           "longRunLowGreyLevelEmphasis", "longRunHighGreyLevelEmphasis"]
 
         # -------------------------------------------------------------------- #
         # ----------------- Definition of the UI interface ------------------- #
@@ -99,7 +108,9 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         # ----------------- Results Collapsible Button ----------------------- #
 
         self.resultsCollapsibleButton = self.logic.get("ResultsCollapsibleButton")
-        self.featuresTableCollapsibleGroupBox = self.logic.get("FeaturesTableCollapsibleGroupBox")
+        self.featureSetMRMLNodeComboBox = self.logic.get("featureSetMRMLNodeComboBox")
+        self.featureSetMRMLNodeComboBox.setMRMLScene(slicer.mrmlScene)
+        self.featureComboBox = self.logic.get("featureComboBox")
         self.featuresableWidget = self.logic.get("FeaturesableWidget")
         self.displayColormapsCollapsibleGroupBox = self.logic.get("DisplayColormapsCollapsibleGroupBox")
         self.displayColormapsMRMLTreeView = self.logic.get("DisplayColormapsMRMLTreeView")
@@ -126,6 +137,9 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.computeColormapsPushButton.connect('clicked()', self.onComputeColormaps)
 
         # ----------------- Results Collapsible Button ----------------------- #
+
+        self.featureSetMRMLNodeComboBox.connect("currentNodeChanged(vtkMRMLNode*)", self.onFeatureSetChanged)
+        self.featureComboBox.connect("currentIndexChanged(int)", self.onFeatureChanged)
 
         # ---------------- Exportation Collapsible Button -------------------- #
 
@@ -157,13 +171,44 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
 
     def onComputeColormaps(self):
         self.logic.computeColormaps(self.inputScanMRMLNodeComboBox.currentNode(),
-                                    self.inputSegmentationMRMLNodeComboBox.currentNode())
+                                    self.inputSegmentationMRMLNodeComboBox.currentNode(),
+                                    self.gLCMFeaturesCheckBox.isChecked(),
+                                    self.gLRLMFeaturesCheckBox.isChecked(),
+                                    self.insideMaskValueSpinBox.value,
+                                    self.numberOfBinsSpinBox.value,
+                                    self.minVoxelIntensitySpinBox.value,
+                                    self.maxVoxelIntensitySpinBox.value,
+                                    self.minDistanceSpinBox.value,
+                                    self.maxDistanceSpinBox.value,
+                                    self.neighborhoodRadiusSpinBox.value)
 
         # ----------------- Results Collapsible Button ----------------------- #
 
         # ---------------- Exportation Collapsible Button -------------------- #
 
+    def onFeatureSetChanged(self, node):
 
+        self.featureComboBox.clear()
+
+        if node is None:
+            return
+
+        #Set the festureSet displayed in Slicer to the selected module
+        selectionNode = slicer.app.applicationLogic().GetSelectionNode()
+        selectionNode.SetReferenceActiveVolumeID(node.GetID())
+        mode = slicer.vtkMRMLApplicationLogic.BackgroundLayer
+        applicationLogic = slicer.app.applicationLogic()
+        applicationLogic.PropagateVolumeSelection(mode, 0)
+
+        #Set the good feature names in the featureCombobox
+        if node.GetDisplayNode().GetInputImageData().GetNumberOfScalarComponents() == 8:
+            self.featureComboBox.addItems(self.CFeatures)
+        else:
+            self.featureComboBox.addItems(self.RLFeatures)
+
+    def onFeatureChanged(self, index):
+        #Change the feature displayed to the one wanted by the user
+        self.featureSetMRMLNodeComboBox.currentNode().GetDisplayNode().SetDiffusionComponent(index)
 
     def cleanup(self):
         pass
@@ -213,13 +258,67 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
 
     # ---------------- Computation of the wanted features---------------------- #
 
-    def UpdateInternalValue(self, widget, internalValue):
-        internalValue = widget.value
-        print(internalValue)
+
 
     # --------------- Computation of the wanted colormaps --------------------- #
 
+    def computeColormaps(self, inputScan,
+                               inputSegmentation,
+                               computeGLCMFeatures,
+                               computeGLRLMFeatures,
+                               insideMaskValue,
+                               numberOfBins,
+                               minVoxelIntensity,
+                               maxVoxelIntensity,
+                               minDistance,
+                               maxDistance,
+                               neighborhoodRadius):
 
+        if not (computeGLCMFeatures or computeGLRLMFeatures):
+            slicer.util.warningDisplay("Please select at least one type of features to compute")
+            return
+        if not (self.inputDataVerification(inputScan, inputSegmentation)):
+            slicer.util.warningDisplay("Please specify an input scan and an input segmentation")
+            return
+        parameters = {}
+        parameters["inputVolume"] = inputScan
+        parameters["inputMask"] = inputSegmentation
+        parameters["insideMask"] = insideMaskValue
+        parameters["binNumber"] = numberOfBins
+        parameters["pixelIntensityMin"] = minVoxelIntensity
+        parameters["pixelIntensityMax"] = maxVoxelIntensity
+        parameters["neighborhoodRadius"] = neighborhoodRadius
+        if computeGLCMFeatures:
+            volumeNode = slicer.vtkMRMLDiffusionWeightedVolumeNode()
+            slicer.mrmlScene.AddNode(volumeNode)
+            displayNode = slicer.vtkMRMLDiffusionWeightedVolumeDisplayNode()
+            slicer.mrmlScene.AddNode(displayNode)
+            colorNode = slicer.util.getNode('Rainbow')
+            displayNode.SetAndObserveColorNodeID(colorNode.GetID())
+            volumeNode.SetAndObserveDisplayNodeID(displayNode.GetID())
+            volumeNode.SetName("GLCM_ColorMaps")
+            parameters["outputVolume"] = volumeNode
+            slicer.cli.run(slicer.modules.computeglcmfeatures,
+                           None,
+                           parameters,
+                           wait_for_completion=False)
+
+        parameters["distanceMin"] = minDistance
+        parameters["distanceMax"] = maxDistance
+        if computeGLRLMFeatures:
+            volumeNode = slicer.vtkMRMLDiffusionWeightedVolumeNode()
+            slicer.mrmlScene.AddNode(volumeNode)
+            displayNode = slicer.vtkMRMLDiffusionWeightedVolumeDisplayNode()
+            slicer.mrmlScene.AddNode(displayNode)
+            colorNode = slicer.util.getNode('Rainbow')
+            displayNode.SetAndObserveColorNodeID(colorNode.GetID())
+            volumeNode.SetAndObserveDisplayNodeID(displayNode.GetID())
+            volumeNode.SetName("GLRLM_ColorMaps")
+            parameters["outputVolume"] = volumeNode
+            slicer.cli.run(slicer.modules.computeglrlmfeatures,
+                           None,
+                           parameters,
+                           wait_for_completion=False)
 
 ################################################################################
 ###########################  Bone Texture Test #################################

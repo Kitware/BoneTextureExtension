@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>922</width>
-    <height>1189</height>
+    <height>1194</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,8 +37,14 @@
         </item>
         <item>
          <widget class="QRadioButton" name="MultiCaseRadioButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Multi case</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
           </property>
           <property name="checked">
            <bool>false</bool>
@@ -87,6 +93,7 @@
            <property name="hideChildNodeTypes">
             <stringlist>
              <string>vtkMRMLLabelMapVolumeNode</string>
+             <string>vtkMRMLDiffusionWeightedVolumeNode</string>
             </stringlist>
            </property>
            <property name="noneEnabled">
@@ -425,6 +432,53 @@
      </property>
      <layout class="QVBoxLayout" name="ResultVerticalLayout">
       <item>
+       <widget class="ctkCollapsibleGroupBox" name="DisplayColormapsCollapsibleGroupBox">
+        <property name="title">
+         <string>Display Colormaps</string>
+        </property>
+        <layout class="QFormLayout" name="formLayout_4">
+         <item row="0" column="0">
+          <widget class="QLabel" name="featureSetLabel">
+           <property name="text">
+            <string>Faeture set:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="qMRMLNodeComboBox" name="featureSetMRMLNodeComboBox">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="nodeTypes">
+            <stringlist>
+             <string>vtkMRMLDiffusionWeightedVolumeNode</string>
+            </stringlist>
+           </property>
+           <property name="noneEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="editEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="renameEnabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="featureLabel">
+           <property name="text">
+            <string>Feature:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="featureComboBox"/>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
        <widget class="ctkCollapsibleGroupBox" name="FeaturesTableCollapsibleGroupBox">
         <property name="title">
          <string>Features Table</string>
@@ -436,21 +490,7 @@
         </layout>
        </widget>
       </item>
-      <item>
-       <widget class="ctkCollapsibleGroupBox" name="DisplayColormapsCollapsibleGroupBox">
-        <property name="title">
-         <string>Display Colormaps</string>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_9">
-         <item>
-          <widget class="qMRMLTreeView" name="DisplayColormapsMRMLTreeView"/>
-         </item>
-        </layout>
-       </widget>
-      </item>
      </layout>
-     <zorder>DisplayColormapsCollapsibleGroupBox</zorder>
-     <zorder>FeaturesTableCollapsibleGroupBox</zorder>
     </widget>
    </item>
    <item>
@@ -520,11 +560,6 @@
    <class>qMRMLNodeComboBox</class>
    <extends>QWidget</extends>
    <header>qMRMLNodeComboBox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>qMRMLTreeView</class>
-   <extends>QTreeView</extends>
-   <header>qMRMLTreeView.h</header>
   </customwidget>
   <customwidget>
    <class>qMRMLWidget</class>
