@@ -39,6 +39,7 @@ endif()
 #-----------------------------------------------------------------------------
 # Extension modules
 add_subdirectory(ComputeGLCMFeatures)
+add_subdirectory(ComputeGLRLMFeatures)
 add_subdirectory(BoneTexture)
 
 #-----------------------------------------------------------------------------
