@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+  <category>Quantification</category>
+  <title>Compute GLCLM Features</title>
+  <version>1.0</version>
+  <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/ComputeGLCLMFeatures.html</documentation-url>
+  <license></license>
+  <contributor>Jean-Baptiste Vimort, Kitware Inc.</contributor>
+  <acknowledgements>This work was supported by the National Institute of Health (NIH) National Institute for Dental and Craniofacial Research (NIDCR) R01EB021391 (Textural Biomarkers of Arthritis for the Subchondral Bone in the Temporomandibular Joint)</acknowledgements>  
+  <parameters>
+	<label>IO</label>
+	<description>Input/output parameters</description>
+	<image type="scalar">
+		<name>inputVolume</name>
+                <label>Input Volume</label>
+		<channel>input</channel>
+		<index>0</index>
+		<description>Input Volume</description>
+	</image>
+	<image type="diffusion-weighted" fileExtensions=".nhdr">
+		<name>outputVolume</name>
+                <label>Output Volume</label>
+		<channel>output</channel>
+		<index>1</index>
+		<description>Output Volume</description>
+	</image>
+	<image type="label">
+		<name>inputMask</name>
+		<label>Input mask</label>
+                <longflag>inputMask</longflag>
+                <channel>input</channel>
+		<flag>s</flag>
+		<description>A mask defining the region over which texture features will be calculated</description>
+		<default></default>
+	</image>
+	<integer>
+		<name>insideMask</name>
+		<label>Inside Mask Value</label>
+                <longflag>insideMask</longflag>
+		<flag>i</flag>
+		<description>The pixel value that defines the ”inside” of the mask</description>
+		<default>1</default>
+	</integer>
+	<integer>
+		<name>binNumber</name>
+		<label>number of intensity bins</label>
+                <longflag>binNumber</longflag>
+		<flag>b</flag>
+		<description>The number of intensity bins</description>
+		<default>10</default>
+	</integer>
+        <integer>
+		<name>neighborhoodRadius</name>
+		<label>Neighborhood Radius</label>
+                <longflag>neighborhoodRadius</longflag>
+		<flag>n</flag>
+		<description>The size of the neighborhood radius</description>
+		<default>2</default>
+	</integer>
+	<integer>
+		<name>pixelIntensityMin</name>
+		<label>Pixel Intensity Min</label>
+                <longflag>pixelIntensityMin</longflag>
+		<flag>p</flag>
+		<description>Minnimum of the pixel intensity range over which the features will be calculated</description>
+		<default>0</default>
+	</integer>
+	<integer>
+		<name>pixelIntensityMax</name>
+		<label>Pixel Intensity Max</label>
+                <longflag>pixelIntensityMax</longflag>
+ 		<flag>P</flag>
+		<description>Maximum of the pixel intensity range over which the features will be calculated</description>
+		<default>4000</default>
+	</integer>
+  </parameters>
+</executable>
