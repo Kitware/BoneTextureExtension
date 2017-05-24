@@ -24,36 +24,6 @@
      </property>
      <layout class="QVBoxLayout" name="InputDataVerticalLayout">
       <item>
-       <layout class="QHBoxLayout" name="ComputationChoiceHorizontalLayout">
-        <item>
-         <widget class="QRadioButton" name="SingleCaseRadioButton">
-          <property name="text">
-           <string>Single case</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="MultiCaseRadioButton">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>Multi case</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-          <property name="checked">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
        <widget class="QGroupBox" name="SingleCaseGroupBox">
         <property name="title">
          <string/>
@@ -127,44 +97,6 @@
         </layout>
        </widget>
       </item>
-      <item>
-       <widget class="QGroupBox" name="MultiCaseGroupBox">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="title">
-         <string/>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="1">
-          <widget class="ctkDirectoryButton" name="InputScanDirectoryButton"/>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="InputScansLabel">
-           <property name="text">
-            <string>Input Scans</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="InputSegmentationsLabel">
-           <property name="text">
-            <string>Input Segmentations</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="ctkDirectoryButton" name="InputSegmentationDirectoryButton"/>
-         </item>
-        </layout>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
@@ -173,7 +105,7 @@
      <property name="text">
       <string>Computation</string>
      </property>
-     <layout class="QVBoxLayout" name="ComputationVerticalLayout">
+     <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="ctkCollapsibleGroupBox" name="FeatureChoiceCollapsibleGroupBox">
         <property name="title">
@@ -212,18 +144,151 @@
        </widget>
       </item>
       <item>
-       <widget class="ctkCollapsibleGroupBox" name="ParametersCollapsibleGroupBox">
+       <widget class="ctkCollapsibleGroupBox" name="GLCMParametersCollapsibleGroupBox">
         <property name="enabled">
          <bool>true</bool>
         </property>
         <property name="title">
-         <string>parameters</string>
+         <string>GLCM parameters</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
         </property>
         <property name="checked">
+         <bool>false</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_9">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetMinimumSize</enum>
+         </property>
+         <property name="topMargin">
+          <number>9</number>
+         </property>
+         <item>
+          <layout class="QFormLayout" name="formLayout_5">
+           <property name="fieldGrowthPolicy">
+            <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="GLCMMaskInsideValueLabel">
+             <property name="text">
+              <string>Mask &quot;inside&quot; value:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QSpinBox" name="GLCMInsideMaskValueSpinBox">
+             <property name="maximum">
+              <number>1000</number>
+             </property>
+             <property name="singleStep">
+              <number>1</number>
+             </property>
+             <property name="value">
+              <number>1</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="GLCMNumberOfBinsLabel">
+             <property name="text">
+              <string>Number of bins:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="GLCMNumberOfBinsSpinBox">
+             <property name="maximum">
+              <number>255</number>
+             </property>
+             <property name="value">
+              <number>10</number>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="GLCMVoxelIntensityRangeLabel">
+             <property name="text">
+              <string>Voxel Intensity Range:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <layout class="QFormLayout" name="formLayout_6">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_9">
+               <property name="text">
+                <string>min:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_10">
+               <property name="text">
+                <string>max:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="GLCMMaxVoxelIntensitySpinBox">
+               <property name="minimum">
+                <number>-32768</number>
+               </property>
+               <property name="maximum">
+                <number>32768</number>
+               </property>
+               <property name="value">
+                <number>4000</number>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QSpinBox" name="GLCMMinVoxelIntensitySpinBox">
+               <property name="minimum">
+                <number>-32768</number>
+               </property>
+               <property name="maximum">
+                <number>32768</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="GLCMNeighborhoodRadiusLabel">
+             <property name="text">
+              <string>Neighborhood Radius:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QSpinBox" name="GLCMNeighborhoodRadiusSpinBox">
+             <property name="maximum">
+              <number>10</number>
+             </property>
+             <property name="value">
+              <number>6</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="ctkCollapsibleGroupBox" name="GLRLMParametersCollapsibleGroupBox">
+        <property name="enabled">
          <bool>true</bool>
+        </property>
+        <property name="title">
+         <string>GLRLM parameters</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_7">
          <property name="sizeConstraint">
@@ -237,35 +302,28 @@
            <property name="fieldGrowthPolicy">
             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
            </property>
-           <item row="0" column="0">
-            <widget class="QLabel" name="MaskInsideValueLabel">
-             <property name="text">
-              <string>Mask &quot;inside&quot; value:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="NumberOfBinsLabel">
+           <item row="2" column="0">
+            <widget class="QLabel" name="GLRLMNumberOfBinsLabel">
              <property name="text">
               <string>Number of bins:</string>
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="VoxelIntensityRangeLabel">
+           <item row="3" column="0">
+            <widget class="QLabel" name="GLRLMVoxelIntensityRangeLabel">
              <property name="text">
               <string>Voxel Intensity Range:</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="DistanceRangeLabel">
+           <item row="4" column="0">
+            <widget class="QLabel" name="GLRLMDistanceRangeLabel">
              <property name="text">
               <string>Distance range:</string>
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
+           <item row="3" column="1">
             <layout class="QFormLayout" name="formLayout_2">
              <item row="0" column="0">
               <widget class="QLabel" name="label_5">
@@ -282,7 +340,7 @@
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QSpinBox" name="MaxVoxelIntensitySpinBox">
+              <widget class="QSpinBox" name="GLRLMMaxVoxelIntensitySpinBox">
                <property name="minimum">
                 <number>-32768</number>
                </property>
@@ -290,12 +348,12 @@
                 <number>32768</number>
                </property>
                <property name="value">
-                <number>2000</number>
+                <number>4000</number>
                </property>
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QSpinBox" name="MinVoxelIntensitySpinBox">
+              <widget class="QSpinBox" name="GLRLMMinVoxelIntensitySpinBox">
                <property name="minimum">
                 <number>-32768</number>
                </property>
@@ -306,7 +364,7 @@
              </item>
             </layout>
            </item>
-           <item row="3" column="1">
+           <item row="4" column="1">
             <layout class="QFormLayout" name="formLayout_3">
              <property name="fieldGrowthPolicy">
               <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
@@ -326,7 +384,7 @@
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QDoubleSpinBox" name="MaxDistanceSpinBox">
+              <widget class="QDoubleSpinBox" name="GLRLMMaxDistanceSpinBox">
                <property name="maximum">
                 <double>5.000000000000000</double>
                </property>
@@ -339,7 +397,7 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QDoubleSpinBox" name="MinDistanceSpinBox">
+              <widget class="QDoubleSpinBox" name="GLRLMMinDistanceSpinBox">
                <property name="maximum">
                 <double>5.000000000000000</double>
                </property>
@@ -350,8 +408,8 @@
              </item>
             </layout>
            </item>
-           <item row="1" column="1">
-            <widget class="QSpinBox" name="NumberOfBinsSpinBox">
+           <item row="2" column="1">
+            <widget class="QSpinBox" name="GLRLMNumberOfBinsSpinBox">
              <property name="maximum">
               <number>255</number>
              </property>
@@ -360,8 +418,32 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QSpinBox" name="InsideMaskValueSpinBox">
+           <item row="5" column="0">
+            <widget class="QLabel" name="GLRLMNeighborhoodRadiusLabel">
+             <property name="text">
+              <string>Neighborhood Radius:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QSpinBox" name="GLRLMNeighborhoodRadiusSpinBox">
+             <property name="maximum">
+              <number>10</number>
+             </property>
+             <property name="value">
+              <number>4</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="GLRLMMaskInsideValueLabel">
+             <property name="text">
+              <string>Mask &quot;inside&quot; value:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="GLRLMInsideMaskValueSpinBox">
              <property name="maximum">
               <number>1000</number>
              </property>
@@ -373,48 +455,24 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="NeighborhoodRadiusLabel">
-             <property name="text">
-              <string>Neighborhood Radius:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QSpinBox" name="NeighborhoodRadiusSpinBox">
-             <property name="maximum">
-              <number>10</number>
-             </property>
-             <property name="value">
-              <number>4</number>
-             </property>
-            </widget>
-           </item>
           </layout>
          </item>
         </layout>
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="ComputationHorizontalLayout">
-        <property name="topMargin">
-         <number>0</number>
+       <widget class="QPushButton" name="ComputeColormapsPushButton">
+        <property name="text">
+         <string>Compute Colormaps</string>
         </property>
-        <item>
-         <widget class="QPushButton" name="ComputeFeaturesPushButton">
-          <property name="text">
-           <string>Compute Features</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="ComputeColormapsPushButton">
-          <property name="text">
-           <string>Compute Colormaps</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="ComputeFeaturesPushButton">
+        <property name="text">
+         <string>Compute Features</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -578,11 +636,6 @@
    <extends>QGroupBox</extends>
    <header>ctkCollapsibleGroupBox.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ctkDirectoryButton</class>
-   <extends>QWidget</extends>
-   <header>ctkDirectoryButton.h</header>
   </customwidget>
   <customwidget>
    <class>ctkPathLineEdit</class>

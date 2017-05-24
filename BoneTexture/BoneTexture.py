@@ -1,11 +1,6 @@
-import ctk
-import logging
 import os
 import qt
-import math
 import slicer
-import unittest
-import vtk
 from slicer.ScriptedLoadableModule import *
 
 ################################################################################
@@ -17,15 +12,27 @@ class BoneTexture(ScriptedLoadableModule):
     def __init__(self, parent):
         ScriptedLoadableModule.__init__(self, parent)
         self.parent.title = "Bone Texture"
-        self.parent.categories = ["Examples"]
+        self.parent.categories = ["Quantification"]
         self.parent.dependencies = []
-        self.parent.contributors = ["Jean-Baptiste VIMORT (Kitware Inc..)"]
+        self.parent.contributors = ["Jean-Baptiste VIMORT (Kitware Inc.)"]
         self.parent.helpText = """
-    TODO
-    """
+        This module is based on two texture analysis filters that are used to compute
+        feature maps of N-Dimensional images using two well-known texture analysis methods.
+        The two filters used in this module are itkScalarImageToTextureFeaturesImageFilter
+        (which computes textural features based on intensity-based co-occurrence matrices in
+        the image) and itkScalarImageToRunLengthFeaturesImageFilter (which computes textural
+        features based on equally valued intensity clusters of different sizes or run lengths
+        in the image). The output of this module is a vector image of the same size than the
+        input that contains a multidimensional vector in each pixel/voxel. Filters can be configured
+        based in the locality of the textural features (neighborhood size), offset directions
+        for co-ocurrence and run length computation, the number of bins for the intensity
+        histograms, the intensity range or the range of run lengths.
+        """
         self.parent.acknowledgementText = """
-    TODO
-"""
+        This work was supported by the National Institute of Health (NIH) National Institute for
+        Dental and Craniofacial Research (NIDCR) R01EB021391 (Textural Biomarkers of Arthritis for
+        the Subchondral Bone in the Temporomandibular Joint)
+        """
 
 ################################################################################
 ##########################  Bone Texture Widget ################################
@@ -57,6 +64,20 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
                            "lowGreyLevelRunEmphasis" , "highGreyLevelRunEmphasis" ,
                            "shortRunLowGreyLevelEmphasis", "shortRunHighGreyLevelEmphasis",
                            "longRunLowGreyLevelEmphasis", "longRunHighGreyLevelEmphasis"]
+        self.GLCMFeaturesValueDict = {}
+        self.GLCMFeaturesValueDict["insideMask"] = 1
+        self.GLCMFeaturesValueDict["binNumber"] = 10
+        self.GLCMFeaturesValueDict["pixelIntensityMin"] = 0
+        self.GLCMFeaturesValueDict["pixelIntensityMax"] = 4000
+        self.GLCMFeaturesValueDict["neighborhoodRadius"] = 6
+        self.GLRLMFeaturesValueDict = {}
+        self.GLRLMFeaturesValueDict["insideMask"] = 1
+        self.GLRLMFeaturesValueDict["binNumber"] = 10
+        self.GLRLMFeaturesValueDict["pixelIntensityMin"] = 0
+        self.GLRLMFeaturesValueDict["pixelIntensityMax"] = 4000
+        self.GLRLMFeaturesValueDict["neighborhoodRadius"] = 4
+        self.GLRLMFeaturesValueDict["distanceMin"] = 0.00
+        self.GLRLMFeaturesValueDict["distanceMax"] = 1.00
 
         # -------------------------------------------------------------------- #
         # ----------------- Definition of the UI interface ------------------- #
@@ -76,17 +97,11 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         # ---------------- Input Data Collapsible Button --------------------- #
 
         self.inputDataCollapsibleButton = self.logic.get("InputDataCollapsibleButton")
-        self.singleCaseRadioButton = self.logic.get("SingleCaseRadioButton")
-        self.multiCaseRadioButton = self.logic.get("MultiCaseRadioButton")
         self.singleCaseGroupBox = self.logic.get("SingleCaseGroupBox")
-        self.multiCaseGroupBox = self.logic.get("MultiCaseGroupBox")
         self.inputScanMRMLNodeComboBox = self.logic.get("InputScanMRMLNodeComboBox")
         self.inputScanMRMLNodeComboBox.setMRMLScene(slicer.mrmlScene)
         self.inputSegmentationMRMLNodeComboBox = self.logic.get("InputSegmentationMRMLNodeComboBox")
         self.inputSegmentationMRMLNodeComboBox.setMRMLScene(slicer.mrmlScene)
-        self.inputScanDirectoryButton = self.logic.get("InputScanDirectoryButton")
-        self.inputSegmentationDirectoryButton = self.logic.get("InputSegmentationsPathLineEdit")
-
 
         # ---------------- Computation Collapsible Button -------------------- #
 
@@ -96,14 +111,20 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.gLRLMFeaturesCheckBox = self.logic.get("GLRLMFeaturesCheckBox")
         self.computeFeaturesPushButton = self.logic.get("ComputeFeaturesPushButton")
         self.computeColormapsPushButton = self.logic.get("ComputeColormapsPushButton")
-        self.parametersCollapsibleGroupBox = self.logic.get("ParametersCollapsibleGroupBox")
-        self.insideMaskValueSpinBox = self.logic.get("InsideMaskValueSpinBox")
-        self.numberOfBinsSpinBox = self.logic.get("NumberOfBinsSpinBox")
-        self.minVoxelIntensitySpinBox = self.logic.get("MinVoxelIntensitySpinBox")
-        self.maxVoxelIntensitySpinBox = self.logic.get("MaxVoxelIntensitySpinBox")
-        self.minDistanceSpinBox = self.logic.get("MinDistanceSpinBox")
-        self.maxDistanceSpinBox = self.logic.get("MaxDistanceSpinBox")
-        self.neighborhoodRadiusSpinBox = self.logic.get("NeighborhoodRadiusSpinBox")
+        self.GLCMparametersCollapsibleGroupBox = self.logic.get("GLCMParametersCollapsibleGroupBox")
+        self.GLCMinsideMaskValueSpinBox = self.logic.get("GLCMInsideMaskValueSpinBox")
+        self.GLCMnumberOfBinsSpinBox = self.logic.get("GLCMNumberOfBinsSpinBox")
+        self.GLCMminVoxelIntensitySpinBox = self.logic.get("GLCMMinVoxelIntensitySpinBox")
+        self.GLCMmaxVoxelIntensitySpinBox = self.logic.get("GLCMMaxVoxelIntensitySpinBox")
+        self.GLCMneighborhoodRadiusSpinBox = self.logic.get("GLCMNeighborhoodRadiusSpinBox")
+        self.GLRLMparametersCollapsibleGroupBox = self.logic.get("GLRLMParametersCollapsibleGroupBox")
+        self.GLRLMinsideMaskValueSpinBox = self.logic.get("GLRLMInsideMaskValueSpinBox")
+        self.GLRLMnumberOfBinsSpinBox = self.logic.get("GLRLMNumberOfBinsSpinBox")
+        self.GLRLMminVoxelIntensitySpinBox = self.logic.get("GLRLMMinVoxelIntensitySpinBox")
+        self.GLRLMmaxVoxelIntensitySpinBox = self.logic.get("GLRLMMaxVoxelIntensitySpinBox")
+        self.GLRLMminDistanceSpinBox = self.logic.get("GLRLMMinDistanceSpinBox")
+        self.GLRLMmaxDistanceSpinBox = self.logic.get("GLRLMMaxDistanceSpinBox")
+        self.GLRLMneighborhoodRadiusSpinBox = self.logic.get("GLRLMNeighborhoodRadiusSpinBox")
 
         # ----------------- Results Collapsible Button ----------------------- #
 
@@ -128,8 +149,18 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
 
         # ---------------- Input Data Collapsible Button --------------------- #
 
-        self.singleCaseRadioButton.connect('clicked()', self.onSingleCaseComputationSelected)
-        self.multiCaseRadioButton.connect('clicked()', self.onMultiCaseComputationSelected)
+        self.GLCMinsideMaskValueSpinBox.connect('valueChanged(int)',lambda: self.onGLCMFeaturesValueDictModified("insideMask", self.GLCMinsideMaskValueSpinBox.value))
+        self.GLCMnumberOfBinsSpinBox.connect('valueChanged(int)', lambda: self.onGLCMFeaturesValueDictModified("binNumber", self.GLCMnumberOfBinsSpinBox.value))
+        self.GLCMminVoxelIntensitySpinBox.connect('valueChanged(int)', lambda: self.onGLCMFeaturesValueDictModified("pixelIntensityMin", self.GLCMminVoxelIntensitySpinBox.value))
+        self.GLCMmaxVoxelIntensitySpinBox.connect('valueChanged(int)', lambda: self.onGLCMFeaturesValueDictModified("pixelIntensityMax", self.GLCMmaxVoxelIntensitySpinBox.value))
+        self.GLCMneighborhoodRadiusSpinBox.connect('valueChanged(int)', lambda: self.onGLCMFeaturesValueDictModified("neighborhoodRadius", self.GLCMneighborhoodRadiusSpinBox.value))
+        self.GLRLMinsideMaskValueSpinBox.connect('valueChanged(int)', lambda: self.onGLRLMFeaturesValueDictModified("insideMask", self.GLRLMinsideMaskValueSpinBox.value))
+        self.GLRLMnumberOfBinsSpinBox.connect('valueChanged(int)', lambda: self.onGLRLMFeaturesValueDicttModified("binNumber", self.GLRLMnumberOfBinsSpinBox.value))
+        self.GLRLMminVoxelIntensitySpinBox.connect('valueChanged(int)', lambda: self.onGLRLMFeaturesValueDictModified("pixelIntensityMin", self.GLRLMminVoxelIntensitySpinBox.value))
+        self.GLRLMmaxVoxelIntensitySpinBox.connect('valueChanged(int)', lambda: self.onGLRLMFeaturesValueDictModified("pixelIntensityMax", self.GLRLMmaxVoxelIntensitySpinBox.value))
+        self.GLRLMminDistanceSpinBox.connect('valueChanged(double)', lambda: self.onGLRLMFeaturesValueDictModified("distanceMin", self.GLRLMminDistanceSpinBox.value))
+        self.GLRLMmaxDistanceSpinBox.connect('valueChanged(double)', lambda: self.onGLRLMFeaturesValueDictModified("distanceMax", self.GLRLMmaxDistanceSpinBox.value))
+        self.GLRLMneighborhoodRadiusSpinBox.connect('valueChanged(int)', lambda: self.onGLRLMFeaturesValueDictModified("neighborhoodRadius", self.GLRLMneighborhoodRadiusSpinBox.value))
 
         # ---------------- Computation Collapsible Button -------------------- #
 
@@ -147,44 +178,37 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         # -------------------------- Initialisation -------------------------- #
         # -------------------------------------------------------------------- #
 
-        self.onSingleCaseComputationSelected()
-
         # ******************************************************************** #
         # ----------------------- Algorithm ---------------------------------- #
         # ******************************************************************** #
 
         # ---------------- Input Data Collapsible Button --------------------- #
 
-    def onSingleCaseComputationSelected(self):
-        self.singleCaseGroupBox.show()
-        self.multiCaseGroupBox.hide()
+    def onGLCMFeaturesValueDictModified(self, key, value):
+        self.GLCMFeaturesValueDict[key] = value
 
-    def onMultiCaseComputationSelected(self):
-        self.multiCaseGroupBox.show()
-        self.singleCaseGroupBox.hide()
+    def onGLRLMFeaturesValueDictModified(self, key, value):
+        self.GLRLMFeaturesValueDict[key] = value
 
         # ---------------- Computation Collapsible Button -------------------- #
 
     def onComputeFeatures(self):
         self.logic.computeFeatures(self.inputScanMRMLNodeComboBox.currentNode(),
-                                   self.inputSegmentationMRMLNodeComboBox.currentNode())
+                                   self.inputSegmentationMRMLNodeComboBox.currentNode(),
+                                   self.gLCMFeaturesCheckBox.isChecked(),
+                                   self.gLRLMFeaturesCheckBox.isChecked(),
+                                   self.GLCMFeaturesValueDict,
+                                   self.GLRLMFeaturesValueDict)
 
     def onComputeColormaps(self):
         self.logic.computeColormaps(self.inputScanMRMLNodeComboBox.currentNode(),
                                     self.inputSegmentationMRMLNodeComboBox.currentNode(),
                                     self.gLCMFeaturesCheckBox.isChecked(),
                                     self.gLRLMFeaturesCheckBox.isChecked(),
-                                    self.insideMaskValueSpinBox.value,
-                                    self.numberOfBinsSpinBox.value,
-                                    self.minVoxelIntensitySpinBox.value,
-                                    self.maxVoxelIntensitySpinBox.value,
-                                    self.minDistanceSpinBox.value,
-                                    self.maxDistanceSpinBox.value,
-                                    self.neighborhoodRadiusSpinBox.value)
+                                    self.GLCMFeaturesValueDict,
+                                    self.GLRLMFeaturesValueDict)
 
         # ----------------- Results Collapsible Button ----------------------- #
-
-        # ---------------- Exportation Collapsible Button -------------------- #
 
     def onFeatureSetChanged(self, node):
 
@@ -193,22 +217,26 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         if node is None:
             return
 
-        #Set the festureSet displayed in Slicer to the selected module
+        # Set the festureSet displayed in Slicer to the selected module
         selectionNode = slicer.app.applicationLogic().GetSelectionNode()
         selectionNode.SetReferenceActiveVolumeID(node.GetID())
         mode = slicer.vtkMRMLApplicationLogic.BackgroundLayer
         applicationLogic = slicer.app.applicationLogic()
         applicationLogic.PropagateVolumeSelection(mode, 0)
 
-        #Set the good feature names in the featureCombobox
+        # Set the good feature names in the featureCombobox
         if node.GetDisplayNode().GetInputImageData().GetNumberOfScalarComponents() == 8:
             self.featureComboBox.addItems(self.CFeatures)
         else:
             self.featureComboBox.addItems(self.RLFeatures)
 
     def onFeatureChanged(self, index):
-        #Change the feature displayed to the one wanted by the user
-        self.featureSetMRMLNodeComboBox.currentNode().GetDisplayNode().SetDiffusionComponent(index)
+        if self.featureSetMRMLNodeComboBox.currentNode():
+            # Change the feature displayed to the one wanted by the user
+            self.featureSetMRMLNodeComboBox.currentNode().GetDisplayNode().SetDiffusionComponent(index)
+
+        # ---------------- Exportation Collapsible Button -------------------- #
+
 
     def cleanup(self):
         pass
@@ -251,74 +279,81 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
     # ------- Test to ensure that the input data exist and are conform ------- #
 
     def inputDataVerification(self, inputScan, inputSegmentation):
-        if not(inputScan and inputSegmentation):
+        if not(inputScan):
+            slicer.util.warningDisplay("Please specify an input scan")
             return False
-        else:
-            return True
+        if inputScan and inputSegmentation:
+            if inputScan.GetImageData().GetDimensions() != inputSegmentation.GetImageData().GetDimensions():
+                slicer.util.warningDisplay("The input san and the input segmentation must be the same size")
+                return False
+            if (inputScan.GetSpacing() != inputSegmentation.GetSpacing()) or \
+                    (inputScan.GetOrigin() != inputSegmentation.GetOrigin()):
+                slicer.util.warningDisplay("The input san and the input segmentation must overlap: same origin, spacing and orientation")
+                return False
+        return True
 
     # ---------------- Computation of the wanted features---------------------- #
 
+    def computeFeatures(self,
+                        inputScan,
+                        inputSegmentation,
+                        computeGLCMFeatures,
+                        computeGLRLMFeatures,
+                        GLCMFeaturesValueDict,
+                        GLRLMFeaturesValueDict):
+
+        slicer.util.warningDisplay("This part of the module is still under construction")
 
 
     # --------------- Computation of the wanted colormaps --------------------- #
 
-    def computeColormaps(self, inputScan,
-                               inputSegmentation,
-                               computeGLCMFeatures,
-                               computeGLRLMFeatures,
-                               insideMaskValue,
-                               numberOfBins,
-                               minVoxelIntensity,
-                               maxVoxelIntensity,
-                               minDistance,
-                               maxDistance,
-                               neighborhoodRadius):
+    def computeColormaps(self,
+                         inputScan,
+                         inputSegmentation,
+                         computeGLCMFeatures,
+                         computeGLRLMFeatures,
+                         GLCMFeaturesValueDict,
+                         GLRLMFeaturesValueDict):
 
         if not (computeGLCMFeatures or computeGLRLMFeatures):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
             return
         if not (self.inputDataVerification(inputScan, inputSegmentation)):
-            slicer.util.warningDisplay("Please specify an input scan and an input segmentation")
             return
-        parameters = {}
+
+        if computeGLCMFeatures:
+            self.computeSingleColormap(inputScan,
+                                       inputSegmentation,
+                                       GLCMFeaturesValueDict,
+                                       "GLCM_ColorMaps")
+
+        if computeGLRLMFeatures:
+            self.computeSingleColormap(inputScan,
+                                       inputSegmentation,
+                                       GLRLMFeaturesValueDict,
+                                       "GLRLM_ColorMaps")
+
+    def computeSingleColormap(self,
+                              inputScan,
+                              inputSegmentation,
+                              valueDict,
+                              outputName):
+        parameters = dict(valueDict)
         parameters["inputVolume"] = inputScan
         parameters["inputMask"] = inputSegmentation
-        parameters["insideMask"] = insideMaskValue
-        parameters["binNumber"] = numberOfBins
-        parameters["pixelIntensityMin"] = minVoxelIntensity
-        parameters["pixelIntensityMax"] = maxVoxelIntensity
-        parameters["neighborhoodRadius"] = neighborhoodRadius
-        if computeGLCMFeatures:
-            volumeNode = slicer.vtkMRMLDiffusionWeightedVolumeNode()
-            slicer.mrmlScene.AddNode(volumeNode)
-            displayNode = slicer.vtkMRMLDiffusionWeightedVolumeDisplayNode()
-            slicer.mrmlScene.AddNode(displayNode)
-            colorNode = slicer.util.getNode('Rainbow')
-            displayNode.SetAndObserveColorNodeID(colorNode.GetID())
-            volumeNode.SetAndObserveDisplayNodeID(displayNode.GetID())
-            volumeNode.SetName("GLCM_ColorMaps")
-            parameters["outputVolume"] = volumeNode
-            slicer.cli.run(slicer.modules.computeglcmfeatures,
-                           None,
-                           parameters,
-                           wait_for_completion=False)
-
-        parameters["distanceMin"] = minDistance
-        parameters["distanceMax"] = maxDistance
-        if computeGLRLMFeatures:
-            volumeNode = slicer.vtkMRMLDiffusionWeightedVolumeNode()
-            slicer.mrmlScene.AddNode(volumeNode)
-            displayNode = slicer.vtkMRMLDiffusionWeightedVolumeDisplayNode()
-            slicer.mrmlScene.AddNode(displayNode)
-            colorNode = slicer.util.getNode('Rainbow')
-            displayNode.SetAndObserveColorNodeID(colorNode.GetID())
-            volumeNode.SetAndObserveDisplayNodeID(displayNode.GetID())
-            volumeNode.SetName("GLRLM_ColorMaps")
-            parameters["outputVolume"] = volumeNode
-            slicer.cli.run(slicer.modules.computeglrlmfeatures,
-                           None,
-                           parameters,
-                           wait_for_completion=False)
+        volumeNode = slicer.vtkMRMLDiffusionWeightedVolumeNode()
+        slicer.mrmlScene.AddNode(volumeNode)
+        displayNode = slicer.vtkMRMLDiffusionWeightedVolumeDisplayNode()
+        slicer.mrmlScene.AddNode(displayNode)
+        colorNode = slicer.util.getNode('Rainbow')
+        displayNode.SetAndObserveColorNodeID(colorNode.GetID())
+        volumeNode.SetAndObserveDisplayNodeID(displayNode.GetID())
+        volumeNode.SetName(outputName)
+        parameters["outputVolume"] = volumeNode
+        slicer.cli.run(slicer.modules.computeglrlmfeatures,
+                       None,
+                       parameters,
+                       wait_for_completion=False)
 
 ################################################################################
 ###########################  Bone Texture Test #################################
