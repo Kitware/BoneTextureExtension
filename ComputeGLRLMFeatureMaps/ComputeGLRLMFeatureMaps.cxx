@@ -39,7 +39,7 @@
 
 #include "itkPluginUtilities.h"
 
-#include "ComputeGLRLMFeaturesCLP.h"
+#include "ComputeGLRLMFeatureMapsCLP.h"
 
 namespace
 {
