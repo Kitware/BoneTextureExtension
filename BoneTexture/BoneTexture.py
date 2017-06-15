@@ -302,8 +302,38 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
                         GLCMFeaturesValueDict,
                         GLRLMFeaturesValueDict):
 
-        slicer.util.warningDisplay("This part of the module is still under construction")
+        if not (computeGLCMFeatures or computeGLRLMFeatures):
+            slicer.util.warningDisplay("Please select at least one type of features to compute")
+            return
+        if not (self.inputDataVerification(inputScan, inputSegmentation)):
+            return
 
+        if computeGLCMFeatures:
+            featureVector = self.computeSingleFeatureSet(inputScan,
+                                                         inputSegmentation,
+                                                         slicer.modules.computeglcmfeatures,
+                                                         GLCMFeaturesValueDict)
+
+        if computeGLRLMFeatures:
+            featureVector = self.computeSingleFeatureSet(inputScan,
+                                                         inputSegmentation,
+                                                         slicer.modules.computeglrlmfeatures,
+                                                         GLRLMFeaturesValueDict)
+        print (featureVector)
+
+    def computeSingleFeatureSet(self,
+                               inputScan,
+                               inputSegmentation,
+                               CLIname,
+                               valueDict):
+        parameters = dict(valueDict)
+        parameters["inputVolume"] = inputScan
+        parameters["inputMask"] = inputSegmentation
+        CLI = slicer.cli.run(CLIname,
+                             None,
+                             parameters,
+                             wait_for_completion=True)
+        return list(map(float, CLI.GetParameterDefault(2, 0).split(",")))
 
     # --------------- Computation of the wanted colormaps --------------------- #
 
@@ -338,7 +368,7 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
     def computeSingleColormap(self,
                               inputScan,
                               inputSegmentation,
-                              CLI,
+                              CLIname,
                               valueDict,
                               outputName):
         parameters = dict(valueDict)
@@ -353,7 +383,7 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
         volumeNode.SetAndObserveDisplayNodeID(displayNode.GetID())
         volumeNode.SetName(outputName)
         parameters["outputVolume"] = volumeNode
-        slicer.cli.run(CLI,
+        slicer.cli.run(CLIname,
                        None,
                        parameters,
                        wait_for_completion=False)

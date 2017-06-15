@@ -232,10 +232,10 @@
              <item row="1" column="1">
               <widget class="QSpinBox" name="GLCMMaxVoxelIntensitySpinBox">
                <property name="minimum">
-                <number>-32768</number>
+                <number>-1000000</number>
                </property>
                <property name="maximum">
-                <number>32768</number>
+                <number>1000000</number>
                </property>
                <property name="value">
                 <number>4000</number>
@@ -245,10 +245,10 @@
              <item row="0" column="1">
               <widget class="QSpinBox" name="GLCMMinVoxelIntensitySpinBox">
                <property name="minimum">
-                <number>-32768</number>
+                <number>-1000000</number>
                </property>
                <property name="maximum">
-                <number>32768</number>
+                <number>1000000</number>
                </property>
               </widget>
              </item>
@@ -342,10 +342,10 @@
              <item row="1" column="1">
               <widget class="QSpinBox" name="GLRLMMaxVoxelIntensitySpinBox">
                <property name="minimum">
-                <number>-32768</number>
+                <number>-1000000</number>
                </property>
                <property name="maximum">
-                <number>32768</number>
+                <number>1000000</number>
                </property>
                <property name="value">
                 <number>4000</number>
@@ -355,10 +355,10 @@
              <item row="0" column="1">
               <widget class="QSpinBox" name="GLRLMMinVoxelIntensitySpinBox">
                <property name="minimum">
-                <number>-32768</number>
+                <number>-1000000</number>
                </property>
                <property name="maximum">
-                <number>32768</number>
+                <number>1000000</number>
                </property>
               </widget>
              </item>
