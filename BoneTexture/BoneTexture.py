@@ -333,7 +333,7 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
                              None,
                              parameters,
                              wait_for_completion=True)
-        return list(map(float, CLI.GetParameterDefault(2, 0).split(",")))
+        return list(map(float, CLI.GetParameterValue(2, 0).split(",")))
 
     # --------------- Computation of the wanted colormaps --------------------- #
 
