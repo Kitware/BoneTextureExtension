@@ -132,16 +132,8 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.featureSetMRMLNodeComboBox = self.logic.get("featureSetMRMLNodeComboBox")
         self.featureSetMRMLNodeComboBox.setMRMLScene(slicer.mrmlScene)
         self.featureComboBox = self.logic.get("featureComboBox")
-        self.featuresableWidget = self.logic.get("FeaturesableWidget")
         self.displayColormapsCollapsibleGroupBox = self.logic.get("DisplayColormapsCollapsibleGroupBox")
-        self.displayColormapsMRMLTreeView = self.logic.get("DisplayColormapsMRMLTreeView")
-
-        # ---------------- Exportation Collapsible Button -------------------- #
-
-        self.exportationCollapsibleButton = self.logic.get("ExportationCollapsibleButton")
-        self.outputPathLineEdit = self.logic.get("OutputPathLineEdit")
-        self.saveFeaturesPushButton = self.logic.get("SaveFeaturesPushButton")
-        self.saveColormapsPushButton = self.logic.get("SaveColormapsPushButton")
+        self.displayFeaturesTableWidget = self.logic.get("displayFeaturesTableWidget")
 
         # -------------------------------------------------------------------- #
         # ---------------------------- Connections --------------------------- #
@@ -171,8 +163,6 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
 
         self.featureSetMRMLNodeComboBox.connect("currentNodeChanged(vtkMRMLNode*)", self.onFeatureSetChanged)
         self.featureComboBox.connect("currentIndexChanged(int)", self.onFeatureChanged)
-
-        # ---------------- Exportation Collapsible Button -------------------- #
 
         # -------------------------------------------------------------------- #
         # -------------------------- Initialisation -------------------------- #
