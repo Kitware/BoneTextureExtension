@@ -27,17 +27,9 @@ class BoneTextureSerializer(ScriptedLoadableModule):
         self.parent.dependencies = []
         self.parent.contributors = ["Jean-Baptiste VIMORT (Kitware Inc.)"]
         self.parent.helpText = """
-        This module is based on two texture analysis filters that are used to compute
-        feature maps of N-Dimensional images using two well-known texture analysis methods.
-        The two filters used in this module are itkScalarImageToTextureFeaturesImageFilter
-        (which computes textural features based on intensity-based co-occurrence matrices in
-        the image) and itkScalarImageToRunLengthFeaturesImageFilter (which computes textural
-        features based on equally valued intensity clusters of different sizes or run lengths
-        in the image). The output of this module is a vector image of the same size than the
-        input that contains a multidimensional vector in each pixel/voxel. Filters can be configured
-        based in the locality of the textural features (neighborhood size), offset directions
-        for co-ocurrence and run length computation, the number of bins for the intensity
-        histograms, the intensity range or the range of run lengths.
+        This module to serialyse the BoneTexture's algorythms on several cases contained in the same folder.
+        The input data should be named in the folowing way: Scan"ID".nrrd (for the input scan) and Segm"ID".nrrd
+        (for the segmentation if it exist)
         """
         self.parent.acknowledgementText = """
         This work was supported by the National Institute of Health (NIH) National Institute for
@@ -196,14 +188,16 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
                                    self.gLCMFeaturesCheckBox.isChecked(),
                                    self.gLRLMFeaturesCheckBox.isChecked(),
                                    self.GLCMFeaturesValueDict,
-                                   self.GLRLMFeaturesValueDict)
+                                   self.GLRLMFeaturesValueDict,
+                                   self.outputFolderDirectoryButton.directory.encode('utf-8'))
 
     def onComputeColormaps(self):
         self.logic.computeColormaps(self.caseDict,
                                     self.gLCMFeaturesCheckBox.isChecked(),
                                     self.gLRLMFeaturesCheckBox.isChecked(),
                                     self.GLCMFeaturesValueDict,
-                                    self.GLRLMFeaturesValueDict)
+                                    self.GLRLMFeaturesValueDict,
+                                    self.outputFolderDirectoryButton.directory.encode('utf-8'))
 
         # ---------------- Exportation Collapsible Button -------------------- #
 
@@ -271,7 +265,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
         for fileName in os.listdir(inputDirectory):
             if fileName.endswith(".nrrd"):
                 print(fileName)
-                if fileName.startswith("SegmC"):
+                if fileName.startswith("Segm"):
                     caseID = re.search("SegmC(.+?).nrrd", fileName).group(1)
                     if caseID in caseDict:
                         caseDict[caseID].segmentationFilePath = inputDirectory + '/' + fileName
@@ -298,7 +292,8 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                         computeGLCMFeatures,
                         computeGLRLMFeatures,
                         GLCMFeaturesValueDict,
-                        GLRLMFeaturesValueDict):
+                        GLRLMFeaturesValueDict,
+                        outputDirectory):
 
         if not (computeGLCMFeatures or computeGLRLMFeatures):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
@@ -306,7 +301,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
 
         properties = {}
 
-        file = open('/home/jean-baptiste/Documents/result1.csv', 'w')
+        file = open(outputDirectory, 'w')
         cw = csv.writer(file, delimiter=',')
         for case in caseDict.values():
             properties['labelmap'] = False
@@ -355,7 +350,8 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                          computeGLCMFeatures,
                          computeGLRLMFeatures,
                          GLCMFeaturesValueDict,
-                         GLRLMFeaturesValueDict):
+                         GLRLMFeaturesValueDict,
+                         outputDirectory):
 
         if not (computeGLCMFeatures or computeGLRLMFeatures):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
@@ -363,19 +359,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
         if not (self.inputDataVerification(inputScan, inputSegmentation)):
             return
 
-        if computeGLCMFeatures:
-            self.computeSingleColormap(inputScan,
-                                       inputSegmentation,
-                                       slicer.modules.computeglcmfeaturemaps,
-                                       GLCMFeaturesValueDict,
-                                       "GLCM_ColorMaps")
-
-        if computeGLRLMFeatures:
-            self.computeSingleColormap(inputScan,
-                                       inputSegmentation,
-                                       slicer.modules.computeglrlmfeaturemaps,
-                                       GLRLMFeaturesValueDict,
-                                       "GLRLM_ColorMaps")
+        slicer.util.warningDisplay("This part of the module is still under construction")
 
     def computeSingleColormap(self,
                               inputScan,
