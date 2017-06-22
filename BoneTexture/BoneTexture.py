@@ -1,5 +1,6 @@
 import os
 import qt
+
 import slicer
 from slicer.ScriptedLoadableModule import *
 
@@ -183,12 +184,23 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         # ---------------- Computation Collapsible Button -------------------- #
 
     def onComputeFeatures(self):
-        self.logic.computeFeatures(self.inputScanMRMLNodeComboBox.currentNode(),
-                                   self.inputSegmentationMRMLNodeComboBox.currentNode(),
-                                   self.gLCMFeaturesCheckBox.isChecked(),
-                                   self.gLRLMFeaturesCheckBox.isChecked(),
-                                   self.GLCMFeaturesValueDict,
-                                   self.GLRLMFeaturesValueDict)
+        featureVector = self.logic.computeFeatures(self.inputScanMRMLNodeComboBox.currentNode(),
+                                                   self.inputSegmentationMRMLNodeComboBox.currentNode(),
+                                                   self.gLCMFeaturesCheckBox.isChecked(),
+                                                   self.gLRLMFeaturesCheckBox.isChecked(),
+                                                   self.GLCMFeaturesValueDict,
+                                                   self.GLRLMFeaturesValueDict)
+
+        if featureVector[0]:
+            for i in range(8):
+                self.displayFeaturesTableWidget.item(i,1).setText(featureVector[0][i])
+
+        if featureVector[1]:
+            for i in range(10):
+                self.displayFeaturesTableWidget.item(i, 3).setText(featureVector[1][i])
+
+
+
 
     def onComputeColormaps(self):
         self.logic.computeColormaps(self.inputScanMRMLNodeComboBox.currentNode(),
@@ -298,18 +310,20 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
         if not (self.inputDataVerification(inputScan, inputSegmentation)):
             return
 
+        resultVector = [None, None]
+
         if computeGLCMFeatures:
-            featureVector = self.computeSingleFeatureSet(inputScan,
-                                                         inputSegmentation,
-                                                         slicer.modules.computeglcmfeatures,
-                                                         GLCMFeaturesValueDict)
+            resultVector[0] = self.computeSingleFeatureSet(inputScan,
+                                                           inputSegmentation,
+                                                           slicer.modules.computeglcmfeatures,
+                                                           GLCMFeaturesValueDict)
 
         if computeGLRLMFeatures:
-            featureVector = self.computeSingleFeatureSet(inputScan,
-                                                         inputSegmentation,
-                                                         slicer.modules.computeglrlmfeatures,
-                                                         GLRLMFeaturesValueDict)
-        print (featureVector)
+            resultVector[1] = self.computeSingleFeatureSet(inputScan,
+                                                           inputSegmentation,
+                                                           slicer.modules.computeglrlmfeatures,
+                                                           GLRLMFeaturesValueDict)
+        return resultVector
 
     def computeSingleFeatureSet(self,
                                inputScan,
