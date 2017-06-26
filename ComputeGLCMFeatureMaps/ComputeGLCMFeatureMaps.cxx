@@ -35,7 +35,7 @@
 #include "itkMetaDataDictionary.h"
 #include "itkMetaDataObject.h"
 
-#include "itkScalarImageToTextureFeaturesImageFilter.h"
+#include "itkCoocurrenceTextureFeaturesImageFilter.h"
 
 #include "itkPluginUtilities.h"
 
@@ -63,7 +63,7 @@ int DoIt( int argc, char * argv[] )
   reader->SetFileName( inputVolume );
   reader->Update();
 
-  typedef itk::Statistics::ScalarImageToTextureFeaturesImageFilter< InputImageType, OutputImageType > FilterType;
+  typedef itk::Statistics::CoocurrenceTextureFeaturesImageFilter< InputImageType, OutputImageType > FilterType;
   typename FilterType::Pointer filter = FilterType::New();
   filter->SetInput(reader->GetOutput());
 

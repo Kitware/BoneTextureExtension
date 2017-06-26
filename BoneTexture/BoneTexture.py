@@ -19,9 +19,9 @@ class BoneTexture(ScriptedLoadableModule):
         self.parent.helpText = """
         This module is based on two texture analysis filters that are used to compute
         feature maps of N-Dimensional images using two well-known texture analysis methods.
-        The two filters used in this module are itkScalarImageToTextureFeaturesImageFilter
+        The two filters used in this module are itkCoocurrenceTextureFeaturesImageFilter
         (which computes textural features based on intensity-based co-occurrence matrices in
-        the image) and itkScalarImageToRunLengthFeaturesImageFilter (which computes textural
+        the image) and itkRunLengthTextureFeaturesImageFilter (which computes textural
         features based on equally valued intensity clusters of different sizes or run lengths
         in the image). The output of this module is a vector image of the same size than the
         input that contains a multidimensional vector in each pixel/voxel. Filters can be configured
