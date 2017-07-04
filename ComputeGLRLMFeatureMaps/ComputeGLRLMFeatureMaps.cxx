@@ -25,9 +25,6 @@
 
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
-#include "itkEuler3DTransform.h"
-#include "itkResampleImageFilter.h"
-#include "itkCastImageFilter.h"
 #include "itkFloatingPointExceptions.h"
 #include "itkImage.h"
 #include "itkVector.h"
