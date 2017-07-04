@@ -265,21 +265,21 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
         for fileName in os.listdir(inputDirectory):
             if fileName.endswith(".nrrd"):
                 print(fileName)
-                if fileName.startswith("Segm"):
+                if fileName.startswith("SegmC"):
                     caseID = re.search("SegmC(.+?).nrrd", fileName).group(1)
                     if caseID in caseDict:
-                        caseDict[caseID].segmentationFilePath = inputDirectory + '/' + fileName
+                        caseDict[caseID].segmentationFilePath = os.path.join(inputDirectory , fileName)
                     else:
                         temp = case(caseID)
-                        temp.segmentationFilePath = inputDirectory + '/' + fileName
+                        temp.segmentationFilePath = os.path.join(inputDirectory , fileName)
                         caseDict[caseID] = temp
                 elif fileName.startswith("Scan"):
                     caseID = re.search("Scan(.+?).nrrd", fileName).group(1)
                     if caseID in caseDict:
-                        caseDict[caseID].scanFilePath = inputDirectory + '/' + fileName
+                        caseDict[caseID].scanFilePath = os.path.join(inputDirectory , fileName)
                     else:
                         temp = case(caseID)
-                        temp.scanFilePath = inputDirectory + '/' + fileName
+                        temp.scanFilePath = os.path.join(inputDirectory , fileName )
                         caseDict[caseID] = temp
                     # if not os.path.exists(outputDirectory + '/' + caseID):
                     #     os.makedirs(outputDirectory + '/' + caseID)
@@ -301,7 +301,8 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
 
         properties = {}
 
-        file = open(outputDirectory, 'w')
+        file = open( os.path.join(outputDirectory , "TexturalFeatureTable.csv"), 'w+')
+        print(file)
         cw = csv.writer(file, delimiter=',')
         for case in caseDict.values():
             properties['labelmap'] = False
@@ -326,7 +327,12 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                                                              GLRLMFeaturesValueDict)
             slicer.mrmlScene.RemoveNode(inputScan)
             slicer.mrmlScene.RemoveNode(inputSegmentation)
-            cw.writerow([case.caseID] + case.GLCMFeatures + case.GLRLMFeatures)
+            toWrite = [case.caseID]
+            if (case.GLCMFeatures):
+                toWrite += case.GLCMFeatures
+            if (case.GLRLMFeatures):
+                toWrite += case.GLRLMFeatures
+            cw.writerow(toWrite)
         file.close()
 
     def computeSingleFeatureSet(self,
