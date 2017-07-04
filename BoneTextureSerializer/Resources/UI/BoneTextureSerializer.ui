@@ -448,6 +448,13 @@
         </item>
        </layout>
       </item>
+      <item>
+       <widget class="QCheckBox" name="separateFeaturesCheckBox">
+        <property name="text">
+         <string>Separate feature maps</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

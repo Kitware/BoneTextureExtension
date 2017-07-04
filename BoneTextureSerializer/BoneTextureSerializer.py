@@ -59,15 +59,6 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
 
         self.logic = BoneTextureSerializerLogic(self)
         self.caseDict = dict()
-        self.CFeatures = ["energy", "entropy",
-                          "correlation", "inverseDifferenceMoment",
-                          "inertia", "clusterShade",
-                          "clusterProminence", "haralickCorrelation"]
-        self.RLFeatures = ["shortRunEmphasis", "longRunEmphasis",
-                           "greyLevelNonuniformity", "runLengthNonuniformity",
-                           "lowGreyLevelRunEmphasis" , "highGreyLevelRunEmphasis" ,
-                           "shortRunLowGreyLevelEmphasis", "shortRunHighGreyLevelEmphasis",
-                           "longRunLowGreyLevelEmphasis", "longRunHighGreyLevelEmphasis"]
         self.GLCMFeaturesValueDict = {}
         self.GLCMFeaturesValueDict["insideMask"] = 1
         self.GLCMFeaturesValueDict["binNumber"] = 10
@@ -131,6 +122,8 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
 
         self.exportationCollapsibleButton = self.logic.get("ExportationCollapsibleButton")
         self.outputFolderDirectoryButton = self.logic.get("OutputFolderDirectoryButton")
+        self.separateFeaturesCheckBox = self.logic.get("separateFeaturesCheckBox")
+
 
         # -------------------------------------------------------------------- #
         # ---------------------------- Connections --------------------------- #
@@ -158,7 +151,6 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
         self.computeColormapsPushButton.connect('clicked()', self.onComputeColormaps)
 
         # ---------------- Exportation Collapsible Button -------------------- #
-        self.outputFolderDirectoryButton.connect('directoryChanged(const QString &)', self.onDirectoryChanged)
 
         # -------------------------------------------------------------------- #
         # -------------------------- Initialisation -------------------------- #
@@ -178,8 +170,7 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
 
     def onDirectoryChanged(self):
         self.logic.updateCaseDictionary(self.caseDict,
-                                        self.inputFolderDirectoryButton.directory,
-                                        self.outputFolderDirectoryButton.directory)
+                                        self.inputFolderDirectoryButton.directory)
 
         # ---------------- Computation Collapsible Button -------------------- #
 
@@ -197,7 +188,8 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
                                     self.gLRLMFeaturesCheckBox.isChecked(),
                                     self.GLCMFeaturesValueDict,
                                     self.GLRLMFeaturesValueDict,
-                                    self.outputFolderDirectoryButton.directory.encode('utf-8'))
+                                    self.outputFolderDirectoryButton.directory.encode('utf-8'),
+                                    self.separateFeaturesCheckBox.isChecked())
 
         # ---------------- Exportation Collapsible Button -------------------- #
 
@@ -219,6 +211,15 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
     def __init__(self, interface):
         print("----- Bone Texture Serializer logic init -----")
         self.interface = interface
+        self.CFeatures = ["energy", "entropy",
+                          "correlation", "inverseDifferenceMoment",
+                          "inertia", "clusterShade",
+                          "clusterProminence", "haralickCorrelation"]
+        self.RLFeatures = ["shortRunEmphasis", "longRunEmphasis",
+                           "greyLevelNonuniformity", "runLengthNonuniformity",
+                           "lowGreyLevelRunEmphasis" , "highGreyLevelRunEmphasis" ,
+                           "shortRunLowGreyLevelEmphasis", "shortRunHighGreyLevelEmphasis",
+                           "longRunLowGreyLevelEmphasis", "longRunHighGreyLevelEmphasis"]
 
     # ************************************************************************ #
     # ------------------------ Algorithm ------------------------------------- #
@@ -259,8 +260,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
 
     def updateCaseDictionary(self,
                              caseDict,
-                             inputDirectory,
-                             outputDirectory):
+                             inputDirectory):
         caseDict.clear()
         for fileName in os.listdir(inputDirectory):
             if fileName.endswith(".nrrd"):
@@ -281,9 +281,6 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                         temp = case(caseID)
                         temp.scanFilePath = os.path.join(inputDirectory , fileName )
                         caseDict[caseID] = temp
-                    # if not os.path.exists(outputDirectory + '/' + caseID):
-                    #     os.makedirs(outputDirectory + '/' + caseID)
-                    #     caseDict[caseID].outputFilePath = outputDirectory + '/' + caseID + "/" + caseID
 
     # ---------------- Computation of the wanted features---------------------- #
 
@@ -357,7 +354,8 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                          computeGLRLMFeatures,
                          GLCMFeaturesValueDict,
                          GLRLMFeaturesValueDict,
-                         outputDirectory):
+                         outputDirectory,
+                         saparateFeatureMaps):
 
         if not (computeGLCMFeatures or computeGLRLMFeatures):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
@@ -375,14 +373,22 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                 return
 
             print(case.caseID)
-            #properties["fileName"] = "nhdr"
             if computeGLCMFeatures:
                 volumeNode = self.computeSingleColormap(inputScan,
                                                         inputSegmentation,
                                                         slicer.modules.computeglcmfeaturemaps,
                                                         GLCMFeaturesValueDict,
                                                         "GLCM_ColorMaps")
-                slicer.util.saveNode(volumeNode, os.path.join(outputDirectory , case.caseID + "_GLCMFeatureMap.nhdr"))
+                if saparateFeatureMaps:
+                    param = dict()
+                    param["inputVolume"] = volumeNode
+                    param["outputFileBaseName"] = os.path.join(outputDirectory , case.caseID  + "_GLCMFeatureMap")
+                    slicer.cli.run(slicer.modules.separatevectorimage,
+                                   None,
+                                   param,
+                                   wait_for_completion=True)
+                else:
+                    slicer.util.saveNode(volumeNode, os.path.join(outputDirectory , case.caseID + "_GLCMFeatureMap.nhdr"))
                 slicer.mrmlScene.RemoveNode(volumeNode)
 
             if computeGLRLMFeatures:
@@ -391,11 +397,22 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                                                         slicer.modules.computeglrlmfeaturemaps,
                                                         GLRLMFeaturesValueDict,
                                                         "GLRLM_ColorMaps")
-                slicer.util.saveNode(volumeNode, os.path.join(outputDirectory , case.caseID + "_GLRLMFeatureMap.nhdr"))
+                if saparateFeatureMaps:
+                    param = dict()
+                    param["inputVolume"] = volumeNode
+                    param["outputFileBaseName"] = os.path.join(outputDirectory , case.caseID  + "_GLRLMFeatureMap")
+                    slicer.cli.run(slicer.modules.separatevectorimage,
+                                   None,
+                                   param,
+                                   wait_for_completion=True)
+                else:
+                    slicer.util.saveNode(volumeNode, os.path.join(outputDirectory , case.caseID + "_GLRLMFeatureMap.nhdr"))
                 slicer.mrmlScene.RemoveNode(volumeNode)
 
             slicer.mrmlScene.RemoveNode(inputScan)
             slicer.mrmlScene.RemoveNode(inputSegmentation)
+
+        self.renameSeparatedFeatures(outputDirectory)
 
     def computeSingleColormap(self,
                               inputScan,
@@ -421,6 +438,17 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                        wait_for_completion=True)
 
         return volumeNode
+
+    def renameSeparatedFeatures(self, outputDirectory):
+        for fileName in os.listdir(outputDirectory):
+            for i in range(8):
+                if fileName.endswith("GLCMFeatureMap_" + str(i) + ".nrrd"):
+                    os.rename(os.path.join(outputDirectory, fileName),
+                              os.path.join(outputDirectory, fileName.replace(str(i), self.CFeatures[i])))
+            for i in range(10):
+                if fileName.endswith("GLRLMFeatureMap_" + str(i) + ".nrrd"):
+                    os.rename(os.path.join(outputDirectory, fileName),
+                              os.path.join(outputDirectory, fileName.replace(str(i), self.RLFeatures[i])))
 
 ################################################################################
 ####################  Bone Texture Serializer Test #############################
