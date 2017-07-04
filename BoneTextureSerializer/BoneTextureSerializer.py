@@ -362,10 +362,40 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
         if not (computeGLCMFeatures or computeGLRLMFeatures):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
             return
-        if not (self.inputDataVerification(inputScan, inputSegmentation)):
-            return
 
-        slicer.util.warningDisplay("This part of the module is still under construction")
+        properties = {}
+        for case in caseDict.values():
+            inputScan = slicer.util.loadNodeFromFile(case.scanFilePath, 'VolumeFile', properties, returnNode=True)
+            inputScan = inputScan[1]
+            properties['labelmap'] = True
+            inputSegmentation = slicer.util.loadNodeFromFile(case.segmentationFilePath, 'VolumeFile', properties, returnNode=True)
+            inputSegmentation = inputSegmentation[1]
+
+            if not (self.inputDataVerification(inputScan, inputSegmentation)):
+                return
+
+            print(case.caseID)
+            #properties["fileName"] = "nhdr"
+            if computeGLCMFeatures:
+                volumeNode = self.computeSingleColormap(inputScan,
+                                                        inputSegmentation,
+                                                        slicer.modules.computeglcmfeaturemaps,
+                                                        GLCMFeaturesValueDict,
+                                                        "GLCM_ColorMaps")
+                slicer.util.saveNode(volumeNode, os.path.join(outputDirectory , case.caseID + "_GLCMFeatureMap.nhdr"))
+                slicer.mrmlScene.RemoveNode(volumeNode)
+
+            if computeGLRLMFeatures:
+                volumeNode = self.computeSingleColormap(inputScan,
+                                                        inputSegmentation,
+                                                        slicer.modules.computeglrlmfeaturemaps,
+                                                        GLRLMFeaturesValueDict,
+                                                        "GLRLM_ColorMaps")
+                slicer.util.saveNode(volumeNode, os.path.join(outputDirectory , case.caseID + "_GLRLMFeatureMap.nhdr"))
+                slicer.mrmlScene.RemoveNode(volumeNode)
+
+            slicer.mrmlScene.RemoveNode(inputScan)
+            slicer.mrmlScene.RemoveNode(inputSegmentation)
 
     def computeSingleColormap(self,
                               inputScan,
@@ -389,6 +419,8 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                        None,
                        parameters,
                        wait_for_completion=True)
+
+        return volumeNode
 
 ################################################################################
 ####################  Bone Texture Serializer Test #############################
