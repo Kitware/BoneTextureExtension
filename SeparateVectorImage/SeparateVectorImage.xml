@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+    <category>Quantification.Texture Features</category>
+    <title>Separate Vector Image</title>
+    <version>1.0</version>
+    <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/SeparateVectorImage.html</documentation-url>
+    <license></license>
+    <contributor>Jean-Baptiste Vimort, Kitware Inc.</contributor>
+    <acknowledgements>This work was supported by the National Institute of Health (NIH) National Institute for Dental and Craniofacial Research (NIDCR) R01EB021391 (Textural Biomarkers of Arthritis for the Subchondral Bone in the Temporomandibular Joint)</acknowledgements>
+    <parameters>
+        <label>IO</label>
+        <description>Input/output parameters</description>
+        <image type="diffusion-weighted" fileExtensions=".nhdr">
+            <name>inputVolume</name>
+            <label>Input Volume</label>
+            <channel>input</channel>
+            <index>0</index>
+            <description>Input Volume</description> 
+        </image>
+        <file>
+	    <name>outputFileBaseName</name>
+            <label>Output File Base Name</label>
+            <channel>output</channel>
+            <index>1</index>
+            <description>Output File Base Name</description>
+        </file>
+    </parameters>
+</executable>
