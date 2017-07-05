@@ -70,7 +70,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.GLCMFeaturesValueDict["binNumber"] = 10
         self.GLCMFeaturesValueDict["pixelIntensityMin"] = 0
         self.GLCMFeaturesValueDict["pixelIntensityMax"] = 4000
-        self.GLCMFeaturesValueDict["neighborhoodRadius"] = 6
+        self.GLCMFeaturesValueDict["neighborhoodRadius"] = 4
         self.GLRLMFeaturesValueDict = {}
         self.GLRLMFeaturesValueDict["insideMask"] = 1
         self.GLRLMFeaturesValueDict["binNumber"] = 10

@@ -136,7 +136,6 @@
             <name>outputVector</name>
             <label>Output Vector</label>
             <channel>output</channel>
-            <default>42,42,42</default>
             <description>Output Vector</description>
         </float-vector>
     </parameters>

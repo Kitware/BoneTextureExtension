@@ -55,7 +55,7 @@
                 <longflag>neighborhoodRadius</longflag>
             <flag>n</flag>
             <description>The size of the neighborhood radius</description>
-            <default>2</default>
+            <default>4</default>
         </integer>
         <integer>
             <name>pixelIntensityMin</name>

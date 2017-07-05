@@ -157,6 +157,9 @@
         <property name="checked">
          <bool>false</bool>
         </property>
+        <property name="collapsed">
+         <bool>true</bool>
+        </property>
         <layout class="QVBoxLayout" name="verticalLayout_9">
          <property name="sizeConstraint">
           <enum>QLayout::SetMinimumSize</enum>
@@ -267,7 +270,7 @@
               <number>10</number>
              </property>
              <property name="value">
-              <number>6</number>
+              <number>4</number>
              </property>
             </widget>
            </item>
@@ -839,8 +842,6 @@
           </widget>
          </item>
         </layout>
-        <zorder>displayFeaturesTableWidget</zorder>
-        <zorder>displayFeaturesTableWidget</zorder>
        </widget>
       </item>
      </layout>
