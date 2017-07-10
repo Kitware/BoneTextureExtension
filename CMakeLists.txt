@@ -4,21 +4,14 @@ project(BoneTextureExtension)
 
 #-----------------------------------------------------------------------------
 # Extension meta-information
-set(EXTENSION_HOMEPAGE "TODO")
+set(EXTENSION_HOMEPAGE "https://www.slicer.org/wiki/Documentation/Nightly/Extensions/BoneTextureExtension")
 set(EXTENSION_CATEGORY "Quantification")
 set(EXTENSION_CONTRIBUTORS "Jean-Baptiste VIMORT (Kitware Inc.)")
-set(EXTENSION_DESCRIPTION "This extensions contain several modules taht can be used to compute feature maps of N-Dimensional images using well-known texture analysis methods.
-
-Key Features:
-
-- Estimated texture features:
-   - 8 2nd order gray level statistical textural features: energy, entropy, correlation, inertia, cluster Shade...
-   - 10 run length textural features: run length emphasis, grey level non uniformity, run length non uniformity, low grey level long run emphasis...
-- Input configurable parameters: locality of the texture, offset directions for co-ocurrence and run length computation, the number of bins for the intensity histograms, and the intensity range or the range of run lengths.")
+set(EXTENSION_DESCRIPTION "This extensions contain several modules that can be used to compute feature maps of N-Dimensional images using well-known texture analysis methods. Key Features: 8 coocurrence textural features: energy, entropy, correlation, inertia, cluster Shade... / 10 run length textural features: run length emphasis, grey level non uniformity, run length non uniformity, low grey level long run emphasis... / Input configurable parameters: locality of the texture, offset directions for co-ocurrence and run length computation, the number of bins for the intensity histograms, and the intensity range or the range of run lengths.")
 
 
-set(EXTENSION_ICONURL "TODO")
-set(EXTENSION_SCREENSHOTURLS "TODO")
+set(EXTENSION_ICONURL "https://www.slicer.org/w/images/0/09/Logo-BoneTextureExtension.png")
+set(EXTENSION_SCREENSHOTURLS "https://www.slicer.org/w/images/7/70/BoneTextureExtension-Slicer.png")
 set(EXTENSION_DEPENDS "NA") # Specified as a space separated string, a list or 'NA' if any
 
 set(EXTENSION_BUILD_SUBDIRECTORY BoneTextureExtension-build)

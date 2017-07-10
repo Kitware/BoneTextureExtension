@@ -3,7 +3,7 @@
     <category>Quantification.Texture Features</category>
     <title>Compute GLCM Features</title>
     <version>1.0</version>
-    <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/ComputeGLCMFeatures.html</documentation-url>
+    <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/ComputeGLCMFeatures</documentation-url>
     <license></license>
     <contributor>Jean-Baptiste Vimort, Kitware Inc.</contributor>
     <acknowledgements>This work was supported by the National Institute of Health (NIH) National Institute for Dental and Craniofacial Research (NIDCR) R01EB021391 (Textural Biomarkers of Arthritis for the Subchondral Bone in the Temporomandibular Joint)</acknowledgements>

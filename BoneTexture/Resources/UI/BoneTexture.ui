@@ -542,7 +542,7 @@
       <item row="1" column="0">
        <widget class="ctkCollapsibleGroupBox" name="CollapsibleGroupBox">
         <property name="title">
-         <string>Features Value</string>
+         <string>Feature Values</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
