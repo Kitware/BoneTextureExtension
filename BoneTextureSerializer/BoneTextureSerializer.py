@@ -442,13 +442,15 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
     def renameSeparatedFeatures(self, outputDirectory):
         for fileName in os.listdir(outputDirectory):
             for i in range(8):
-                if fileName.endswith("GLCMFeatureMap_" + str(i) + ".nrrd"):
+                if fileName.endswith("GLCMFeatureMap_" + str(i+1) + ".nrrd"):
                     os.rename(os.path.join(outputDirectory, fileName),
-                              os.path.join(outputDirectory, fileName.replace(str(i), self.CFeatures[i])))
+                              os.path.join(outputDirectory, fileName.replace(
+                                  "GLCMFeatureMap_" + str(i+1) + ".nrrd", "GLCMFeatureMap_" + self.CFeatures[i] + ".nrrd")))
             for i in range(10):
-                if fileName.endswith("GLRLMFeatureMap_" + str(i) + ".nrrd"):
+                if fileName.endswith("GLRLMFeatureMap_" + str(i+1) + ".nrrd"):
                     os.rename(os.path.join(outputDirectory, fileName),
-                              os.path.join(outputDirectory, fileName.replace(str(i), self.RLFeatures[i])))
+                              os.path.join(outputDirectory, fileName.replace(
+                                  "GLRLMFeatureMap_" + str(i+1) + ".nrrd", "GLRLMFeatureMap_" + self.RLFeatures[i] + ".nrrd")))
 
 ################################################################################
 ####################  Bone Texture Serializer Test #############################
