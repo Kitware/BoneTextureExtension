@@ -44,130 +44,249 @@ namespace
 template< typename TPixel >
 int DoIt( int argc, char * argv[] )
 {
-  PARSE_ARGS;
 
-  const unsigned int Dimension = 3;
+    PARSE_ARGS;
 
-  typedef TPixel                                       PixelType;
-  typedef itk::VectorImage< PixelType, Dimension >     InputImageType;
-  typedef itk::Image< PixelType, Dimension >           InputMaskType;
-  typedef itk::ImageFileReader< InputImageType >       ReaderType;
-  typedef itk::ImageFileReader< InputMaskType >        MaskReaderType;
-  
-  typename ReaderType::Pointer reader = ReaderType::New();
-  reader->SetFileName( inputVolume );
-  reader->Update();
+    const unsigned int Dimension = 3;
 
-  std::ofstream outputFile;
-  const char *outputFilename = outputFileBaseName.c_str();
-  outputFile.open(outputFilename, std::ios::out);
+    typedef TPixel                                       PixelType;
+    typedef itk::VectorImage< PixelType, Dimension >     InputImageType;
+    typedef itk::Image< PixelType, Dimension >           InputMaskType;
+    typedef itk::ImageFileReader< InputImageType >       ReaderType;
+    typedef itk::ImageFileReader< InputMaskType >        MaskReaderType;
 
-  typename itk::ImageRegionConstIterator< InputImageType > inIt( reader->GetOutput(),  reader->GetOutput()->GetRequestedRegion());
-  inIt.GoToBegin ();
-  typename InputImageType::PixelType inputPixel;
-  typename InputImageType::IndexType inputIndex;
-  const unsigned int VectorComponentDimension = reader->GetOutput()->GetNumberOfComponentsPerPixel();
+    typename ReaderType::Pointer reader = ReaderType::New();
+    reader->SetFileName( inputVolume );
+    reader->Update();
 
-  if(inputMask != "")
-  {
-    typename MaskReaderType::Pointer maskReader = MaskReaderType::New();
-    maskReader->SetFileName( inputMask );
-    maskReader->Update(); 
-    typename itk::ImageRegionConstIterator< InputMaskType > maskIt( maskReader->GetOutput(),  maskReader->GetOutput()->GetRequestedRegion());
-    maskIt.GoToBegin ();
-    while ( !inIt.IsAtEnd() )
+    std::ofstream outputFile;
+    const char *outputFilename = outputFileBaseName.c_str();
+    outputFile.open(outputFilename, std::ios::out);
+
+    if(predefineTitle)
     {
-      if(maskIt.Get() != 0)
-      {
-        inputIndex = inIt.GetIndex();
-        for( unsigned int i = 0; i < Dimension; i++ )
-        {
-          outputFile<<inputIndex[i];
-          if (i != (Dimension - 1)) outputFile<<",";
-        }
-        inputPixel = inIt.Get();
-        for( unsigned int i = 0; i < VectorComponentDimension; i++ )
-        {
-          outputFile<<inputPixel[i]<<",";
-        }
+        outputFile<<"X"<<",";
+        outputFile<<"Y"<<",";
+        outputFile<<"Z"<<",";
+        outputFile<<"Energy"<<",";
+        outputFile<<"Entropy"<<",";
+        outputFile<<"Correlation"<<",";
+        outputFile<<"InverseDifferenceMoment"<<",";
+        outputFile<<"Inertia"<<",";
+        outputFile<<"ClusterShade"<<",";
+        outputFile<<"ClusterProminence"<<",";
+        outputFile<<"HarralickCorrelation"<<",";
+        outputFile<<"ShortRunEmphasis"<<",";
+        outputFile<<"LongRunEmpasis"<<",";
+        outputFile<<"GreyLevelNonUniformity"<<",";
+        outputFile<<"RunLengthNonUniformity"<<",";
+        outputFile<<"LowGreyLevelRunEmphasis"<<",";
+        outputFile<<"HighGreyLevelRunEmphasis"<<",";
+        outputFile<<"ShortRunLowGreyLevelEmphasis"<<",";
+        outputFile<<"ShortRunHighGreyLevelEmphasis"<<",";
+        outputFile<<"LongRunLowGreyLevelEmphasis"<<",";
+        outputFile<<"LongRunHighGreyLevelEmphasis"<<",";
+
         outputFile<<std::endl;
-      }
-      ++inIt;
-      ++maskIt;
     }
-    outputFile.close();
-  }
-  else
-  {
-    while ( !inIt.IsAtEnd() )
+
+    typename itk::ImageRegionConstIterator< InputImageType > inIt( reader->GetOutput(),  reader->GetOutput()->GetRequestedRegion());
+    inIt.GoToBegin ();
+    typename InputImageType::PixelType inputPixel;
+    typename InputImageType::IndexType inputIndex;
+    const unsigned int VectorComponentDimension = reader->GetOutput()->GetNumberOfComponentsPerPixel();
+
+    if(inputMask != "")
     {
-      inputIndex = inIt.GetIndex();
-      for( unsigned int i = 0; i < Dimension; i++ )
-      {
-        outputFile<<inputIndex[i];
-        if (i != (Dimension - 1)) outputFile<<",";
-      }
-      inputPixel = inIt.Get();
-      for( unsigned int i = 0; i < VectorComponentDimension; i++ )
-      {
-        outputFile<<inputPixel[i]<<",";
-      }
+        typename MaskReaderType::Pointer maskReader = MaskReaderType::New();
+        maskReader->SetFileName( inputMask );
+        maskReader->Update();
+        typename itk::ImageRegionConstIterator< InputMaskType > maskIt( maskReader->GetOutput(),  maskReader->GetOutput()->GetRequestedRegion());
+        maskIt.GoToBegin ();
+        if(additionalInputVolume != "")
+        {
+            typename ReaderType::Pointer additionalReader = ReaderType::New();
+            additionalReader->SetFileName( additionalInputVolume );
+            additionalReader->Update();
+            typename itk::ImageRegionConstIterator< InputImageType > addInIt( additionalReader->GetOutput(),  additionalReader->GetOutput()->GetRequestedRegion());
+            addInIt.GoToBegin ();
+            const unsigned int AdditionnalVectorComponentDimension = additionalReader->GetOutput()->GetNumberOfComponentsPerPixel();
 
-      outputFile<<std::endl;
-      ++inIt;
+
+            /// Mask + Input Volume + Additional Input Volume ///
+            while ( !inIt.IsAtEnd() )
+            {
+                if(maskIt.Get() != 0)
+                {
+                    inputIndex = inIt.GetIndex();
+                    for( unsigned int i = 0; i < Dimension; i++ )
+                    {
+                        outputFile<<inputIndex[i]<<",";
+                    }
+                    inputPixel = inIt.Get();
+                    for( unsigned int i = 0; i < VectorComponentDimension; i++ )
+                    {
+                        outputFile<<inputPixel[i]<<",";
+                    }
+                    inputPixel = addInIt.Get();
+                    for( unsigned int i = 0; i < AdditionnalVectorComponentDimension; i++ )
+                    {
+                        outputFile<<inputPixel[i];
+                        if (i != (AdditionnalVectorComponentDimension - 1)) outputFile<<",";
+                    }
+                    outputFile<<std::endl;
+                }
+                ++addInIt;
+                ++inIt;
+                ++maskIt;
+            }
+        }
+
+
+        else
+        {
+
+            /// Mask + Input Volume///
+            while ( !inIt.IsAtEnd() )
+            {
+                if(maskIt.Get() != 0)
+                {
+                    inputIndex = inIt.GetIndex();
+                    for( unsigned int i = 0; i < Dimension; i++ )
+                    {
+                        outputFile<<inputIndex[i]<<",";
+                    }
+                    inputPixel = inIt.Get();
+                    for( unsigned int i = 0; i < VectorComponentDimension; i++ )
+                    {
+                        outputFile<<inputPixel[i];
+                        if (i != (VectorComponentDimension - 1)) outputFile<<",";
+                    }
+                    outputFile<<std::endl;
+                }
+                ++inIt;
+                ++maskIt;
+            }
+
+
+
+        }
+    }
+    else
+    {
+        if(additionalInputVolume != "")
+        {
+            typename ReaderType::Pointer additionalReader = ReaderType::New();
+            additionalReader->SetFileName( additionalInputVolume );
+            additionalReader->Update();
+            typename itk::ImageRegionConstIterator< InputImageType > addInIt( additionalReader->GetOutput(),  additionalReader->GetOutput()->GetRequestedRegion());
+            addInIt.GoToBegin ();
+            const unsigned int AdditionnalVectorComponentDimension = reader->GetOutput()->GetNumberOfComponentsPerPixel();
+
+
+            ///Input Volume + Additional Input Volume ///
+            while ( !inIt.IsAtEnd() )
+            {
+
+                inputIndex = inIt.GetIndex();
+                for( unsigned int i = 0; i < Dimension; i++ )
+                {
+                    outputFile<<inputIndex[i]<<",";
+                }
+                inputPixel = inIt.Get();
+                for( unsigned int i = 0; i < VectorComponentDimension; i++ )
+                {
+                    outputFile<<inputPixel[i]<<",";
+                }
+                inputPixel = addInIt.Get();
+                for( unsigned int i = 0; i < AdditionnalVectorComponentDimension; i++ )
+                {
+                    outputFile<<inputPixel[i];
+                    if (i != (AdditionnalVectorComponentDimension - 1)) outputFile<<",";
+                }
+                outputFile<<std::endl;
+                ++addInIt;
+                ++inIt;
+            }
+        }
+
+
+        else
+        {
+
+
+            ///  Input Volume ///
+            while ( !inIt.IsAtEnd() )
+            {
+                inputIndex = inIt.GetIndex();
+                for( unsigned int i = 0; i < Dimension; i++ )
+                {
+                    outputFile<<inputIndex[i]<<",";
+                }
+                inputPixel = inIt.Get();
+                for( unsigned int i = 0; i < VectorComponentDimension; i++ )
+                {
+                    outputFile<<inputPixel[i];
+                    if (i != (VectorComponentDimension - 1)) outputFile<<",";
+                }
+                outputFile<<std::endl;
+                ++inIt;
+            }
+        }
+
+
     }
     outputFile.close();
-  }
 
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 } // end of anonymous namespace
 
 int main( int argc, char * argv[] )
 {
-  PARSE_ARGS;
+    PARSE_ARGS;
 
-  itk::ImageIOBase::IOPixelType     inputPixelType;
-  itk::ImageIOBase::IOComponentType inputComponentType;
-  itk::FloatingPointExceptions::Enable();
-  itk::FloatingPointExceptions::SetExceptionAction( itk::FloatingPointExceptions::ABORT );
+    itk::ImageIOBase::IOPixelType     inputPixelType;
+    itk::ImageIOBase::IOComponentType inputComponentType;
+    itk::FloatingPointExceptions::Enable();
+    itk::FloatingPointExceptions::SetExceptionAction( itk::FloatingPointExceptions::ABORT );
 
-  try
+    try
     {
 
-    itk::GetImageType(inputVolume, inputPixelType, inputComponentType);
+        itk::GetImageType(inputVolume, inputPixelType, inputComponentType);
 
-    switch( inputComponentType )
-      {
-      case itk::ImageIOBase::UCHAR:
-        return DoIt< int >( argc, argv );
-        break;
-      case itk::ImageIOBase::USHORT:
-        return DoIt< int >( argc, argv );
-        break;
-      case itk::ImageIOBase::SHORT:
-        return DoIt< int >( argc, argv );
-        break;
-      case itk::ImageIOBase::FLOAT:
-        return DoIt< float >( argc, argv );
-        break;
-      case itk::ImageIOBase::INT:
-        return DoIt< int >( argc, argv );
-        break;
-      default:
-        std::cerr << "Unknown input image pixel component type: "
-          << itk::ImageIOBase::GetComponentTypeAsString( inputComponentType )
-          << std::endl;
+        switch( inputComponentType )
+        {
+        case itk::ImageIOBase::UCHAR:
+            return DoIt< int >( argc, argv );
+            break;
+        case itk::ImageIOBase::USHORT:
+            return DoIt< int >( argc, argv );
+            break;
+        case itk::ImageIOBase::SHORT:
+            return DoIt< int >( argc, argv );
+            break;
+        case itk::ImageIOBase::FLOAT:
+            return DoIt< float >( argc, argv );
+            break;
+        case itk::ImageIOBase::INT:
+            return DoIt< int >( argc, argv );
+            break;
+        default:
+            std::cerr << "Unknown input image pixel component type: "
+                      << itk::ImageIOBase::GetComponentTypeAsString( inputComponentType )
+                      << std::endl;
+            return EXIT_FAILURE;
+            break;
+        }
+    }
+    catch( itk::ExceptionObject & excep )
+    {
+        std::cerr << argv[0] << ": exception caught !" << std::endl;
+        std::cerr << excep << std::endl;
         return EXIT_FAILURE;
-        break;
-      }
     }
-  catch( itk::ExceptionObject & excep )
-    {
-    std::cerr << argv[0] << ": exception caught !" << std::endl;
-    std::cerr << excep << std::endl;
-    return EXIT_FAILURE;
-    }
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

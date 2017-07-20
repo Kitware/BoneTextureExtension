@@ -17,6 +17,13 @@
             <index>0</index>
             <description>Input Volume</description> 
         </image>
+        <image type="diffusion-weighted" fileExtensions=".nhdr">
+            <name>additionalInputVolume</name>
+            <label>additional Input Volume</label>
+            <channel>input</channel>
+            <flag>i</flag>
+            <description>Input Volume</description>
+        </image>
         <image type="label">
             <name>inputMask</name>
             <label>Input mask</label>
@@ -26,6 +33,15 @@
             <description>A mask defining the region over which texture features will be calculated</description>
             <default></default>
         </image>
+        <boolean>
+            <name>predefineTitle</name>
+            <label>Add feature names redefine Title</label>
+            <longflag>predefineTitle</longflag>
+            <channel>input</channel>
+            <flag>p</flag>
+            <description>Add the names of the features computed in BoneTextureExtension (GLCM the GLRLM)</description>
+            <default></default>
+        </boolean>
         <file fileExtensions=".csv">
 	    <name>outputFileBaseName</name>
             <label>Output File Base Name</label>
