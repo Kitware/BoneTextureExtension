@@ -47,6 +47,7 @@ add_subdirectory(ComputeGLRLMFeatureMaps)
 add_subdirectory(BoneTexture)
 add_subdirectory(BoneTextureSerializer)
 add_subdirectory(SeparateVectorImage)
+add_subdirectory(SaveVectorImageAsCSV)
 
 #-----------------------------------------------------------------------------
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
