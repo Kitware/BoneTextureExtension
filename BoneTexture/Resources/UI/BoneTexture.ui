@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>922</width>
-    <height>1194</height>
+    <height>1210</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -267,7 +267,7 @@
            <item row="3" column="1">
             <widget class="QSpinBox" name="GLCMNeighborhoodRadiusSpinBox">
              <property name="maximum">
-              <number>10</number>
+              <number>100</number>
              </property>
              <property name="value">
               <number>4</number>
@@ -291,7 +291,7 @@
          <bool>true</bool>
         </property>
         <property name="checked">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_7">
          <property name="sizeConstraint">
@@ -389,7 +389,7 @@
              <item row="1" column="1">
               <widget class="QDoubleSpinBox" name="GLRLMMaxDistanceSpinBox">
                <property name="maximum">
-                <double>5.000000000000000</double>
+                <double>1000.000000000000000</double>
                </property>
                <property name="singleStep">
                 <double>0.100000000000000</double>
@@ -431,7 +431,7 @@
            <item row="5" column="1">
             <widget class="QSpinBox" name="GLRLMNeighborhoodRadiusSpinBox">
              <property name="maximum">
-              <number>10</number>
+              <number>100</number>
              </property>
              <property name="value">
               <number>4</number>
@@ -466,14 +466,14 @@
       <item>
        <widget class="QPushButton" name="ComputeColormapsPushButton">
         <property name="text">
-         <string>Compute Colormaps</string>
+         <string>Compute Texture Maps</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="ComputeFeaturesPushButton">
         <property name="text">
-         <string>Compute Features</string>
+         <string>Compute Texture Feature Set</string>
         </property>
        </widget>
       </item>
