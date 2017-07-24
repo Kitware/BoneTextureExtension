@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+    <category>Quantification.Texture Features</category>
+    <title>Create label map from CSV</title>
+    <version>1.0</version>
+    <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/SaveVectorImageAsCSV</documentation-url>
+    <license></license>
+    <contributor>Jean-Baptiste Vimort, Kitware Inc.</contributor>
+    <acknowledgements>This work was supported by the National Institute of Health (NIH) National Institute for Dental and Craniofacial Research (NIDCR) R01EB021391 (Textural Biomarkers of Arthritis for the Subchondral Bone in the Temporomandibular Joint)</acknowledgements>
+    <parameters>
+        <label>IO</label>
+        <description>Input/output parameters</description>
+        <image type="scalar">
+            <name>inputVolume</name>
+            <label>Input Volume</label>
+            <channel>input</channel>
+            <index>0</index>
+            <description>Input Volume</description>
+        </image>
+        <file fileExtensions=".csv">
+            <name>inputFileName</name>
+            <label>Input File Name</label>
+            <channel>input</channel>
+            <index>1</index>
+            <description>Input File Name</description>
+        </file>
+        <image type="label">
+            <name>outputLabeMap</name>
+            <label>Output Label Map</label>
+            <channel>output</channel>
+            <index>2</index>
+            <description>Label Map created from the CSV</description>
+        </image>
+        <string>
+            <name>Label1</name>
+            <label>Label 1</label>
+            <channel>input</channel>
+            <index>3</index>
+            <default>1</default>
+        </string>
+        <string>
+            <name>Label2</name>
+            <label>Label 2</label>
+            <channel>input</channel>
+            <longflag>L2</longflag>
+            <default></default>
+        </string>
+        <string>
+            <name>Label3</name>
+            <label>Label 3</label>
+            <channel>input</channel>
+            <longflag>L3</longflag>
+            <default></default>
+        </string>
+        <string>
+            <name>Label4</name>
+            <label>Label 4</label>
+            <channel>input</channel>
+            <longflag>L4</longflag>
+            <default></default>
+        </string>
+        <string>
+            <name>Label5</name>
+            <label>Label 5</label>
+            <channel>input</channel>
+            <longflag>L5</longflag>
+            <default></default>
+        </string>
+    </parameters>
+</executable>

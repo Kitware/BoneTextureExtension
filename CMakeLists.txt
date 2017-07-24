@@ -48,6 +48,7 @@ add_subdirectory(BoneTexture)
 add_subdirectory(BoneTextureSerializer)
 add_subdirectory(SeparateVectorImage)
 add_subdirectory(SaveVectorImageAsCSV)
+add_subdirectory(CreateLabelMapFromCSV)
 
 #-----------------------------------------------------------------------------
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
