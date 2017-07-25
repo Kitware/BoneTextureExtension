@@ -436,22 +436,25 @@
      <property name="contentsFrameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
-     <layout class="QVBoxLayout" name="ExportationVerticalLayout">
-      <item>
-       <layout class="QHBoxLayout" name="OutputPathHorizontalLayout">
-        <item>
-         <widget class="QLabel" name="OutputPathLabel">
-          <property name="text">
-           <string>Output folder:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="ctkDirectoryButton" name="OutputFolderDirectoryButton"/>
-        </item>
-       </layout>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="1">
+       <widget class="ctkDirectoryButton" name="OutputFolderDirectoryButton"/>
       </item>
-      <item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="OutputPathLabel">
+        <property name="text">
+         <string>Output folder:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="saveAsCSVCheckBox">
+        <property name="text">
+         <string>Save As CSV</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
        <widget class="QCheckBox" name="separateFeaturesCheckBox">
         <property name="text">
          <string>Separate feature maps</string>

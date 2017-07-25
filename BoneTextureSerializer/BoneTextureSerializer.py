@@ -123,6 +123,7 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
         self.exportationCollapsibleButton = self.logic.get("ExportationCollapsibleButton")
         self.outputFolderDirectoryButton = self.logic.get("OutputFolderDirectoryButton")
         self.separateFeaturesCheckBox = self.logic.get("separateFeaturesCheckBox")
+        self.saveAsCSVCheckBox = self.logic.get("saveAsCSVCheckBox")
 
 
         # -------------------------------------------------------------------- #
@@ -189,7 +190,8 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
                                     self.GLCMFeaturesValueDict,
                                     self.GLRLMFeaturesValueDict,
                                     self.outputFolderDirectoryButton.directory.encode('utf-8'),
-                                    self.separateFeaturesCheckBox.isChecked())
+                                    self.separateFeaturesCheckBox.isChecked(),
+                                    self.saveAsCSVCheckBox.isChecked())
 
         # ---------------- Exportation Collapsible Button -------------------- #
 
@@ -355,7 +357,8 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                          GLCMFeaturesValueDict,
                          GLRLMFeaturesValueDict,
                          outputDirectory,
-                         saparateFeatureMaps):
+                         saparateFeatureMaps,
+                         saveAsCSV):
 
         if not (computeGLCMFeatures or computeGLRLMFeatures):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
@@ -373,6 +376,10 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                 return
 
             print(case.caseID)
+
+            storageforCSV = {}
+            if saveAsCSV and (not os.path.exists(os.path.join(outputDirectory , "CSVfeatureMaps"))):
+                os.makedirs(os.path.join(outputDirectory , "CSVfeatureMaps"))
             if computeGLCMFeatures:
                 volumeNode = self.computeSingleColormap(inputScan,
                                                         inputSegmentation,
@@ -389,7 +396,11 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                                    wait_for_completion=True)
                 else:
                     slicer.util.saveNode(volumeNode, os.path.join(outputDirectory , case.caseID + "_GLCMFeatureMap.nhdr"))
-                slicer.mrmlScene.RemoveNode(volumeNode)
+
+                if saveAsCSV:
+                    storageforCSV["GLCM"] = volumeNode
+                else:
+                    slicer.mrmlScene.RemoveNode(volumeNode)
 
             if computeGLRLMFeatures:
                 volumeNode = self.computeSingleColormap(inputScan,
@@ -407,7 +418,29 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                                    wait_for_completion=True)
                 else:
                     slicer.util.saveNode(volumeNode, os.path.join(outputDirectory , case.caseID + "_GLRLMFeatureMap.nhdr"))
-                slicer.mrmlScene.RemoveNode(volumeNode)
+
+                if saveAsCSV:
+                    storageforCSV["GLRLM"] = volumeNode
+                else:
+                    slicer.mrmlScene.RemoveNode(volumeNode)
+
+            if saveAsCSV:
+                param = dict()
+                if computeGLCMFeatures:
+                    param["inputVolume"] = storageforCSV["GLCM"]
+                    if computeGLRLMFeatures:
+                        param["additionalInputVolume"] = storageforCSV["GLRLM"]
+                else:
+                    param["inputVolume"] = storageforCSV["GLRLM"]
+                param["inputMask"] = inputSegmentation
+                param["outputFileBaseName"] = os.path.join(outputDirectory , "CSVfeatureMaps" , case.caseID + "_FeatureMap.csv")
+                param["predefineTitle"] = True
+                slicer.cli.run(slicer.modules.savevectorimageascsv,
+                               None,
+                               param,
+                               wait_for_completion=True)
+                slicer.mrmlScene.RemoveNode(storageforCSV["GLCM"])
+                slicer.mrmlScene.RemoveNode(storageforCSV["GLRLM"])
 
             slicer.mrmlScene.RemoveNode(inputScan)
             slicer.mrmlScene.RemoveNode(inputSegmentation)
