@@ -31,7 +31,7 @@ if(NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 set(proj ${SUPERBUILD_TOPLEVEL_PROJECT})
-set(${proj}_DEPENDS ITKTextureFeature)
+set(${proj}_DEPENDS ITKTextureFeature ITKBoneMorphometry)
 
 ExternalProject_Include_Dependencies(${proj}
   PROJECT_VAR proj
@@ -60,3 +60,4 @@ ExternalProject_Add(${proj}
   DEPENDS
     ${${proj}_DEPENDS}
   )
+
