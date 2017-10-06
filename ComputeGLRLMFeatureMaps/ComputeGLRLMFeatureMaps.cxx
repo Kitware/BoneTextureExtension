@@ -60,7 +60,7 @@ int DoIt( int argc, char * argv[] )
   reader->SetFileName( inputVolume );
   reader->Update();
 
-  typedef itk::Statistics::RunLengthTextureFeaturesImageFilter< InputImageType, OutputImageType > FilterType;
+  typedef itk::Statistics::RunLengthTextureFeaturesImageFilter< InputImageType, OutputImageType ,InputImageType > FilterType;
   typename FilterType::Pointer filter = FilterType::New();
   filter->SetInput(reader->GetOutput());
 
@@ -76,8 +76,10 @@ int DoIt( int argc, char * argv[] )
   filter->SetNumberOfBinsPerAxis(binNumber);
   hood.SetRadius(neighborhoodRadius);
   filter->SetNeighborhoodRadius(hood.GetRadius());
-  filter->SetPixelValueMinMax(pixelIntensityMin, pixelIntensityMax);
-  filter->SetDistanceValueMinMax(distanceMin, distanceMax);
+  filter->SetHistogramValueMinimum( pixelIntensityMin );
+  filter->SetHistogramValueMaximum( pixelIntensityMax );
+  filter->SetHistogramDistanceMinimum( distanceMin );
+  filter->SetHistogramDistanceMaximum( distanceMax );
   filter->Update();
   
   itk::MetaDataDictionary dictionary;

@@ -71,6 +71,7 @@ int DoIt( int argc, char * argv[] )
   filter->SetInsidePixelValue(insideMask);
   filter->SetNumberOfBinsPerAxis(binNumber);
   filter->SetPixelValueMinMax(pixelIntensityMin, pixelIntensityMax);
+  filter->SetDistanceValueMinMax(distanceMin, distanceMax);
 
   typename FilterType::FeatureNameVectorPointer requestedFeatures = FilterType::FeatureNameVector::New();
   requestedFeatures->push_back(FilterType::RunLengthFeaturesFilterType::ShortRunEmphasis);
