@@ -115,7 +115,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="GLCMFeaturesLabel">
            <property name="text">
-            <string>GLCM features</string>
+            <string>Gray Level Co-occurrences (GLCM) features</string>
            </property>
           </widget>
          </item>
@@ -136,7 +136,21 @@
          <item row="1" column="0">
           <widget class="QLabel" name="GLRLMFeaturesLabel">
            <property name="text">
-            <string>GLRLM features</string>
+            <string>Gray Level Run Length (GLRLM) features</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="BMFeaturesLabel">
+           <property name="text">
+            <string>Bone Morphometry (BM) features</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QCheckBox" name="BMFeaturesCheckBox">
+           <property name="text">
+            <string/>
            </property>
           </widget>
          </item>
@@ -464,6 +478,62 @@
        </widget>
       </item>
       <item>
+       <widget class="ctkCollapsibleGroupBox" name="CollapsibleGroupBox_2">
+        <property name="title">
+         <string>BM parameters</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <layout class="QFormLayout" name="formLayout_7">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Threshold:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Neighborhood Radius:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QSpinBox" name="BMThresholdSpinBox">
+             <property name="minimum">
+              <number>-1000000</number>
+             </property>
+             <property name="maximum">
+              <number>1000000</number>
+             </property>
+             <property name="singleStep">
+              <number>0</number>
+             </property>
+             <property name="value">
+              <number>1</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="BMNeighborhoodRadiusSpinBox">
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>4</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="ComputeColormapsPushButton">
         <property name="text">
          <string>Compute Texture Maps</string>
@@ -659,6 +729,16 @@
              <string>Values</string>
             </property>
            </column>
+           <column>
+            <property name="text">
+             <string>BM Features</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Values</string>
+            </property>
+           </column>
            <item row="0" column="0">
             <property name="text">
              <string>energy</string>
@@ -675,6 +755,16 @@
             </property>
            </item>
            <item row="0" column="3">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </item>
+           <item row="0" column="4">
+            <property name="text">
+             <string>BVTV</string>
+            </property>
+           </item>
+           <item row="0" column="5">
             <property name="text">
              <string>0.0</string>
             </property>
@@ -699,6 +789,16 @@
              <string>0.0</string>
             </property>
            </item>
+           <item row="1" column="4">
+            <property name="text">
+             <string>TbTh</string>
+            </property>
+           </item>
+           <item row="1" column="5">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </item>
            <item row="2" column="0">
             <property name="text">
              <string>correlation</string>
@@ -715,6 +815,16 @@
             </property>
            </item>
            <item row="2" column="3">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </item>
+           <item row="2" column="4">
+            <property name="text">
+             <string>TbSp</string>
+            </property>
+           </item>
+           <item row="2" column="5">
             <property name="text">
              <string>0.0</string>
             </property>
@@ -739,6 +849,16 @@
              <string>0.0</string>
             </property>
            </item>
+           <item row="3" column="4">
+            <property name="text">
+             <string>TbN</string>
+            </property>
+           </item>
+           <item row="3" column="5">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </item>
            <item row="4" column="0">
             <property name="text">
              <string>inertia</string>
@@ -755,6 +875,16 @@
             </property>
            </item>
            <item row="4" column="3">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </item>
+           <item row="4" column="4">
+            <property name="text">
+             <string>BSBV</string>
+            </property>
+           </item>
+           <item row="4" column="5">
             <property name="text">
              <string>0.0</string>
             </property>

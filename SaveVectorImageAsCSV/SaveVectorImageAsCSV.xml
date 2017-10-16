@@ -18,11 +18,20 @@
             <description>Input Volume</description> 
         </image>
         <image type="diffusion-weighted" fileExtensions=".nhdr">
-            <name>additionalInputVolume</name>
-            <label>additional Input Volume</label>
+            <name>secondInputVolume</name>
+            <label>second Input Volume</label>
             <channel>input</channel>
-            <flag>i</flag>
-            <description>Input Volume</description>
+            <longflag>secondInputVolume</longflag>
+            <flag>a</flag>
+            <description>2nd Input Volume (Optional)</description>
+        </image>
+        <image type="diffusion-weighted" fileExtensions=".nhdr">
+            <name>thirdInputVolume</name>
+            <label>third Input Volume</label>
+            <channel>input</channel>
+            <longflag>thirdInputVolume</longflag>
+            <flag>b</flag>
+            <description>Third Input Volume (Optional)</description>
         </image>
         <image type="label">
             <name>inputMask</name>

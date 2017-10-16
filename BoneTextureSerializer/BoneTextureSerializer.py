@@ -13,6 +13,7 @@ class case(object):
         self.outputFilePath = None
         self.GLCMFeatures = None
         self.GLRLMFeatures = None
+        self.BMFeatures = None
 
 ################################################################################
 ######################  Bone Texture Serializer ################################
@@ -73,6 +74,9 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
         self.GLRLMFeaturesValueDict["neighborhoodRadius"] = 4
         self.GLRLMFeaturesValueDict["distanceMin"] = 0.00
         self.GLRLMFeaturesValueDict["distanceMax"] = 1.00
+        self.BMFeaturesValueDict = {}
+        self.BMFeaturesValueDict["threshold"] = 1
+        self.BMFeaturesValueDict["neighborhoodRadius"] = 4
 
         # -------------------------------------------------------------------- #
         # ----------------- Definition of the UI interface ------------------- #
@@ -101,6 +105,7 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
         self.featureChoiceCollapsibleGroupBox = self.logic.get("FeatureChoiceCollapsibleGroupBox")
         self.gLCMFeaturesCheckBox = self.logic.get("GLCMFeaturesCheckBox")
         self.gLRLMFeaturesCheckBox = self.logic.get("GLRLMFeaturesCheckBox")
+        self.bMFeaturesCheckBox = self.logic.get("BMFeaturesCheckBox")
         self.computeFeaturesPushButton = self.logic.get("ComputeFeaturesPushButton")
         self.computeColormapsPushButton = self.logic.get("ComputeColormapsPushButton")
         self.GLCMparametersCollapsibleGroupBox = self.logic.get("GLCMParametersCollapsibleGroupBox")
@@ -117,6 +122,9 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
         self.GLRLMminDistanceSpinBox = self.logic.get("GLRLMMinDistanceSpinBox")
         self.GLRLMmaxDistanceSpinBox = self.logic.get("GLRLMMaxDistanceSpinBox")
         self.GLRLMneighborhoodRadiusSpinBox = self.logic.get("GLRLMNeighborhoodRadiusSpinBox")
+        self.bMparametersCollapsibleGroupBox = self.logic.get("BMParametersCollapsibleGroupBox")
+        self.BMthresholdSpinBox = self.logic.get("BMThresholdSpinBox")
+        self.BMneighborhoodRadiusSpinBox = self.logic.get("BMNeighborhoodRadiusSpinBox")
 
         # ---------------- Exportation Collapsible Button -------------------- #
 
@@ -145,6 +153,8 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
         self.GLRLMminDistanceSpinBox.connect('valueChanged(double)', lambda: self.onGLRLMFeaturesValueDictModified("distanceMin", self.GLRLMminDistanceSpinBox.value))
         self.GLRLMmaxDistanceSpinBox.connect('valueChanged(double)', lambda: self.onGLRLMFeaturesValueDictModified("distanceMax", self.GLRLMmaxDistanceSpinBox.value))
         self.GLRLMneighborhoodRadiusSpinBox.connect('valueChanged(int)', lambda: self.onGLRLMFeaturesValueDictModified("neighborhoodRadius", self.GLRLMneighborhoodRadiusSpinBox.value))
+        self.BMthresholdSpinBox.connect('valueChanged(int)', lambda: self.onBMFeaturesValueDictModified("threshold", self.BMthresholdSpinBox.value))
+        self.BMneighborhoodRadiusSpinBox.connect('valueChanged(int)', lambda: self.onBMFeaturesValueDictModified("neighborhoodRadius", self.BMneighborhoodRadiusSpinBox.value))
 
         # ---------------- Computation Collapsible Button -------------------- #
 
@@ -169,6 +179,9 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
     def onGLRLMFeaturesValueDictModified(self, key, value):
         self.GLRLMFeaturesValueDict[key] = value
 
+    def onBMFeaturesValueDictModified(self, key, value):
+        self.BMFeaturesValueDict[key] = value
+
     def onDirectoryChanged(self):
         self.logic.updateCaseDictionary(self.caseDict,
                                         self.inputFolderDirectoryButton.directory)
@@ -179,16 +192,20 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
         self.logic.computeFeatures(self.caseDict,
                                    self.gLCMFeaturesCheckBox.isChecked(),
                                    self.gLRLMFeaturesCheckBox.isChecked(),
+                                   self.bMFeaturesCheckBox.isChecked(),
                                    self.GLCMFeaturesValueDict,
                                    self.GLRLMFeaturesValueDict,
+                                   self.BMFeaturesValueDict,
                                    self.outputFolderDirectoryButton.directory.encode('utf-8'))
 
     def onComputeColormaps(self):
         self.logic.computeColormaps(self.caseDict,
                                     self.gLCMFeaturesCheckBox.isChecked(),
                                     self.gLRLMFeaturesCheckBox.isChecked(),
+                                    self.bMFeaturesCheckBox.isChecked(),
                                     self.GLCMFeaturesValueDict,
                                     self.GLRLMFeaturesValueDict,
+                                    self.BMFeaturesValueDict,
                                     self.outputFolderDirectoryButton.directory.encode('utf-8'),
                                     self.separateFeaturesCheckBox.isChecked(),
                                     self.saveAsCSVCheckBox.isChecked())
@@ -222,6 +239,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                            "lowGreyLevelRunEmphasis" , "highGreyLevelRunEmphasis" ,
                            "shortRunLowGreyLevelEmphasis", "shortRunHighGreyLevelEmphasis",
                            "longRunLowGreyLevelEmphasis", "longRunHighGreyLevelEmphasis"]
+        self.BMFeatures = ["BVTV", "TbTh", "TbSp", "TbN", "BSBV" ]
 
     # ************************************************************************ #
     # ------------------------ Algorithm ------------------------------------- #
@@ -290,11 +308,13 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                         caseDict,
                         computeGLCMFeatures,
                         computeGLRLMFeatures,
+                        computeBMFeatures,
                         GLCMFeaturesValueDict,
                         GLRLMFeaturesValueDict,
+                        BMFeaturesValueDict,
                         outputDirectory):
 
-        if not (computeGLCMFeatures or computeGLRLMFeatures):
+        if not (computeGLCMFeatures or computeGLRLMFeatures or computeBMFeatures):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
             return
 
@@ -315,15 +335,22 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
 
             if computeGLCMFeatures:
                 case.GLCMFeatures = self.computeSingleFeatureSet(inputScan,
-                                                             inputSegmentation,
-                                                             slicer.modules.computeglcmfeatures,
-                                                             GLCMFeaturesValueDict)
+                                                                 inputSegmentation,
+                                                                 slicer.modules.computeglcmfeatures,
+                                                                 GLCMFeaturesValueDict)
 
             if computeGLRLMFeatures:
                 case.GLRLMFeatures = self.computeSingleFeatureSet(inputScan,
-                                                             inputSegmentation,
-                                                             slicer.modules.computeglrlmfeatures,
-                                                             GLRLMFeaturesValueDict)
+                                                                  inputSegmentation,
+                                                                  slicer.modules.computeglrlmfeatures,
+                                                                  GLRLMFeaturesValueDict)
+
+            if computeBMFeatures:
+                case.BMFeatures = self.computeSingleFeatureSet(inputScan,
+                                                               inputSegmentation,
+                                                               slicer.modules.computebmfeatures,
+                                                               BMFeaturesValueDict)
+
             slicer.mrmlScene.RemoveNode(inputScan)
             slicer.mrmlScene.RemoveNode(inputSegmentation)
             toWrite = [case.caseID]
@@ -331,6 +358,8 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                 toWrite += case.GLCMFeatures
             if (case.GLRLMFeatures):
                 toWrite += case.GLRLMFeatures
+            if (case.BMFeatures):
+                toWrite += case.BMFeatures
             cw.writerow(toWrite)
         file.close()
 
@@ -354,13 +383,15 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                          caseDict,
                          computeGLCMFeatures,
                          computeGLRLMFeatures,
+                         computeBMFeatures,
                          GLCMFeaturesValueDict,
                          GLRLMFeaturesValueDict,
+                         BMFeaturesValueDict,
                          outputDirectory,
                          saparateFeatureMaps,
                          saveAsCSV):
 
-        if not (computeGLCMFeatures or computeGLRLMFeatures):
+        if not (computeGLCMFeatures or computeGLRLMFeatures or computeBMFeatures):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
             return
 
@@ -424,23 +455,58 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                 else:
                     slicer.mrmlScene.RemoveNode(volumeNode)
 
+            if computeBMFeatures:
+                volumeNode = self.computeSingleColormap(inputScan,
+                                                        inputSegmentation,
+                                                        slicer.modules.computebmfeaturemaps,
+                                                        BMFeaturesValueDict,
+                                                        "BM_ColorMaps")
+                if saparateFeatureMaps:
+                    param = dict()
+                    param["inputVolume"] = volumeNode
+                    param["outputFileBaseName"] = os.path.join(outputDirectory, case.caseID + "_BMFeatureMap")
+                    slicer.cli.run(slicer.modules.separatevectorimage,
+                                   None,
+                                   param,
+                                   wait_for_completion=True)
+                else:
+                    slicer.util.saveNode(volumeNode,
+                                         os.path.join(outputDirectory, case.caseID + "_BMFeatureMap.nhdr"))
+
+                if saveAsCSV:
+                    storageforCSV["BM"] = volumeNode
+                else:
+                    slicer.mrmlScene.RemoveNode(volumeNode)
+
             if saveAsCSV:
                 param = dict()
+                param["inputMask"] = inputSegmentation
+                param["outputFileBaseName"] = os.path.join(outputDirectory , "CSVfeatureMaps" , case.caseID + "_FeatureMap.csv")
                 if computeGLCMFeatures:
                     param["inputVolume"] = storageforCSV["GLCM"]
                     if computeGLRLMFeatures:
-                        param["additionalInputVolume"] = storageforCSV["GLRLM"]
-                else:
+                        param["secondInputVolume"] = storageforCSV["GLRLM"]
+                        if computeBMFeatures:
+                            param["thirdInputVolume"] = storageforCSV["BM"]
+                            param["predefineTitle"] = True
+                    elif computeBMFeatures:
+                        param["secondInputVolume"] = storageforCSV["BM"]
+                elif computeGLRLMFeatures:
                     param["inputVolume"] = storageforCSV["GLRLM"]
-                param["inputMask"] = inputSegmentation
-                param["outputFileBaseName"] = os.path.join(outputDirectory , "CSVfeatureMaps" , case.caseID + "_FeatureMap.csv")
-                param["predefineTitle"] = True
+                    if computeBMFeatures:
+                        param["secondInputVolume"] = storageforCSV["BM"]
+                else:
+                    param["inputVolume"] = storageforCSV["BM"]
+
+                print param
+
                 slicer.cli.run(slicer.modules.savevectorimageascsv,
                                None,
                                param,
                                wait_for_completion=True)
                 slicer.mrmlScene.RemoveNode(storageforCSV["GLCM"])
                 slicer.mrmlScene.RemoveNode(storageforCSV["GLRLM"])
+                slicer.mrmlScene.RemoveNode(storageforCSV["BM"])
 
             slicer.mrmlScene.RemoveNode(inputScan)
             slicer.mrmlScene.RemoveNode(inputSegmentation)

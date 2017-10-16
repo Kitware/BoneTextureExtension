@@ -86,6 +86,12 @@ int DoIt( int argc, char * argv[] )
         outputFile<<"ShortRunHighGreyLevelEmphasis"<<",";
         outputFile<<"LongRunLowGreyLevelEmphasis"<<",";
         outputFile<<"LongRunHighGreyLevelEmphasis"<<",";
+        outputFile<<"BVTV"<<",";
+        outputFile<<"TbN"<<",";
+        outputFile<<"TbTh"<<",";
+        outputFile<<"TbSp"<<",";
+        outputFile<<"BSBV"<<",";
+
 
         outputFile<<std::endl;
     }
@@ -103,42 +109,88 @@ int DoIt( int argc, char * argv[] )
         maskReader->Update();
         typename itk::ImageRegionConstIterator< InputMaskType > maskIt( maskReader->GetOutput(),  maskReader->GetOutput()->GetRequestedRegion());
         maskIt.GoToBegin ();
-        if(additionalInputVolume != "")
+        if(secondInputVolume != "")
         {
-            typename ReaderType::Pointer additionalReader = ReaderType::New();
-            additionalReader->SetFileName( additionalInputVolume );
-            additionalReader->Update();
-            typename itk::ImageRegionConstIterator< InputImageType > addInIt( additionalReader->GetOutput(),  additionalReader->GetOutput()->GetRequestedRegion());
-            addInIt.GoToBegin ();
-            const unsigned int AdditionnalVectorComponentDimension = additionalReader->GetOutput()->GetNumberOfComponentsPerPixel();
+            typename ReaderType::Pointer secondReader = ReaderType::New();
+            secondReader->SetFileName( secondInputVolume );
+            secondReader->Update();
+            typename itk::ImageRegionConstIterator< InputImageType > secInIt( secondReader->GetOutput(),  secondReader->GetOutput()->GetRequestedRegion());
+            secInIt.GoToBegin ();
+            const unsigned int SecondVectorComponentDimension = secondReader->GetOutput()->GetNumberOfComponentsPerPixel();
 
-
-            /// Mask + Input Volume + Additional Input Volume ///
-            while ( !inIt.IsAtEnd() )
+            if(thirdInputVolume != "")
             {
-                if(maskIt.Get() != 0)
+                typename ReaderType::Pointer thirdReader = ReaderType::New();
+                thirdReader->SetFileName( thirdInputVolume );
+                thirdReader->Update();
+                typename itk::ImageRegionConstIterator< InputImageType > thirdInIt( thirdReader->GetOutput(),  thirdReader->GetOutput()->GetRequestedRegion());
+                thirdInIt.GoToBegin ();
+                const unsigned int ThirdVectorComponentDimension = thirdReader->GetOutput()->GetNumberOfComponentsPerPixel();
+
+                /// Mask + Input Volume + second and third Input Volume ///
+                while ( !inIt.IsAtEnd() )
                 {
-                    inputIndex = inIt.GetIndex();
-                    for( unsigned int i = 0; i < Dimension; i++ )
+                    if(maskIt.Get() != 0)
                     {
-                        outputFile<<inputIndex[i]<<",";
+                        inputIndex = inIt.GetIndex();
+                        for( unsigned int i = 0; i < Dimension; i++ )
+                        {
+                            outputFile<<inputIndex[i]<<",";
+                        }
+                        inputPixel = inIt.Get();
+                        for( unsigned int i = 0; i < VectorComponentDimension; i++ )
+                        {
+                            outputFile<<inputPixel[i]<<",";
+                        }
+                        inputPixel = secInIt.Get();
+                        for( unsigned int i = 0; i < SecondVectorComponentDimension; i++ )
+                        {
+                            outputFile<<inputPixel[i]<<",";
+                        }
+                        inputPixel = thirdInIt.Get();
+                        for( unsigned int i = 0; i < ThirdVectorComponentDimension; i++ )
+                        {
+                            outputFile<<inputPixel[i];
+                            if (i != (ThirdVectorComponentDimension - 1)) outputFile<<",";
+                        }
+                        outputFile<<std::endl;
                     }
-                    inputPixel = inIt.Get();
-                    for( unsigned int i = 0; i < VectorComponentDimension; i++ )
-                    {
-                        outputFile<<inputPixel[i]<<",";
-                    }
-                    inputPixel = addInIt.Get();
-                    for( unsigned int i = 0; i < AdditionnalVectorComponentDimension; i++ )
-                    {
-                        outputFile<<inputPixel[i];
-                        if (i != (AdditionnalVectorComponentDimension - 1)) outputFile<<",";
-                    }
-                    outputFile<<std::endl;
+                    ++secInIt;
+                    ++inIt;
+                    ++maskIt;
+                    ++thirdInIt;
                 }
-                ++addInIt;
-                ++inIt;
-                ++maskIt;
+            }
+
+            else
+            {
+                /// Mask + Input Volume + second Input Volume ///
+                while ( !inIt.IsAtEnd() )
+                {
+                    if(maskIt.Get() != 0)
+                    {
+                        inputIndex = inIt.GetIndex();
+                        for( unsigned int i = 0; i < Dimension; i++ )
+                        {
+                            outputFile<<inputIndex[i]<<",";
+                        }
+                        inputPixel = inIt.Get();
+                        for( unsigned int i = 0; i < VectorComponentDimension; i++ )
+                        {
+                            outputFile<<inputPixel[i]<<",";
+                        }
+                        inputPixel = secInIt.Get();
+                        for( unsigned int i = 0; i < SecondVectorComponentDimension; i++ )
+                        {
+                            outputFile<<inputPixel[i];
+                            if (i != (SecondVectorComponentDimension - 1)) outputFile<<",";
+                        }
+                        outputFile<<std::endl;
+                    }
+                    ++secInIt;
+                    ++inIt;
+                    ++maskIt;
+                }
             }
         }
 
@@ -168,45 +220,86 @@ int DoIt( int argc, char * argv[] )
                 ++maskIt;
             }
 
-
-
         }
     }
     else
     {
-        if(additionalInputVolume != "")
+        if(secondInputVolume != "")
         {
-            typename ReaderType::Pointer additionalReader = ReaderType::New();
-            additionalReader->SetFileName( additionalInputVolume );
-            additionalReader->Update();
-            typename itk::ImageRegionConstIterator< InputImageType > addInIt( additionalReader->GetOutput(),  additionalReader->GetOutput()->GetRequestedRegion());
-            addInIt.GoToBegin ();
-            const unsigned int AdditionnalVectorComponentDimension = reader->GetOutput()->GetNumberOfComponentsPerPixel();
+            typename ReaderType::Pointer secondReader = ReaderType::New();
+            secondReader->SetFileName( secondInputVolume );
+            secondReader->Update();
+            typename itk::ImageRegionConstIterator< InputImageType > secInIt( secondReader->GetOutput(),  secondReader->GetOutput()->GetRequestedRegion());
+            secInIt.GoToBegin ();
+            const unsigned int SecondVectorComponentDimension = reader->GetOutput()->GetNumberOfComponentsPerPixel();
 
+            if(thirdInputVolume != "")
+            {
+                typename ReaderType::Pointer thirdReader = ReaderType::New();
+                thirdReader->SetFileName( thirdInputVolume );
+                thirdReader->Update();
+                typename itk::ImageRegionConstIterator< InputImageType > thirdInIt( thirdReader->GetOutput(),  thirdReader->GetOutput()->GetRequestedRegion());
+                thirdInIt.GoToBegin ();
+                const unsigned int ThirdVectorComponentDimension = thirdReader->GetOutput()->GetNumberOfComponentsPerPixel();
 
-            ///Input Volume + Additional Input Volume ///
-            while ( !inIt.IsAtEnd() )
+                /// Input Volume + second and third Input Volume ///
+                while ( !inIt.IsAtEnd() )
+                {
+                    inputIndex = inIt.GetIndex();
+                    for( unsigned int i = 0; i < Dimension; i++ )
+                    {
+                        outputFile<<inputIndex[i]<<",";
+                    }
+                    inputPixel = inIt.Get();
+                    for( unsigned int i = 0; i < VectorComponentDimension; i++ )
+                    {
+                        outputFile<<inputPixel[i]<<",";
+                    }
+                    inputPixel = secInIt.Get();
+                    for( unsigned int i = 0; i < SecondVectorComponentDimension; i++ )
+                    {
+                        outputFile<<inputPixel[i]<<",";
+                    }
+                    inputPixel = thirdInIt.Get();
+                    for( unsigned int i = 0; i < ThirdVectorComponentDimension; i++ )
+                    {
+                        outputFile<<inputPixel[i];
+                        if (i != (ThirdVectorComponentDimension - 1)) outputFile<<",";
+                    }
+                    outputFile<<std::endl;
+                    ++secInIt;
+                    ++inIt;
+                    ++thirdInIt;
+                }
+            }
+
+            else
             {
 
-                inputIndex = inIt.GetIndex();
-                for( unsigned int i = 0; i < Dimension; i++ )
+                ///Input Volume + second Input Volume ///
+                while ( !inIt.IsAtEnd() )
                 {
-                    outputFile<<inputIndex[i]<<",";
+
+                    inputIndex = inIt.GetIndex();
+                    for( unsigned int i = 0; i < Dimension; i++ )
+                    {
+                        outputFile<<inputIndex[i]<<",";
+                    }
+                    inputPixel = inIt.Get();
+                    for( unsigned int i = 0; i < VectorComponentDimension; i++ )
+                    {
+                        outputFile<<inputPixel[i]<<",";
+                    }
+                    inputPixel = secInIt.Get();
+                    for( unsigned int i = 0; i < SecondVectorComponentDimension; i++ )
+                    {
+                        outputFile<<inputPixel[i];
+                        if (i != (SecondVectorComponentDimension - 1)) outputFile<<",";
+                    }
+                    outputFile<<std::endl;
+                    ++secInIt;
+                    ++inIt;
                 }
-                inputPixel = inIt.Get();
-                for( unsigned int i = 0; i < VectorComponentDimension; i++ )
-                {
-                    outputFile<<inputPixel[i]<<",";
-                }
-                inputPixel = addInIt.Get();
-                for( unsigned int i = 0; i < AdditionnalVectorComponentDimension; i++ )
-                {
-                    outputFile<<inputPixel[i];
-                    if (i != (AdditionnalVectorComponentDimension - 1)) outputFile<<",";
-                }
-                outputFile<<std::endl;
-                ++addInIt;
-                ++inIt;
             }
         }
 
