@@ -65,6 +65,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
                            "lowGreyLevelRunEmphasis" , "highGreyLevelRunEmphasis" ,
                            "shortRunLowGreyLevelEmphasis", "shortRunHighGreyLevelEmphasis",
                            "longRunLowGreyLevelEmphasis", "longRunHighGreyLevelEmphasis"]
+        self.BMFeatures = ["BVTV", "TbTh", "TbSp", "TbN", "BSBV" ]
         self.GLCMFeaturesValueDict = {}
         self.GLCMFeaturesValueDict["insideMask"] = 1
         self.GLCMFeaturesValueDict["binNumber"] = 10
@@ -79,6 +80,9 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.GLRLMFeaturesValueDict["neighborhoodRadius"] = 4
         self.GLRLMFeaturesValueDict["distanceMin"] = 0.00
         self.GLRLMFeaturesValueDict["distanceMax"] = 1.00
+        self.BMFeaturesValueDict = {}
+        self.BMFeaturesValueDict["threshold"] = 1
+        self.BMFeaturesValueDict["neighborhoodRadius"] = 4
 
         # -------------------------------------------------------------------- #
         # ----------------- Definition of the UI interface ------------------- #
@@ -110,6 +114,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.featureChoiceCollapsibleGroupBox = self.logic.get("FeatureChoiceCollapsibleGroupBox")
         self.gLCMFeaturesCheckBox = self.logic.get("GLCMFeaturesCheckBox")
         self.gLRLMFeaturesCheckBox = self.logic.get("GLRLMFeaturesCheckBox")
+        self.bMFeaturesCheckBox = self.logic.get("BMFeaturesCheckBox")
         self.computeFeaturesPushButton = self.logic.get("ComputeFeaturesPushButton")
         self.computeColormapsPushButton = self.logic.get("ComputeColormapsPushButton")
         self.GLCMparametersCollapsibleGroupBox = self.logic.get("GLCMParametersCollapsibleGroupBox")
@@ -126,6 +131,9 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.GLRLMminDistanceSpinBox = self.logic.get("GLRLMMinDistanceSpinBox")
         self.GLRLMmaxDistanceSpinBox = self.logic.get("GLRLMMaxDistanceSpinBox")
         self.GLRLMneighborhoodRadiusSpinBox = self.logic.get("GLRLMNeighborhoodRadiusSpinBox")
+        self.bMparametersCollapsibleGroupBox = self.logic.get("BMParametersCollapsibleGroupBox")
+        self.BMthresholdSpinBox = self.logic.get("BMThresholdSpinBox")
+        self.BMneighborhoodRadiusSpinBox = self.logic.get("BMNeighborhoodRadiusSpinBox")
 
         # ----------------- Results Collapsible Button ----------------------- #
 
@@ -154,6 +162,8 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.GLRLMminDistanceSpinBox.connect('valueChanged(double)', lambda: self.onGLRLMFeaturesValueDictModified("distanceMin", self.GLRLMminDistanceSpinBox.value))
         self.GLRLMmaxDistanceSpinBox.connect('valueChanged(double)', lambda: self.onGLRLMFeaturesValueDictModified("distanceMax", self.GLRLMmaxDistanceSpinBox.value))
         self.GLRLMneighborhoodRadiusSpinBox.connect('valueChanged(int)', lambda: self.onGLRLMFeaturesValueDictModified("neighborhoodRadius", self.GLRLMneighborhoodRadiusSpinBox.value))
+        self.BMthresholdSpinBox.connect('valueChanged(int)', lambda: self.onBMFeaturesValueDictModified("neighborhoodRadius", self.BMthresholdSpinBox.value))
+        self.BMneighborhoodRadiusSpinBox.connect('valueChanged(int)', lambda: self.onBMFeaturesValueDictModified("neighborhoodRadius", self.BMneighborhoodRadiusSpinBox.value))
 
         # ---------------- Computation Collapsible Button -------------------- #
 
@@ -181,6 +191,9 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
     def onGLRLMFeaturesValueDictModified(self, key, value):
         self.GLRLMFeaturesValueDict[key] = value
 
+    def onBMFeaturesValueDictModified(self, key, value):
+        self.BMFeaturesValueDict[key] = value
+
         # ---------------- Computation Collapsible Button -------------------- #
 
     def onComputeFeatures(self):
@@ -188,8 +201,10 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
                                                    self.inputSegmentationMRMLNodeComboBox.currentNode(),
                                                    self.gLCMFeaturesCheckBox.isChecked(),
                                                    self.gLRLMFeaturesCheckBox.isChecked(),
+                                                   self.bMFeaturesCheckBox.isChecked(),
                                                    self.GLCMFeaturesValueDict,
-                                                   self.GLRLMFeaturesValueDict)
+                                                   self.GLRLMFeaturesValueDict,
+                                                   self.BMFeaturesValueDict)
 
         if featureVector[0]:
             for i in range(8):
@@ -199,6 +214,10 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
             for i in range(10):
                 self.displayFeaturesTableWidget.item(i, 3).setText(featureVector[1][i])
 
+        if featureVector[2]:
+            for i in range(5):
+                self.displayFeaturesTableWidget.item(i, 5).setText(featureVector[2][i])
+
 
 
 
@@ -207,8 +226,10 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
                                     self.inputSegmentationMRMLNodeComboBox.currentNode(),
                                     self.gLCMFeaturesCheckBox.isChecked(),
                                     self.gLRLMFeaturesCheckBox.isChecked(),
+                                    self.bMFeaturesCheckBox.isChecked(),
                                     self.GLCMFeaturesValueDict,
-                                    self.GLRLMFeaturesValueDict)
+                                    self.GLRLMFeaturesValueDict,
+                                    self.BMFeaturesValueDict)
 
         # ----------------- Results Collapsible Button ----------------------- #
 
@@ -229,8 +250,10 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         # Set the good feature names in the featureCombobox
         if node.GetDisplayNode().GetInputImageData().GetNumberOfScalarComponents() == 8:
             self.featureComboBox.addItems(self.CFeatures)
-        else:
+        elif node.GetDisplayNode().GetInputImageData().GetNumberOfScalarComponents() == 10:
             self.featureComboBox.addItems(self.RLFeatures)
+        elif node.GetDisplayNode().GetInputImageData().GetNumberOfScalarComponents() == 5:
+            self.featureComboBox.addItems(self.BMFeatures)
 
     def onFeatureChanged(self, index):
         if self.featureSetMRMLNodeComboBox.currentNode():
@@ -301,16 +324,18 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
                         inputSegmentation,
                         computeGLCMFeatures,
                         computeGLRLMFeatures,
+                        computeBMFeatures,
                         GLCMFeaturesValueDict,
-                        GLRLMFeaturesValueDict):
+                        GLRLMFeaturesValueDict,
+                        BMFeaturesValueDict):
 
-        if not (computeGLCMFeatures or computeGLRLMFeatures):
+        if not (computeGLCMFeatures or computeGLRLMFeatures or computeBMFeatures):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
             return
         if not (self.inputDataVerification(inputScan, inputSegmentation)):
             return
 
-        resultVector = [None, None]
+        resultVector = [None, None, None]
 
         if computeGLCMFeatures:
             resultVector[0] = self.computeSingleFeatureSet(inputScan,
@@ -323,6 +348,13 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
                                                            inputSegmentation,
                                                            slicer.modules.computeglrlmfeatures,
                                                            GLRLMFeaturesValueDict)
+
+        if computeBMFeatures:
+            resultVector[2] = self.computeSingleFeatureSet(inputScan,
+                                                           inputSegmentation,
+                                                           slicer.modules.computebmfeatures,
+                                                           BMFeaturesValueDict)
+
         return resultVector
 
     def computeSingleFeatureSet(self,
@@ -346,10 +378,12 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
                          inputSegmentation,
                          computeGLCMFeatures,
                          computeGLRLMFeatures,
+                         computeBMFeatures,
                          GLCMFeaturesValueDict,
-                         GLRLMFeaturesValueDict):
+                         GLRLMFeaturesValueDict,
+                         BMFeaturesValueDict):
 
-        if not (computeGLCMFeatures or computeGLRLMFeatures):
+        if not (computeGLCMFeatures or computeGLRLMFeatures or computeBMFeatures):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
             return
         if not (self.inputDataVerification(inputScan, inputSegmentation)):
@@ -368,6 +402,13 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
                                        slicer.modules.computeglrlmfeaturemaps,
                                        GLRLMFeaturesValueDict,
                                        "GLRLM_ColorMaps")
+
+        if BMFeaturesValueDict:
+            self.computeSingleColormap(inputScan,
+                                       inputSegmentation,
+                                       slicer.modules.computebmfeaturemaps,
+                                       BMFeaturesValueDict,
+                                       "BM_ColorMaps")
 
     def computeSingleColormap(self,
                               inputScan,
