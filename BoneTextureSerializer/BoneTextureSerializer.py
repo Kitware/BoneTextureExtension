@@ -250,6 +250,12 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
     def get(self, objectName):
         return self.findWidget(self.interface.widget, objectName)
 
+    def isClose(self, a, b, rel_tol=0.0, abs_tol=0.0):
+        for i in range(len(a)):
+            if not (abs(a[i] - b[i]) <= max(rel_tol * max(abs(a[i]), abs(b[i])), abs_tol)):
+                return flase
+        return True
+
     def findWidget(self, widget, objectName):
         if widget.objectName == objectName:
             return widget
@@ -270,8 +276,8 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
             if inputScan.GetImageData().GetDimensions() != inputSegmentation.GetImageData().GetDimensions():
                 slicer.util.warningDisplay("The input san and the input segmentation must be the same size")
                 return False
-            if (inputScan.GetSpacing() != inputSegmentation.GetSpacing()) or \
-                    (inputScan.GetOrigin() != inputSegmentation.GetOrigin()):
+            if not self.isClose(inputScan.GetSpacing(), inputSegmentation.GetSpacing(), 0.0, 1e-04 )or \
+                   not self.isClose(inputScan.GetOrigin(), inputSegmentation.GetOrigin(), 0.0, 1e-04 ):
                 slicer.util.warningDisplay("The input san and the input segmentation must overlap: same origin, spacing and orientation")
                 return False
         return True

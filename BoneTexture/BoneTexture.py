@@ -270,10 +270,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
 ################################################################################
 ############################  Bone Texture Logic ###############################
 ################################################################################
-
-
 class BoneTextureLogic(ScriptedLoadableModuleLogic):
-
     # ************************************************************************ #
     # ----------------------- Initialisation --------------------------------- #
     # ************************************************************************ #
@@ -281,6 +278,13 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
     def __init__(self, interface):
         print("----- Bone Texture logic init -----")
         self.interface = interface
+
+
+    def isClose(self, a, b, rel_tol=0.0, abs_tol=0.0):
+        for i in range(len(a)):
+            if not (abs(a[i] - b[i]) <= max(rel_tol * max(abs(a[i]), abs(b[i])), abs_tol)):
+                return flase
+        return True
 
     # ************************************************************************ #
     # ------------------------ Algorithm ------------------------------------- #
@@ -311,8 +315,8 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
             if inputScan.GetImageData().GetDimensions() != inputSegmentation.GetImageData().GetDimensions():
                 slicer.util.warningDisplay("The input san and the input segmentation must be the same size")
                 return False
-            if (inputScan.GetSpacing() != inputSegmentation.GetSpacing()) or \
-                    (inputScan.GetOrigin() != inputSegmentation.GetOrigin()):
+            if not self.isClose(inputScan.GetSpacing(), inputSegmentation.GetSpacing(), 0.0, 1e-04 )or \
+                    not self.isClose(inputScan.GetOrigin(), inputSegmentation.GetOrigin(), 0.0, 1e-04 ):
                 slicer.util.warningDisplay("The input san and the input segmentation must overlap: same origin, spacing and orientation")
                 return False
         return True
