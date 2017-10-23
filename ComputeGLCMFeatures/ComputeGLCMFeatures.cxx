@@ -148,9 +148,9 @@ int main( int argc, char * argv[] )
       case itk::ImageIOBase::SHORT:
         return DoIt< int >( argc, argv );
         break;
-//      case itk::ImageIOBase::FLOAT:
-//        return DoIt< float >( argc, argv );
-//        break;
+      case itk::ImageIOBase::FLOAT:
+        return DoIt< float >( argc, argv );
+        break;
       case itk::ImageIOBase::INT:
         return DoIt< int >( argc, argv );
         break;
