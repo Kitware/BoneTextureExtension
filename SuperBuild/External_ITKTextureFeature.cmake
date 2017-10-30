@@ -10,7 +10,7 @@ ExternalProject_Include_Dependencies(${proj} PROJECT_VAR proj DEPENDS_VAR ${proj
 set(${proj}_BINARY_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
 
 # disable-wrapping 2016-10-24
-set(${proj}_GIT_TAG 8ab24e44ca7ea1ec560af40b5f5c539bf8ffcb03)
+set(${proj}_GIT_TAG 9eaa9a533b21f1c614647487e409619165752746)
 ExternalProject_Add(${proj}
   ${${proj}_EP_ARGS}
   GIT_REPOSITORY ${git_protocol}://github.com/InsightSoftwareConsortium/ITKTextureFeatures.git
