@@ -407,7 +407,7 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
                                        GLRLMFeaturesValueDict,
                                        "GLRLM_ColorMaps")
 
-        if BMFeaturesValueDict:
+        if computeBMFeatures:
             self.computeSingleColormap(inputScan,
                                        inputSegmentation,
                                        slicer.modules.computebmfeaturemaps,

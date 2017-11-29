@@ -33,6 +33,7 @@
 #include "itkMetaDataObject.h"
 
 #include "itkBoneMorphometryFeaturesImageFilter.h"
+#include "itkReplaceFeatureMapNanInfImageFilter.h"
 
 #include "itkPluginUtilities.h"
 
@@ -75,17 +76,22 @@ int DoIt( int argc, char * argv[] )
   hood.SetRadius(neighborhoodRadius);
   filter->SetNeighborhoodRadius(hood.GetRadius());
   filter->SetThreshold( threshold );
-  filter->Update();
+
+  typedef itk::ReplaceFeatureMapNanInfImageFilter<OutputImageType> PostProcessingFilterType;
+  PostProcessingFilterType::Pointer postProcessingFilter = PostProcessingFilterType::New();
+
+  postProcessingFilter->SetInput( filter->GetOutput() );
+  postProcessingFilter->Update();
   
   itk::MetaDataDictionary dictionary;
   itk::EncapsulateMetaData<float>(dictionary,"DWMRI_b-value",1.0);
   itk::EncapsulateMetaData<std::string>(dictionary,"modality","DWMRI");
-  filter->GetOutput()->SetMetaDataDictionary(dictionary);
+  postProcessingFilter->GetOutput()->SetMetaDataDictionary(dictionary);
 
   typedef itk::ImageFileWriter< OutputImageType > WriterType;
   typename WriterType::Pointer writer = WriterType::New();
   writer->SetFileName( outputVolume );
-  writer->SetInput( filter->GetOutput() );
+  writer->SetInput( postProcessingFilter->GetOutput() );
   writer->SetUseCompression( true );
   writer->Update();
 
