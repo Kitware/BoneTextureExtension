@@ -10,7 +10,7 @@ ExternalProject_Include_Dependencies(${proj} PROJECT_VAR proj DEPENDS_VAR ${proj
 set(${proj}_BINARY_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
 
 # disable-wrapping 2016-10-24
-set(${proj}_GIT_TAG f7b54bd157008beff3f27d1e72136aa387b079d0)
+set(${proj}_GIT_TAG aad1ddc651ad014ac6f91222790f5bfd32d229dc)
 ExternalProject_Add(${proj}
   ${${proj}_EP_ARGS}
   GIT_REPOSITORY ${git_protocol}://github.com/InsightSoftwareConsortium/ITKBoneMorphometry.git
