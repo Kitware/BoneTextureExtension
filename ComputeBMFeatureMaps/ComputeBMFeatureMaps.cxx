@@ -76,6 +76,7 @@ int DoIt( int argc, char * argv[] )
   hood.SetRadius(neighborhoodRadius);
   filter->SetNeighborhoodRadius(hood.GetRadius());
   filter->SetThreshold( threshold );
+  filter->Update();
 
   typedef itk::ReplaceFeatureMapNanInfImageFilter<OutputImageType> PostProcessingFilterType;
   PostProcessingFilterType::Pointer postProcessingFilter = PostProcessingFilterType::New();

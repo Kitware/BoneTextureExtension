@@ -1,6 +1,6 @@
 import os
 import qt
-
+import csv
 import slicer
 from slicer.ScriptedLoadableModule import *
 
@@ -143,6 +143,8 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.featureComboBox = self.logic.get("featureComboBox")
         self.displayColormapsCollapsibleGroupBox = self.logic.get("DisplayColormapsCollapsibleGroupBox")
         self.displayFeaturesTableWidget = self.logic.get("displayFeaturesTableWidget")
+        self.SaveTablePushButton = self.logic.get("SaveTablePushButton")
+        self.CSVPathLineEdit = self.logic.get("CSVPathLineEdit")
 
         # -------------------------------------------------------------------- #
         # ---------------------------- Connections --------------------------- #
@@ -174,6 +176,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
 
         self.featureSetMRMLNodeComboBox.connect("currentNodeChanged(vtkMRMLNode*)", self.onFeatureSetChanged)
         self.featureComboBox.connect("currentIndexChanged(int)", self.onFeatureChanged)
+        self.SaveTablePushButton.connect('clicked()', self.onSaveTable)
 
         # -------------------------------------------------------------------- #
         # -------------------------- Initialisation -------------------------- #
@@ -260,8 +263,8 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
             # Change the feature displayed to the one wanted by the user
             self.featureSetMRMLNodeComboBox.currentNode().GetDisplayNode().SetDiffusionComponent(index)
 
-        # ---------------- Exportation Collapsible Button -------------------- #
-
+    def onSaveTable(self):
+        SaveTableAsCSV(self.displayFeaturesTableWidget,self.CSVPathLineEdit.currentPath)
 
     def cleanup(self):
         pass
@@ -436,6 +439,24 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
                        None,
                        parameters,
                        wait_for_completion=False)
+
+    def SaveTableAsCSV(self,
+                       table,
+                       fileName):
+        if (fileName == None):
+            slicer.util.warningDisplay("Please specify an output file")
+        if (not (fileName.endswith(".csv"))):
+            slicer.util.warningDisplay("The output file must be a csv file")
+        file = open(fileName, 'w')
+        cw = csv.writer(file, delimiter=',')
+
+        for j in range(6):
+            row = []
+            for i in range(10):
+                if table.item(i, j):
+                    row.append(table.item(i, j).text())
+            cw.writerow(row)
+        file.close()
 
 ################################################################################
 ###########################  Bone Texture Test #################################

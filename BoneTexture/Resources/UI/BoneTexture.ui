@@ -971,6 +971,16 @@
            </item>
           </widget>
          </item>
+         <item>
+          <widget class="ctkPathLineEdit" name="CSVPathLineEdit"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="SaveTablePushButton">
+           <property name="text">
+            <string>Save Table</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -1015,6 +1025,11 @@
    <extends>QGroupBox</extends>
    <header>ctkCollapsibleGroupBox.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ctkPathLineEdit</class>
+   <extends>QWidget</extends>
+   <header>ctkPathLineEdit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
