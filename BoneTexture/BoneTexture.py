@@ -264,7 +264,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
             self.featureSetMRMLNodeComboBox.currentNode().GetDisplayNode().SetDiffusionComponent(index)
 
     def onSaveTable(self):
-        SaveTableAsCSV(self.displayFeaturesTableWidget,self.CSVPathLineEdit.currentPath)
+        self.logic.SaveTableAsCSV(self.displayFeaturesTableWidget,self.CSVPathLineEdit.currentPath)
 
     def cleanup(self):
         pass
