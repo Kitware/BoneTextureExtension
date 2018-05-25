@@ -126,9 +126,9 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
         self.BMthresholdSpinBox = self.logic.get("BMThresholdSpinBox")
         self.BMneighborhoodRadiusSpinBox = self.logic.get("BMNeighborhoodRadiusSpinBox")
 
-        # ---------------- Exportation Collapsible Button -------------------- #
+        # ---------------- Export Collapsible Button -------------------- #
 
-        self.exportationCollapsibleButton = self.logic.get("ExportationCollapsibleButton")
+        self.exportationCollapsibleButton = self.logic.get("ExportCollapsibleButton")
         self.outputFolderDirectoryButton = self.logic.get("OutputFolderDirectoryButton")
         self.separateFeaturesCheckBox = self.logic.get("separateFeaturesCheckBox")
         self.saveAsCSVCheckBox = self.logic.get("saveAsCSVCheckBox")
@@ -161,7 +161,7 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
         self.computeFeaturesPushButton.connect('clicked()', self.onComputeFeatures)
         self.computeColormapsPushButton.connect('clicked()', self.onComputeColormaps)
 
-        # ---------------- Exportation Collapsible Button -------------------- #
+        # ---------------- Export Collapsible Button -------------------- #
 
         # -------------------------------------------------------------------- #
         # -------------------------- Initialisation -------------------------- #
@@ -210,7 +210,7 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
                                     self.separateFeaturesCheckBox.isChecked(),
                                     self.saveAsCSVCheckBox.isChecked())
 
-        # ---------------- Exportation Collapsible Button -------------------- #
+        # ---------------- Export Collapsible Button -------------------- #
 
     def cleanup(self):
         pass
