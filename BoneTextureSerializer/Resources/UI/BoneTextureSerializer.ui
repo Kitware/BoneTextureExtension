@@ -496,12 +496,12 @@
     </widget>
    </item>
    <item>
-    <widget class="ctkCollapsibleButton" name="ExportationCollapsibleButton">
+    <widget class="ctkCollapsibleButton" name="ExportCollapsibleButton">
      <property name="focusPolicy">
       <enum>Qt::StrongFocus</enum>
      </property>
      <property name="text">
-      <string>Exportation</string>
+      <string>Export</string>
      </property>
      <property name="contentsFrameShape">
       <enum>QFrame::StyledPanel</enum>
