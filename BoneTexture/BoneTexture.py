@@ -3,7 +3,6 @@ import qt
 import csv
 import slicer
 from slicer.ScriptedLoadableModule import *
-import VectorToScalarVolume # For extra widget, handling input vector/RGB images.
 
 ################################################################################
 ############################  Bone Texture #####################################
@@ -103,27 +102,11 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         # ---------------- Input Data Collapsible Button --------------------- #
 
         self.inputDataCollapsibleButton = self.logic.get("InputDataCollapsibleButton")
-        self.inputDataVerticalLayout = self.logic.get("InputDataVerticalLayout")
         self.singleCaseGroupBox = self.logic.get("SingleCaseGroupBox")
         self.inputScanMRMLNodeComboBox = self.logic.get("InputScanMRMLNodeComboBox")
         self.inputScanMRMLNodeComboBox.setMRMLScene(slicer.mrmlScene)
         self.inputSegmentationMRMLNodeComboBox = self.logic.get("InputSegmentationMRMLNodeComboBox")
         self.inputSegmentationMRMLNodeComboBox.setMRMLScene(slicer.mrmlScene)
-        # Add a python widget from core slicer scripted module: VectorToScalarModule
-        # It works fine, but that module should be written in c++ to be truly reusable with qtdesigner,
-        self.vectorToScalarVolumeGroupBox = qt.QGroupBox(self.inputDataCollapsibleButton)
-        self.vectorToScalarVolumeGroupBox.setTitle("Conversion: Vector Input Scan to Scalar")
-        self.vectorToScalarVolumeLayout = qt.QVBoxLayout(self.vectorToScalarVolumeGroupBox)
-        self.vectorToScalarVolumeConversionWidget = VectorToScalarVolume.VectorToScalarVolumeConversionMethodWidget()
-        self.vectorToScalarVolumePushButton = qt.QPushButton(self.vectorToScalarVolumeGroupBox)
-        self.vectorToScalarVolumePushButton.setText("Convert input scan to scalar")
-        self.vectorToScalarVolumeLayout.addWidget(self.vectorToScalarVolumeConversionWidget)
-        self.vectorToScalarVolumeLayout.addWidget(self.vectorToScalarVolumePushButton)
-        self.inputDataVerticalLayout.addWidget(self.vectorToScalarVolumeGroupBox)
-        vectorToScalarIndex = self.vectorToScalarVolumeConversionWidget.methodSelectorComboBox.findData(
-            VectorToScalarVolume.VectorToScalarVolumeLogic.LUMINANCE)
-        self.vectorToScalarVolumeConversionWidget.methodSelectorComboBox.setCurrentIndex(vectorToScalarIndex)
-        self.vectorToScalarVolumeGroupBox.enabled = False
 
         # ---------------- Computation Collapsible Button -------------------- #
 
@@ -167,18 +150,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         # ---------------------------- Connections --------------------------- #
         # -------------------------------------------------------------------- #
 
-        # ------------------------- Input Images ----------------------------- #
-        self.inputScanMRMLNodeComboBox.connect("currentNodeChanged(vtkMRMLNode*)", self.onInputScanChanged)
-
-        self.vectorToScalarVolumeConversionWidget.methodSelectorComboBox.connect(
-            'currentIndexChanged(int)',
-            lambda currentIndex:
-            self.vectorToScalarVolumeConversionWidget.setGuiBasedOnOptions(
-                self.vectorToScalarVolumeConversionWidget.methodSelectorComboBox.itemData(currentIndex),
-                self.inputScanMRMLNodeComboBox.currentNode())
-        )
-        self.vectorToScalarVolumePushButton.connect('clicked()', self.onVectorToScalarVolumePushButtonClicked)
-        # ---------------- Computation Collapsible Button --------------------- #
+        # ---------------- Input Data Collapsible Button --------------------- #
 
         self.GLCMinsideMaskValueSpinBox.connect('valueChanged(int)',lambda: self.onGLCMFeaturesValueDictModified("insideMask", self.GLCMinsideMaskValueSpinBox.value))
         self.GLCMnumberOfBinsSpinBox.connect('valueChanged(int)', lambda: self.onGLCMFeaturesValueDictModified("binNumber", self.GLCMnumberOfBinsSpinBox.value))
@@ -215,49 +187,6 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         # ******************************************************************** #
 
         # ---------------- Input Data Collapsible Button --------------------- #
-
-    def onInputScanChanged(self):
-        """ Check if input is vector image, and allow conversion enabling VectorToScalarVolume widget """
-        inputScan = self.inputScanMRMLNodeComboBox.currentNode()
-        if inputScan is None:
-            self.vectorToScalarVolumeGroupBox.enabled = False
-            return
-        if inputScan.IsTypeOf('vtkMRMLVectorVolumeNode'):
-            self.vectorToScalarVolumeGroupBox.enabled = True
-        else:
-            self.vectorToScalarVolumeGroupBox.enabled = False
-
-    def onVectorToScalarVolumePushButtonClicked(self):
-        """
-        Convert current input VectorVolume to a ScalarVolume.
-        And set that ScalarVolume as the new input.
-        """
-        # create and add output node to scene (hide this selection from user)
-        inputVolumeNode = self.inputScanMRMLNodeComboBox.currentNode()
-        conversionMethod = self.vectorToScalarVolumeConversionWidget.conversionMethod()
-        componentToExtract = self.vectorToScalarVolumeConversionWidget.componentToExtract()
-
-        inputName = self.inputScanMRMLNodeComboBox.currentNode().GetName()
-        methodName = '_ToScalarMethod'
-        outputName = inputName + methodName + conversionMethod
-        if conversionMethod == VectorToScalarVolume.VectorToScalarVolumeLogic.SINGLE_COMPONENT:
-            outputName += str(componentToExtract)
-        outputVolumeNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScalarVolumeNode", slicer.mrmlScene.GetUniqueNameByString(outputName))
-        # run conversion
-        success = self.logic.convertInputVectorToScalarVolume(inputVolumeNode,
-                                                              outputVolumeNode,
-                                                              conversionMethod,
-                                                              componentToExtract)
-        if success:
-            selectionNode = slicer.app.applicationLogic().GetSelectionNode()
-            selectionNode.SetReferenceActiveVolumeID(outputVolumeNode.GetID())
-            slicer.app.applicationLogic().PropagateVolumeSelection(0)
-
-            # set the output as the new input for this module.
-            self.inputScanMRMLNodeComboBox.setCurrentNode(outputVolumeNode)
-        else:
-            slicer.mrmlScene.RemoveNode(outputVolumeNode)
-
 
     def onGLCMFeaturesValueDictModified(self, key, value):
         self.GLCMFeaturesValueDict[key] = value
@@ -385,26 +314,15 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
         if not(inputScan):
             slicer.util.warningDisplay("Please specify an input scan")
             return False
-        else:
-            if inputScan.IsTypeOf('vtkMRMLVectorVolumeNode'):
-                slicer.util.warningDisplay("The input scan has a vector pixel type, please transform it to a scalar type first.")
-                return False
-
         if inputScan and inputSegmentation:
             if inputScan.GetImageData().GetDimensions() != inputSegmentation.GetImageData().GetDimensions():
-                slicer.util.warningDisplay("The input scan and the input segmentation must be the same size")
+                slicer.util.warningDisplay("The input san and the input segmentation must be the same size")
                 return False
             if not self.isClose(inputScan.GetSpacing(), inputSegmentation.GetSpacing(), 0.0, 1e-04 )or \
                     not self.isClose(inputScan.GetOrigin(), inputSegmentation.GetOrigin(), 0.0, 1e-04 ):
-                slicer.util.warningDisplay("The input scan and the input segmentation must overlap: same origin, spacing and orientation")
+                slicer.util.warningDisplay("The input san and the input segmentation must overlap: same origin, spacing and orientation")
                 return False
         return True
-
-    # ---------------- Convert Vector Input to Scalar ---------------------- #
-    def convertInputVectorToScalarVolume(self, inputScan, outputScalarVolume, conversionMethod, componentToExtract):
-        externalLogic = VectorToScalarVolume.VectorToScalarVolumeLogic()
-        # externalLogic.run performs the validation of parameters.
-        return externalLogic.runWithVariables(inputScan, outputScalarVolume, conversionMethod, componentToExtract)
 
     # ---------------- Computation of the wanted features---------------------- #
 
@@ -418,10 +336,10 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
                         GLRLMFeaturesValueDict,
                         BMFeaturesValueDict):
 
-        if not (self.inputDataVerification(inputScan, inputSegmentation)):
-            return
         if not (computeGLCMFeatures or computeGLRLMFeatures or computeBMFeatures):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
+            return
+        if not (self.inputDataVerification(inputScan, inputSegmentation)):
             return
 
         resultVector = [None, None, None]
@@ -472,10 +390,10 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
                          GLRLMFeaturesValueDict,
                          BMFeaturesValueDict):
 
-        if not (self.inputDataVerification(inputScan, inputSegmentation)):
-            return
         if not (computeGLCMFeatures or computeGLRLMFeatures or computeBMFeatures):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
+            return
+        if not (self.inputDataVerification(inputScan, inputSegmentation)):
             return
 
         if computeGLCMFeatures:
