@@ -3,6 +3,9 @@ import qt
 import csv
 import slicer
 from slicer.ScriptedLoadableModule import *
+# Use label statistics to compute good default parameters for texture modules.
+from LabelStatistics import LabelStatisticsLogic
+import math # for ceil
 
 ################################################################################
 ############################  Bone Texture #####################################
@@ -117,6 +120,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.bMFeaturesCheckBox = self.logic.get("BMFeaturesCheckBox")
         self.computeFeaturesPushButton = self.logic.get("ComputeFeaturesPushButton")
         self.computeColormapsPushButton = self.logic.get("ComputeColormapsPushButton")
+        self.computeParametersBasedOnInputs = self.logic.get("ComputeParametersBasedOnInputsButton")
         self.GLCMparametersCollapsibleGroupBox = self.logic.get("GLCMParametersCollapsibleGroupBox")
         self.GLCMinsideMaskValueSpinBox = self.logic.get("GLCMInsideMaskValueSpinBox")
         self.GLCMnumberOfBinsSpinBox = self.logic.get("GLCMNumberOfBinsSpinBox")
@@ -167,8 +171,10 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.BMthresholdSpinBox.connect('valueChanged(int)', lambda: self.onBMFeaturesValueDictModified("threshold", self.BMthresholdSpinBox.value))
         self.BMneighborhoodRadiusSpinBox.connect('valueChanged(int)', lambda: self.onBMFeaturesValueDictModified("neighborhoodRadius", self.BMneighborhoodRadiusSpinBox.value))
 
-        # ---------------- Computation Collapsible Button -------------------- #
+        # ----------- Compute Parameters Based on Inputs Button -------------- #
+        self.computeParametersBasedOnInputs.connect('clicked()', self.onComputeParametersBasedOnInputs)
 
+        # ---------------- Computation Collapsible Button -------------------- #
         self.computeFeaturesPushButton.connect('clicked()', self.onComputeFeatures)
         self.computeColormapsPushButton.connect('clicked()', self.onComputeColormaps)
 
@@ -198,6 +204,23 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.BMFeaturesValueDict[key] = value
 
         # ---------------- Computation Collapsible Button -------------------- #
+
+    def onComputeParametersBasedOnInputs(self):
+        inputScan = self.inputScanMRMLNodeComboBox.currentNode()
+        inputSegmentation = self.inputSegmentationMRMLNodeComboBox.currentNode()
+        isValid = self.logic.inputDataVerification(inputScan, inputSegmentation)
+        if isValid is False:
+            return
+
+        minIntensityValue, maxIntensityValue = self.logic.computeLabelStatistics(inputScan, inputSegmentation)
+        numBins = self.logic.computeBinsBasedOnIntensityRange(minIntensityValue, maxIntensityValue)
+
+        self.GLCMnumberOfBinsSpinBox.value = numBins
+        self.GLCMminVoxelIntensitySpinBox.value = minIntensityValue
+        self.GLCMmaxVoxelIntensitySpinBox.value = maxIntensityValue
+        self.GLRLMnumberOfBinsSpinBox.value = numBins
+        self.GLRLMminVoxelIntensitySpinBox.value = minIntensityValue
+        self.GLRLMmaxVoxelIntensitySpinBox.value = maxIntensityValue
 
     def onComputeFeatures(self):
         featureVector = self.logic.computeFeatures(self.inputScanMRMLNodeComboBox.currentNode(),
@@ -288,6 +311,27 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
             if not (abs(a[i] - b[i]) <= max(rel_tol * max(abs(a[i]), abs(b[i])), abs_tol)):
                 return flase
         return True
+
+    def computeLabelStatistics(self, inputScan, inputSegmentation):
+        """ Use slicer core module to get the min/max intensity value inside the mask.
+        Returns tuple (min, max) with intensity values inside the mask. """
+        # May take time
+        labelStatisticsLogic = LabelStatisticsLogic(inputScan, inputSegmentation)
+        insideSegmentationIndex = 1
+        minIntensityValue = labelStatisticsLogic.labelStats[(insideSegmentationIndex, 'Min')]
+        maxIntensityValue = labelStatisticsLogic.labelStats[(insideSegmentationIndex, 'Max')]
+        return minIntensityValue, maxIntensityValue
+
+    def computeBinsBasedOnIntensityRange(self, minIntensityValue, maxIntensityValue):
+        """ Compute number of bins based on the intensity range min/max.
+        The formula is ad-hoc, and add 100 bins for each 1000 value difference between min and max.
+        Example: min = -500,  max = 3000, numBins = 400
+        The minimum number of bins is 100, indepedently of the input.
+        Returns integer number of bins.
+        """
+        numBins = 100 * int(math.ceil(abs(maxIntensityValue - minIntensityValue)/1000.0))
+        return numBins
+
 
     # ************************************************************************ #
     # ------------------------ Algorithm ------------------------------------- #
