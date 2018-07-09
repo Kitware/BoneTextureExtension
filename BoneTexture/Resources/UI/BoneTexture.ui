@@ -19,9 +19,6 @@
      <property name="text">
       <string>Input data</string>
      </property>
-     <property name="contentsFrameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
      <layout class="QVBoxLayout" name="InputDataVerticalLayout">
       <item>
        <widget class="QGroupBox" name="SingleCaseGroupBox">
@@ -558,9 +555,6 @@
      <property name="checked">
       <bool>true</bool>
      </property>
-     <property name="contentsFrameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
        <widget class="ctkCollapsibleGroupBox" name="DisplayColormapsCollapsibleGroupBox">
@@ -972,7 +966,16 @@
           </widget>
          </item>
          <item>
-          <widget class="ctkPathLineEdit" name="CSVPathLineEdit"/>
+          <widget class="ctkPathLineEdit" name="CSVPathLineEdit">
+           <property name="filters">
+            <set>ctkPathLineEdit::AllEntries|ctkPathLineEdit::Dirs|ctkPathLineEdit::Drives|ctkPathLineEdit::Files|ctkPathLineEdit::NoDot|ctkPathLineEdit::NoDotDot|ctkPathLineEdit::Readable|ctkPathLineEdit::Writable</set>
+           </property>
+           <property name="nameFilters">
+            <stringlist>
+             <string>*.csv</string>
+            </stringlist>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="SaveTablePushButton">
