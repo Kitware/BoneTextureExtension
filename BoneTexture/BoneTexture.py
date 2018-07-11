@@ -1,11 +1,15 @@
+import csv
+import logging
 import os
 import qt
-import csv
 import slicer
+
 from slicer.ScriptedLoadableModule import *
+from slicer.util import VTKObservationMixin
+
 # Use label statistics to compute good default parameters for texture modules.
 from LabelStatistics import LabelStatisticsLogic
-import math # for ceil
+import math  # for ceil
 
 ################################################################################
 ############################  Bone Texture #####################################
@@ -49,26 +53,32 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
     # -------------------------- Initialisation ------------------------------ #
     # ************************************************************************ #
 
-    def setup(self):
-        ScriptedLoadableModuleWidget.setup(self)
-        print("-----  Bone Texture widget setup -----")
-        self.moduleName = 'BoneTexture'
-        scriptedModulesPath = eval('slicer.modules.%s.path' % self.moduleName.lower())
-        scriptedModulesPath = os.path.dirname(scriptedModulesPath)
-
-        # - Initialisation of Bone Texture and its logic - #
-
+    def __init__(self, parent=None):
+        ScriptedLoadableModuleWidget.__init__(self, parent)
         self.logic = BoneTextureLogic(self)
+
         self.CFeatures = ["energy", "entropy",
                           "correlation", "inverseDifferenceMoment",
                           "inertia", "clusterShade",
                           "clusterProminence", "haralickCorrelation"]
         self.RLFeatures = ["shortRunEmphasis", "longRunEmphasis",
                            "greyLevelNonuniformity", "runLengthNonuniformity",
-                           "lowGreyLevelRunEmphasis" , "highGreyLevelRunEmphasis" ,
+                           "lowGreyLevelRunEmphasis", "highGreyLevelRunEmphasis",
                            "shortRunLowGreyLevelEmphasis", "shortRunHighGreyLevelEmphasis",
                            "longRunLowGreyLevelEmphasis", "longRunHighGreyLevelEmphasis"]
-        self.BMFeatures = ["BVTV", "TbTh", "TbSp", "TbN", "BSBV" ]
+        self.BMFeatures = ["BVTV", "TbTh", "TbSp", "TbN", "BSBV"]
+
+
+    def setup(self):
+        ScriptedLoadableModuleWidget.setup(self)
+        logging.debug("-----  Bone Texture widget setup -----")
+        self.moduleName = 'BoneTexture'
+        scriptedModulesPath = eval('slicer.modules.%s.path' % self.moduleName.lower())
+        scriptedModulesPath = os.path.dirname(scriptedModulesPath)
+
+        # - Init parameters. - #
+        # TODO (EASY): a parameter node should be maintained instead of these dictionaries. - #
+
         self.GLCMFeaturesValueDict = {}
         self.GLCMFeaturesValueDict["insideMask"] = 1
         self.GLCMFeaturesValueDict["binNumber"] = 10
@@ -156,20 +166,34 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
 
         # ---------------- Input Data Collapsible Button --------------------- #
 
-        self.GLCMinsideMaskValueSpinBox.connect('valueChanged(int)',lambda: self.onGLCMFeaturesValueDictModified("insideMask", self.GLCMinsideMaskValueSpinBox.value))
-        self.GLCMnumberOfBinsSpinBox.connect('valueChanged(int)', lambda: self.onGLCMFeaturesValueDictModified("binNumber", self.GLCMnumberOfBinsSpinBox.value))
-        self.GLCMminVoxelIntensitySpinBox.connect('valueChanged(int)', lambda: self.onGLCMFeaturesValueDictModified("pixelIntensityMin", self.GLCMminVoxelIntensitySpinBox.value))
-        self.GLCMmaxVoxelIntensitySpinBox.connect('valueChanged(int)', lambda: self.onGLCMFeaturesValueDictModified("pixelIntensityMax", self.GLCMmaxVoxelIntensitySpinBox.value))
-        self.GLCMneighborhoodRadiusSpinBox.connect('valueChanged(int)', lambda: self.onGLCMFeaturesValueDictModified("neighborhoodRadius", self.GLCMneighborhoodRadiusSpinBox.value))
-        self.GLRLMinsideMaskValueSpinBox.connect('valueChanged(int)', lambda: self.onGLRLMFeaturesValueDictModified("insideMask", self.GLRLMinsideMaskValueSpinBox.value))
-        self.GLRLMnumberOfBinsSpinBox.connect('valueChanged(int)', lambda: self.onGLRLMFeaturesValueDictModified("binNumber", self.GLRLMnumberOfBinsSpinBox.value))
-        self.GLRLMminVoxelIntensitySpinBox.connect('valueChanged(int)', lambda: self.onGLRLMFeaturesValueDictModified("pixelIntensityMin", self.GLRLMminVoxelIntensitySpinBox.value))
-        self.GLRLMmaxVoxelIntensitySpinBox.connect('valueChanged(int)', lambda: self.onGLRLMFeaturesValueDictModified("pixelIntensityMax", self.GLRLMmaxVoxelIntensitySpinBox.value))
-        self.GLRLMminDistanceSpinBox.connect('valueChanged(double)', lambda: self.onGLRLMFeaturesValueDictModified("distanceMin", self.GLRLMminDistanceSpinBox.value))
-        self.GLRLMmaxDistanceSpinBox.connect('valueChanged(double)', lambda: self.onGLRLMFeaturesValueDictModified("distanceMax", self.GLRLMmaxDistanceSpinBox.value))
-        self.GLRLMneighborhoodRadiusSpinBox.connect('valueChanged(int)', lambda: self.onGLRLMFeaturesValueDictModified("neighborhoodRadius", self.GLRLMneighborhoodRadiusSpinBox.value))
-        self.BMthresholdSpinBox.connect('valueChanged(int)', lambda: self.onBMFeaturesValueDictModified("threshold", self.BMthresholdSpinBox.value))
-        self.BMneighborhoodRadiusSpinBox.connect('valueChanged(int)', lambda: self.onBMFeaturesValueDictModified("neighborhoodRadius", self.BMneighborhoodRadiusSpinBox.value))
+        self.GLCMinsideMaskValueSpinBox.connect('valueChanged(int)',
+                                                lambda: self.onGLCMFeaturesValueDictModified("insideMask", self.GLCMinsideMaskValueSpinBox.value))
+        self.GLCMnumberOfBinsSpinBox.connect('valueChanged(int)',
+                                             lambda: self.onGLCMFeaturesValueDictModified("binNumber", self.GLCMnumberOfBinsSpinBox.value))
+        self.GLCMminVoxelIntensitySpinBox.connect('valueChanged(int)',
+                                                  lambda: self.onGLCMFeaturesValueDictModified("pixelIntensityMin", self.GLCMminVoxelIntensitySpinBox.value))
+        self.GLCMmaxVoxelIntensitySpinBox.connect('valueChanged(int)',
+                                                  lambda: self.onGLCMFeaturesValueDictModified("pixelIntensityMax", self.GLCMmaxVoxelIntensitySpinBox.value))
+        self.GLCMneighborhoodRadiusSpinBox.connect('valueChanged(int)',
+                                                   lambda: self.onGLCMFeaturesValueDictModified("neighborhoodRadius", self.GLCMneighborhoodRadiusSpinBox.value))
+        self.GLRLMinsideMaskValueSpinBox.connect('valueChanged(int)',
+                                                 lambda: self.onGLRLMFeaturesValueDictModified("insideMask", self.GLRLMinsideMaskValueSpinBox.value))
+        self.GLRLMnumberOfBinsSpinBox.connect('valueChanged(int)',
+                                              lambda: self.onGLRLMFeaturesValueDictModified("binNumber", self.GLRLMnumberOfBinsSpinBox.value))
+        self.GLRLMminVoxelIntensitySpinBox.connect('valueChanged(int)',
+                                                   lambda: self.onGLRLMFeaturesValueDictModified("pixelIntensityMin", self.GLRLMminVoxelIntensitySpinBox.value))
+        self.GLRLMmaxVoxelIntensitySpinBox.connect('valueChanged(int)',
+                                                   lambda: self.onGLRLMFeaturesValueDictModified("pixelIntensityMax", self.GLRLMmaxVoxelIntensitySpinBox.value))
+        self.GLRLMminDistanceSpinBox.connect('valueChanged(double)',
+                                             lambda: self.onGLRLMFeaturesValueDictModified("distanceMin", self.GLRLMminDistanceSpinBox.value))
+        self.GLRLMmaxDistanceSpinBox.connect('valueChanged(double)',
+                                             lambda: self.onGLRLMFeaturesValueDictModified("distanceMax", self.GLRLMmaxDistanceSpinBox.value))
+        self.GLRLMneighborhoodRadiusSpinBox.connect('valueChanged(int)',
+                                                    lambda: self.onGLRLMFeaturesValueDictModified("neighborhoodRadius", self.GLRLMneighborhoodRadiusSpinBox.value))
+        self.BMthresholdSpinBox.connect('valueChanged(int)',
+                                        lambda: self.onBMFeaturesValueDictModified("threshold", self.BMthresholdSpinBox.value))
+        self.BMneighborhoodRadiusSpinBox.connect('valueChanged(int)',
+                                                 lambda: self.onBMFeaturesValueDictModified("neighborhoodRadius", self.BMneighborhoodRadiusSpinBox.value))
 
         # ----------- Compute Parameters Based on Inputs Button -------------- #
         self.computeParametersBasedOnInputs.connect('clicked()', self.onComputeParametersBasedOnInputs)
@@ -295,25 +319,28 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
 ################################################################################
 ############################  Bone Texture Logic ###############################
 ################################################################################
-class BoneTextureLogic(ScriptedLoadableModuleLogic):
+class BoneTextureLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
     # ************************************************************************ #
     # ----------------------- Initialisation --------------------------------- #
     # ************************************************************************ #
 
     def __init__(self, interface):
-        print("----- Bone Texture logic init -----")
+        logging.debug("----- Bone Texture logic init -----")
+        ScriptedLoadableModuleLogic.__init__(self)
+        VTKObservationMixin.__init__(self)
         self.interface = interface
-        self.GLCMNodeObserver = None
-        self.GLRLMNodeObserver = None
-        self.BMNodeObserver = None
+        # Outputs:
         self.featuresGLCM = None
         self.featuresGLRLM = None
         self.featuresBM = None
 
+    def __del__(self):
+        self.removeObservers()
+
     def isClose(self, a, b, rel_tol=0.0, abs_tol=0.0):
         for i in range(len(a)):
             if not (abs(a[i] - b[i]) <= max(rel_tol * max(abs(a[i]), abs(b[i])), abs_tol)):
-                return flase
+                return False
         return True
 
     def computeLabelStatistics(self, inputScan, inputSegmentation):
@@ -366,8 +393,8 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
             if inputScan.GetImageData().GetDimensions() != inputSegmentation.GetImageData().GetDimensions():
                 slicer.util.warningDisplay("The input san and the input segmentation must be the same size")
                 return False
-            if not self.isClose(inputScan.GetSpacing(), inputSegmentation.GetSpacing(), 0.0, 1e-04 )or \
-                    not self.isClose(inputScan.GetOrigin(), inputSegmentation.GetOrigin(), 0.0, 1e-04 ):
+            if not self.isClose(inputScan.GetSpacing(), inputSegmentation.GetSpacing(), 0.0, 1e-04) or \
+                    not self.isClose(inputScan.GetOrigin(), inputSegmentation.GetOrigin(), 0.0, 1e-04):
                 slicer.util.warningDisplay("The input san and the input segmentation must overlap: same origin, spacing and orientation")
                 return False
         return True
@@ -392,40 +419,40 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
 
         # Create the CLInodes, and observe them for async logic
         if computeGLCMFeatures:
+            logging.info('Computing GLCM Features ...')
             _module = slicer.modules.computeglcmfeatures
             GLCMParameters = dict(GLCMFeaturesValueDict)
             GLCMParameters["inputVolume"] = inputScan
             GLCMParameters["inputMask"] = inputSegmentation
-            GLCMNode = slicer.cli.createNode( _module , GLCMParameters)
-            self.GLCMNodeObserver = GLCMNode.AddObserver(slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent,
-                                                         self.onGLCMNodeModified)
-            GLCMNode = slicer.cli.run(_module, node=GLCMNode , parameters=GLCMParameters, wait_for_completion=False)
+            GLCMNode = slicer.cli.createNode(_module, GLCMParameters)
+            self.addObserver(GLCMNode, slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent, self.onGLCMNodeModified)
+            GLCMNode = slicer.cli.run(_module, node=GLCMNode, parameters=GLCMParameters, wait_for_completion=False)
 
         if computeGLRLMFeatures:
+            logging.info('Computing GLRLM Features ...')
             _module = slicer.modules.computeglrlmfeatures
             GLRLMParameters = dict(GLRLMFeaturesValueDict)
             GLRLMParameters["inputVolume"] = inputScan
             GLRLMParameters["inputMask"] = inputSegmentation
-            GLRLMNode = slicer.cli.createNode( _module , GLRLMParameters)
-            self.GLRLMNodeObserver = GLRLMNode.AddObserver(slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent,
-                                                         self.onGLRLMNodeModified)
-            GLRLMNode = slicer.cli.run(_module, node=GLRLMNode , parameters=GLRLMParameters, wait_for_completion=False)
+            GLRLMNode = slicer.cli.createNode(_module, GLRLMParameters)
+            self.addObserver(GLRLMNode, slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent, self.onGLRLMNodeModified)
+            # self.GLRLMNodeObserver = GLRLMNode.AddObserver(slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent, self.onGLRLMNodeModified)
+            GLRLMNode = slicer.cli.run(_module, node=GLRLMNode, parameters=GLRLMParameters, wait_for_completion=False)
 
         if computeBMFeatures:
+            logging.info('Computing BM Features ...')
             _module = slicer.modules.computebmfeatures
             BMParameters = dict(BMFeaturesValueDict)
             BMParameters["inputVolume"] = inputScan
             BMParameters["inputMask"] = inputSegmentation
-            BMNode = slicer.cli.createNode( _module , BMParameters)
-            self.BMNodeObserver = BMNode.AddObserver(slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent,
-                                                         self.onBMNodeModified)
-            BMNode = slicer.cli.run(_module, node=BMNode , parameters=BMParameters, wait_for_completion=False)
-
+            BMNode = slicer.cli.createNode(_module, BMParameters)
+            self.addObserver(BMNode, slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent, self.onBMNodeModified)
+            BMNode = slicer.cli.run(_module, node=BMNode, parameters=BMParameters, wait_for_completion=False)
 
     def onGLCMNodeModified(self, cliNode, event):
         if not cliNode.IsBusy():
-          cliNode.RemoveObserver(self.GLCMNodeObserver)
-          print ('GLCM status: %s' % cliNode.GetStatusString())
+          self.removeObservers(self.onGLCMNodeModified)
+          logging.info('GLCM status: %s' % cliNode.GetStatusString())
           if cliNode.GetStatusString() == 'Completed':
             self.featuresGLCM = list(map(float, cliNode.GetParameterValue(2, 0).split(",")))
             if self.interface is not None:
@@ -433,8 +460,8 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
 
     def onGLRLMNodeModified(self, cliNode, event):
         if not cliNode.IsBusy():
-          cliNode.RemoveObserver(self.GLRLMNodeObserver)
-          print ('GLRLM status: %s' % cliNode.GetStatusString())
+          self.removeObservers(self.onGLRLMNodeModified)
+          logging.info('GLRLM status: %s' % cliNode.GetStatusString())
           if cliNode.GetStatusString() == 'Completed':
             self.featuresGLRLM = list(map(float, cliNode.GetParameterValue(2, 0).split(",")))
             if self.interface is not None:
@@ -442,8 +469,8 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
 
     def onBMNodeModified(self, cliNode, event):
         if not cliNode.IsBusy():
-          cliNode.RemoveObserver(self.BMNodeObserver)
-          print ('BM status: %s' % cliNode.GetStatusString())
+          self.removeObservers(self.onBMNodeModified)
+          logging.info('BM status: %s' % cliNode.GetStatusString())
           if cliNode.GetStatusString() == 'Completed':
             self.featuresBM = list(map(float, cliNode.GetParameterValue(2, 0).split(",")))
             if self.interface is not None:
@@ -528,7 +555,7 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
     def SaveTableAsCSV(self,
                        table,
                        fileName):
-        if (fileName == None):
+        if fileName is None:
             slicer.util.warningDisplay("Please specify an output file")
         if (not (fileName.endswith(".csv"))):
             slicer.util.warningDisplay("The output file must be a csv file")
@@ -554,7 +581,7 @@ class BoneTextureTest(ScriptedLoadableModuleTest):
     # ************************************************************************ #
 
     def setUp(self):
-        print("----- Bone Texture test setup -----")
+        logging.debug("----- Bone Texture test setup -----")
         # reset the state - clear scene
         self.delayDisplay("Clear the scene")
         slicer.mrmlScene.Clear(0)
