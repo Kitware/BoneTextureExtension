@@ -13,7 +13,7 @@ set(${proj}_BINARY_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
 set(${proj}_GIT_TAG aad1ddc651ad014ac6f91222790f5bfd32d229dc)
 ExternalProject_Add(${proj}
   ${${proj}_EP_ARGS}
-  GIT_REPOSITORY ${git_protocol}://github.com/InsightSoftwareConsortium/ITKBoneMorphometry.git
+  GIT_REPOSITORY ${EP_GIT_PROTOCOL}://github.com/InsightSoftwareConsortium/ITKBoneMorphometry.git
   GIT_TAG ${${proj}_GIT_TAG}
   SOURCE_DIR ${proj}
   BINARY_DIR ${${proj}_BINARY_DIR}
