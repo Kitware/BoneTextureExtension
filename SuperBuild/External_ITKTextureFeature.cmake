@@ -13,7 +13,7 @@ set(${proj}_BINARY_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
 set(${proj}_GIT_TAG 9eaa9a533b21f1c614647487e409619165752746)
 ExternalProject_Add(${proj}
   ${${proj}_EP_ARGS}
-  GIT_REPOSITORY ${git_protocol}://github.com/InsightSoftwareConsortium/ITKTextureFeatures.git
+  GIT_REPOSITORY ${EP_GIT_PROTOCOL}://github.com/InsightSoftwareConsortium/ITKTextureFeatures.git
   GIT_TAG ${${proj}_GIT_TAG}
   SOURCE_DIR ${proj}
   BINARY_DIR ${${proj}_BINARY_DIR}
