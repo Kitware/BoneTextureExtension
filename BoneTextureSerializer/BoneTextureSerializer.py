@@ -504,8 +504,6 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                 else:
                     param["inputVolume"] = storageforCSV["BM"]
 
-                print param
-
                 slicer.cli.run(slicer.modules.savevectorimageascsv,
                                None,
                                param,
