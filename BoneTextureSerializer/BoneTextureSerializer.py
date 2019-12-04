@@ -15,6 +15,10 @@ class case(object):
         self.GLRLMFeatures = None
         self.BMFeatures = None
 
+    def __str__(self):
+        return ( 'caseID: %s \n scanFilePath: %s \n segmentationFilePath: %s \n outputFilePath: %s'
+                % (self.caseID, self.scanFilePath, self.segmentationFilePath, self.outputFilePath) )
+
 ################################################################################
 ######################  Bone Texture Serializer ################################
 ################################################################################
@@ -274,11 +278,11 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
             return False
         if inputScan and inputSegmentation:
             if inputScan.GetImageData().GetDimensions() != inputSegmentation.GetImageData().GetDimensions():
-                slicer.util.warningDisplay("The input san and the input segmentation must be the same size")
+                slicer.util.warningDisplay("The input scan and the input segmentation must be the same size")
                 return False
             if not self.isClose(inputScan.GetSpacing(), inputSegmentation.GetSpacing(), 0.0, 1e-04 )or \
                    not self.isClose(inputScan.GetOrigin(), inputSegmentation.GetOrigin(), 0.0, 1e-04 ):
-                slicer.util.warningDisplay("The input san and the input segmentation must overlap: same origin, spacing and orientation")
+                slicer.util.warningDisplay("The input scan and the input segmentation must overlap: same origin, spacing and orientation")
                 return False
         return True
 
@@ -287,12 +291,15 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
     def updateCaseDictionary(self,
                              caseDict,
                              inputDirectory):
+        """ The input data should be named in the folowing way: Scan"ID".nrrd (for the input scan) and Segm"ID".nrrd
+        (for the segmentation if it exist)
+        """
         caseDict.clear()
         for fileName in os.listdir(inputDirectory):
             if fileName.endswith(".nrrd"):
                 print(fileName)
-                if fileName.startswith("SegmC"):
-                    caseID = re.search("SegmC(.+?).nrrd", fileName).group(1)
+                if fileName.startswith("Segm"):
+                    caseID = re.search("Segm(.+?).nrrd", fileName).group(1)
                     if caseID in caseDict:
                         caseDict[caseID].segmentationFilePath = os.path.join(inputDirectory , fileName)
                     else:
@@ -307,6 +314,8 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                         temp = case(caseID)
                         temp.scanFilePath = os.path.join(inputDirectory , fileName )
                         caseDict[caseID] = temp
+        for key in caseDict:
+            print( caseDict[key] )
 
     # ---------------- Computation of the wanted features---------------------- #
 
@@ -330,6 +339,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
         print(file)
         cw = csv.writer(file, delimiter=',')
         for case in caseDict.values():
+            print('Computing case: %s' % (case))
             properties['labelmap'] = False
             inputScan = slicer.util.loadNodeFromFile(case.scanFilePath, 'VolumeFile', properties, returnNode=True)
             inputScan = inputScan[1]
