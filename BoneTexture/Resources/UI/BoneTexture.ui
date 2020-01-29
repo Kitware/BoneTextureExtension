@@ -578,7 +578,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="featureSetLabel">
            <property name="text">
-            <string>Faeture set:</string>
+            <string>Feature set:</string>
            </property>
           </widget>
          </item>
