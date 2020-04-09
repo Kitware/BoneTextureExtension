@@ -11,9 +11,9 @@ set(EXTENSION_DESCRIPTION "This extensions contain several modules that can be u
 set(EXTENSION_ICONURL "https://www.slicer.org/w/img_auth.php/0/09/Logo-BoneTextureExtension.png")
 set(EXTENSION_SCREENSHOTURLS "https://www.slicer.org/w/img_auth.php/7/70/BoneTextureExtension-Slicer.png")
 set(EXTENSION_DEPENDS "LabelStatistics") # Specified as a list or "NA" if no dependencies
-set(EXTENSION_BUILD_SUBDIRECTORY BoneTextureExtension-build)
+set(EXTENSION_BUILD_SUBDIRECTORY inner-build)
 
-set(SUPERBUILD_TOPLEVEL_PROJECT BoneTextureExtension)
+set(SUPERBUILD_TOPLEVEL_PROJECT inner)
 
 #-----------------------------------------------------------------------------
 # Extension dependencies
