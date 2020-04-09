@@ -10,7 +10,7 @@ set(EXTENSION_CONTRIBUTORS "Jean-Baptiste VIMORT (Kitware Inc.)")
 set(EXTENSION_DESCRIPTION "This extensions contain several modules that can be used to compute feature maps of N-Dimensional images using well-known texture analysis methods. Key Features: 8 coocurrence textural features: energy, entropy, correlation, inertia, cluster Shade... / 10 run length textural features: run length emphasis, grey level non uniformity, run length non uniformity, low grey level long run emphasis... / Input configurable parameters: locality of the texture, offset directions for co-ocurrence and run length computation, the number of bins for the intensity histograms, and the intensity range or the range of run lengths.")
 set(EXTENSION_ICONURL "https://www.slicer.org/w/img_auth.php/0/09/Logo-BoneTextureExtension.png")
 set(EXTENSION_SCREENSHOTURLS "https://www.slicer.org/w/img_auth.php/7/70/BoneTextureExtension-Slicer.png")
-set(EXTENSION_DEPENDS "LabelStatistics") # Specified as a list or "NA" if no dependencies
+set(EXTENSION_DEPENDS "NA") # Specified as a list or "NA" if no dependencies
 set(EXTENSION_BUILD_SUBDIRECTORY inner-build)
 
 set(SUPERBUILD_TOPLEVEL_PROJECT inner)
