@@ -73,14 +73,14 @@ int DoIt( int argc, char * argv[] )
   filter->SetPixelValueMinMax(pixelIntensityMin, pixelIntensityMax);
 
   typename FilterType::FeatureNameVectorPointer requestedFeatures = FilterType::FeatureNameVector::New();
-  requestedFeatures->push_back(FilterType::TextureFeaturesFilterType::Energy);
-  requestedFeatures->push_back(FilterType::TextureFeaturesFilterType::Entropy);
-  requestedFeatures->push_back(FilterType::TextureFeaturesFilterType::Correlation);
-  requestedFeatures->push_back(FilterType::TextureFeaturesFilterType::InverseDifferenceMoment);
-  requestedFeatures->push_back(FilterType::TextureFeaturesFilterType::Inertia);
-  requestedFeatures->push_back(FilterType::TextureFeaturesFilterType::ClusterShade);
-  requestedFeatures->push_back(FilterType::TextureFeaturesFilterType::ClusterProminence);
-  requestedFeatures->push_back(FilterType::TextureFeaturesFilterType::HaralickCorrelation);
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::TextureFeaturesFilterType::Energy));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::TextureFeaturesFilterType::Entropy));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::TextureFeaturesFilterType::Correlation));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::TextureFeaturesFilterType::InverseDifferenceMoment));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::TextureFeaturesFilterType::Inertia));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::TextureFeaturesFilterType::ClusterShade));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::TextureFeaturesFilterType::ClusterProminence));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::TextureFeaturesFilterType::HaralickCorrelation));
   filter->SetRequestedFeatures(requestedFeatures);
 
   filter->Update();
