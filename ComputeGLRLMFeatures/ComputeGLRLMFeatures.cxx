@@ -74,16 +74,16 @@ int DoIt( int argc, char * argv[] )
   filter->SetDistanceValueMinMax(distanceMin, distanceMax);
 
   typename FilterType::FeatureNameVectorPointer requestedFeatures = FilterType::FeatureNameVector::New();
-  requestedFeatures->push_back(FilterType::RunLengthFeaturesFilterType::ShortRunEmphasis);
-  requestedFeatures->push_back(FilterType::RunLengthFeaturesFilterType::LongRunEmphasis);
-  requestedFeatures->push_back(FilterType::RunLengthFeaturesFilterType::GreyLevelNonuniformity);
-  requestedFeatures->push_back(FilterType::RunLengthFeaturesFilterType::RunLengthNonuniformity);
-  requestedFeatures->push_back(FilterType::RunLengthFeaturesFilterType::LowGreyLevelRunEmphasis);
-  requestedFeatures->push_back(FilterType::RunLengthFeaturesFilterType::HighGreyLevelRunEmphasis);
-  requestedFeatures->push_back(FilterType::RunLengthFeaturesFilterType::ShortRunLowGreyLevelEmphasis);
-  requestedFeatures->push_back(FilterType::RunLengthFeaturesFilterType::ShortRunHighGreyLevelEmphasis);
-  requestedFeatures->push_back(FilterType::RunLengthFeaturesFilterType::LongRunLowGreyLevelEmphasis);
-  requestedFeatures->push_back(FilterType::RunLengthFeaturesFilterType::LongRunHighGreyLevelEmphasis);
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::RunLengthFeaturesFilterType::ShortRunEmphasis));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::RunLengthFeaturesFilterType::LongRunEmphasis));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::RunLengthFeaturesFilterType::GreyLevelNonuniformity));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::RunLengthFeaturesFilterType::RunLengthNonuniformity));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::RunLengthFeaturesFilterType::LowGreyLevelRunEmphasis));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::RunLengthFeaturesFilterType::HighGreyLevelRunEmphasis));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::RunLengthFeaturesFilterType::ShortRunLowGreyLevelEmphasis));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::RunLengthFeaturesFilterType::ShortRunHighGreyLevelEmphasis));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::RunLengthFeaturesFilterType::LongRunLowGreyLevelEmphasis));
+  requestedFeatures->push_back(static_cast<uint8_t>(FilterType::RunLengthFeaturesFilterType::LongRunHighGreyLevelEmphasis));
   filter->SetRequestedFeatures(requestedFeatures);
 
   filter->Update();
