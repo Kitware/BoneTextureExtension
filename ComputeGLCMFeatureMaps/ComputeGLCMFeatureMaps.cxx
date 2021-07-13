@@ -81,7 +81,7 @@ int DoIt( int argc, char * argv[] )
   filter->Update();
 
   itk::MetaDataDictionary dictionary;
-  itk::EncapsulateMetaData<float>(dictionary,"DWMRI_b-value",1.0);
+  itk::EncapsulateMetaData<std::string>(dictionary,"DWMRI_b-value","1.0");
   itk::EncapsulateMetaData<std::string>(dictionary,"modality","DWMRI");
   filter->GetOutput()->SetMetaDataDictionary(dictionary);
 
