@@ -200,7 +200,7 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
                                    self.GLCMFeaturesValueDict,
                                    self.GLRLMFeaturesValueDict,
                                    self.BMFeaturesValueDict,
-                                   self.outputFolderDirectoryButton.directory.encode('utf-8'))
+                                   self.outputFolderDirectoryButton.directory)
 
     def onComputeColormaps(self):
         self.logic.computeColormaps(self.caseDict,
@@ -210,7 +210,7 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
                                     self.GLCMFeaturesValueDict,
                                     self.GLRLMFeaturesValueDict,
                                     self.BMFeaturesValueDict,
-                                    self.outputFolderDirectoryButton.directory.encode('utf-8'),
+                                    self.outputFolderDirectoryButton.directory,
                                     self.separateFeaturesCheckBox.isChecked(),
                                     self.saveAsCSVCheckBox.isChecked())
 
