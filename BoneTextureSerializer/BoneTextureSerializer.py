@@ -518,9 +518,9 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                                None,
                                param,
                                wait_for_completion=True)
-                slicer.mrmlScene.RemoveNode(storageforCSV["GLCM"])
-                slicer.mrmlScene.RemoveNode(storageforCSV["GLRLM"])
-                slicer.mrmlScene.RemoveNode(storageforCSV["BM"])
+
+                for storageNode in storageforCSV.values():
+                    slicer.mrmlScene.RemoveNode(storageNode)
 
             slicer.mrmlScene.RemoveNode(inputScan)
             slicer.mrmlScene.RemoveNode(inputSegmentation)
