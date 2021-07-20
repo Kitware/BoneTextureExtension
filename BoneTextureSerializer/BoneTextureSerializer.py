@@ -261,7 +261,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
     def isClose(self, a, b, rel_tol=0.0, abs_tol=0.0):
         for i in range(len(a)):
             if not (abs(a[i] - b[i]) <= max(rel_tol * max(abs(a[i]), abs(b[i])), abs_tol)):
-                return flase
+                return False
         return True
 
     def findWidget(self, widget, objectName):
