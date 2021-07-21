@@ -41,6 +41,32 @@ class BoneTexture(ScriptedLoadableModule):
         the Subchondral Bone in the Temporomandibular Joint)
         """
 
+
+class TableCopyFilter(qt.QWidget):
+    def eventFilter(self, source, event):
+        if event.type() == qt.QEvent.KeyPress and event.matches(qt.QKeySequence.Copy):
+            self.copySelected(source)
+            return True
+        return False
+
+    def copySelected(self, table):
+        selection = table.selectedIndexes()
+
+        if selection:
+            rows = sorted(set(index.row() for index in selection))
+            cols = sorted(set(index.column() for index in selection))
+
+            # allow looking up index data by coordinate
+            data = {(index.row(), index.column()): index.data() for index in selection}
+
+            # fetch a full grid of rows x columns. missing (unselected) values are ''
+            parts = [[data.get((row, col), '') for col in cols] for row in rows]
+
+            # join table into tsv-formatted text
+            text = '\n'.join('\t'.join(part) for part in parts)
+
+            slicer.app.clipboard().setText(text)
+
 ################################################################################
 ##########################  Bone Texture Widget ################################
 ################################################################################
@@ -233,6 +259,8 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         self.featureSetMRMLNodeComboBox.connect("currentNodeChanged(vtkMRMLNode*)", self.onFeatureSetChanged)
         self.featureComboBox.connect("currentIndexChanged(int)", self.onFeatureChanged)
         self.SaveTablePushButton.connect('clicked()', self.onSaveTable)
+        copy_filter = TableCopyFilter(self.displayFeaturesTableWidget)
+        self.displayFeaturesTableWidget.installEventFilter(copy_filter)
 
         # -------------------------------------------------------------------- #
         # -------------------------- Initialisation -------------------------- #

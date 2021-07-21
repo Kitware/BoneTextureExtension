@@ -136,7 +136,10 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
         self.outputFolderDirectoryButton = self.logic.get("OutputFolderDirectoryButton")
         self.separateFeaturesCheckBox = self.logic.get("separateFeaturesCheckBox")
         self.saveAsCSVCheckBox = self.logic.get("saveAsCSVCheckBox")
+        self.writeCSVHeaderCheckBox = self.logic.get("writeCSVHeaderCheckBox")
 
+        # there's probably a way to do this in the .ui file...
+        self.saveAsCSVCheckBox.stateChanged.connect(self.writeCSVHeaderCheckBox.setEnabled)
 
         # -------------------------------------------------------------------- #
         # ---------------------------- Connections --------------------------- #
@@ -200,7 +203,7 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
                                    self.GLCMFeaturesValueDict,
                                    self.GLRLMFeaturesValueDict,
                                    self.BMFeaturesValueDict,
-                                   self.outputFolderDirectoryButton.directory.encode('utf-8'))
+                                   self.outputFolderDirectoryButton.directory)
 
     def onComputeColormaps(self):
         self.logic.computeColormaps(self.caseDict,
@@ -210,9 +213,10 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
                                     self.GLCMFeaturesValueDict,
                                     self.GLRLMFeaturesValueDict,
                                     self.BMFeaturesValueDict,
-                                    self.outputFolderDirectoryButton.directory.encode('utf-8'),
+                                    self.outputFolderDirectoryButton.directory,
                                     self.separateFeaturesCheckBox.isChecked(),
-                                    self.saveAsCSVCheckBox.isChecked())
+                                    self.saveAsCSVCheckBox.isChecked(),
+                                    self.writeCSVHeaderCheckBox.isChecked())
 
         # ---------------- Export Collapsible Button -------------------- #
 
@@ -257,7 +261,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
     def isClose(self, a, b, rel_tol=0.0, abs_tol=0.0):
         for i in range(len(a)):
             if not (abs(a[i] - b[i]) <= max(rel_tol * max(abs(a[i]), abs(b[i])), abs_tol)):
-                return flase
+                return False
         return True
 
     def findWidget(self, widget, objectName):
@@ -405,7 +409,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                          BMFeaturesValueDict,
                          outputDirectory,
                          saparateFeatureMaps,
-                         saveAsCSV):
+                         saveAsCSV, writeCSVHeader):
 
         if not (computeGLCMFeatures or computeGLRLMFeatures or computeBMFeatures):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
@@ -427,6 +431,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
             storageforCSV = {}
             if saveAsCSV and (not os.path.exists(os.path.join(outputDirectory , "CSVfeatureMaps"))):
                 os.makedirs(os.path.join(outputDirectory , "CSVfeatureMaps"))
+
             if computeGLCMFeatures:
                 volumeNode = self.computeSingleColormap(inputScan,
                                                         inputSegmentation,
@@ -444,10 +449,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                 else:
                     slicer.util.saveNode(volumeNode, os.path.join(outputDirectory , case.caseID + "_GLCMFeatureMap.nhdr"))
 
-                if saveAsCSV:
-                    storageforCSV["GLCM"] = volumeNode
-                else:
-                    slicer.mrmlScene.RemoveNode(volumeNode)
+                storageforCSV["GLCM"] = volumeNode
 
             if computeGLRLMFeatures:
                 volumeNode = self.computeSingleColormap(inputScan,
@@ -466,10 +468,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                 else:
                     slicer.util.saveNode(volumeNode, os.path.join(outputDirectory , case.caseID + "_GLRLMFeatureMap.nhdr"))
 
-                if saveAsCSV:
-                    storageforCSV["GLRLM"] = volumeNode
-                else:
-                    slicer.mrmlScene.RemoveNode(volumeNode)
+                storageforCSV["GLRLM"] = volumeNode
 
             if computeBMFeatures:
                 volumeNode = self.computeSingleColormap(inputScan,
@@ -480,52 +479,113 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                 if saparateFeatureMaps:
                     param = dict()
                     param["inputVolume"] = volumeNode
-                    param["outputFileBaseName"] = os.path.join(outputDirectory, case.caseID + "_BMFeatureMap")
+                    param["outputFileBaseName"] = os.path.join(outputDirectory,
+                                                               case.caseID + "_BMFeatureMap")
                     slicer.cli.run(slicer.modules.separatevectorimage,
                                    None,
                                    param,
                                    wait_for_completion=True)
                 else:
                     slicer.util.saveNode(volumeNode,
-                                         os.path.join(outputDirectory, case.caseID + "_BMFeatureMap.nhdr"))
+                                         os.path.join(outputDirectory,
+                                                      case.caseID + "_BMFeatureMap.nhdr"))
 
-                if saveAsCSV:
-                    storageforCSV["BM"] = volumeNode
-                else:
-                    slicer.mrmlScene.RemoveNode(volumeNode)
+                storageforCSV["BM"] = volumeNode
+
+            import csv
 
             if saveAsCSV:
-                param = dict()
-                param["inputMask"] = inputSegmentation
-                param["outputFileBaseName"] = os.path.join(outputDirectory , "CSVfeatureMaps" , case.caseID + "_FeatureMap.csv")
+                tempdir = slicer.util.tempDirectory(key='BoneTextureSerializer')
+
+                readers = []
+                headings = []
+
                 if computeGLCMFeatures:
-                    param["inputVolume"] = storageforCSV["GLCM"]
-                    if computeGLRLMFeatures:
-                        param["secondInputVolume"] = storageforCSV["GLRLM"]
-                        if computeBMFeatures:
-                            param["thirdInputVolume"] = storageforCSV["BM"]
-                            param["predefineTitle"] = True
-                    elif computeBMFeatures:
-                        param["secondInputVolume"] = storageforCSV["BM"]
-                elif computeGLRLMFeatures:
-                    param["inputVolume"] = storageforCSV["GLRLM"]
-                    if computeBMFeatures:
-                        param["secondInputVolume"] = storageforCSV["BM"]
-                else:
-                    param["inputVolume"] = storageforCSV["BM"]
+                    name = os.path.join(tempdir, case.caseID + '_GLCM.csv')
+                    slicer.cli.run(
+                        slicer.modules.savevectorimageascsv,
+                        None,
+                        {
+                            'inputMask': inputSegmentation,
+                            'inputVolume': storageforCSV['GLCM'],
+                            'outputFileBaseName': name,
+                        },
+                        wait_for_completion=True,
+                    )
+                    readers.append(csv.reader(open(name)))  # going to close these
+                    headings.append(self.CFeatures)
 
-                slicer.cli.run(slicer.modules.savevectorimageascsv,
-                               None,
-                               param,
-                               wait_for_completion=True)
-                slicer.mrmlScene.RemoveNode(storageforCSV["GLCM"])
-                slicer.mrmlScene.RemoveNode(storageforCSV["GLRLM"])
-                slicer.mrmlScene.RemoveNode(storageforCSV["BM"])
+                if computeGLRLMFeatures:
+                    name = os.path.join(tempdir, case.caseID + '_GLRLM.csv')
+                    slicer.cli.run(
+                        slicer.modules.savevectorimageascsv,
+                        None,
+                        {
+                            'inputMask': inputSegmentation,
+                            'inputVolume': storageforCSV['GLRLM'],
+                            'outputFileBaseName': name,
+                        },
+                        wait_for_completion=True,
+                    )
+                    readers.append(csv.reader(open(name)))  # going to close these
+                    headings.append(self.RLFeatures)
 
-            slicer.mrmlScene.RemoveNode(inputScan)
-            slicer.mrmlScene.RemoveNode(inputSegmentation)
+                if computeBMFeatures:
+                    name = os.path.join(tempdir, case.caseID + '_BM.csv')
+                    slicer.cli.run(
+                        slicer.modules.savevectorimageascsv,
+                        None,
+                        {
+                            'inputMask': inputSegmentation,
+                            'inputVolume': storageforCSV['BM'],
+                            'outputFileBaseName': name,
+                        },
+                        wait_for_completion=True,
+                    )
+                    readers.append(csv.reader(open(name)))  # going to close these
+                    headings.append(self.BMFeatures)
 
-        self.renameSeparatedFeatures(outputDirectory)
+                # now we need to merge the csvs, and add a header.
+                # since they were all generated with the same segmentation,
+                # we can assume the order of the files is the same.
+                # so we just need to grab the x,y,z coords and each of the values,
+                # then save those to one csv in the output directory.
+
+                outPath = os.path.join(
+                    outputDirectory,
+                    "CSVfeatureMaps",
+                    case.caseID + "_FeatureMap.csv",
+                )
+
+
+                with open(outPath, 'w') as outFile:
+                    writer = csv.writer(outFile)
+
+                    if writeCSVHeader:
+                        allHeadings = [field for heading in headings for field in heading]
+                        writer.writerow(('X', 'Y', 'Z', *allHeadings))
+
+                    for rows in zip(*readers):
+                        # Shouldn't be needed... but just in case we didn't actually
+                        # compute anything.
+                        x = y = z = None
+
+                        allData = []
+                        for row in rows:
+                            x, y, z, *data = row
+                            allData.extend(data)
+
+                        writer.writerow((x, y, z, *allData))
+
+                readers.clear()  # triggers deletion and closes the file handles
+
+                for storageNode in storageforCSV.values():
+                    slicer.mrmlScene.RemoveNode(storageNode)
+
+                slicer.mrmlScene.RemoveNode(inputScan)
+                slicer.mrmlScene.RemoveNode(inputSegmentation)
+
+                self.renameSeparatedFeatures(outputDirectory)
 
     def computeSingleColormap(self,
                               inputScan,
