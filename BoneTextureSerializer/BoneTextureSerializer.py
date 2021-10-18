@@ -112,6 +112,7 @@ class BoneTextureSerializerWidget(ScriptedLoadableModuleWidget):
         self.bMFeaturesCheckBox = self.logic.get("BMFeaturesCheckBox")
         self.computeFeaturesPushButton = self.logic.get("ComputeFeaturesPushButton")
         self.computeColormapsPushButton = self.logic.get("ComputeColormapsPushButton")
+        self.computationProgressBar = self.logic.get("ComputationProgressBar")
         self.GLCMparametersCollapsibleGroupBox = self.logic.get("GLCMParametersCollapsibleGroupBox")
         self.GLCMinsideMaskValueSpinBox = self.logic.get("GLCMInsideMaskValueSpinBox")
         self.GLCMnumberOfBinsSpinBox = self.logic.get("GLCMNumberOfBinsSpinBox")
@@ -337,51 +338,68 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
             return
 
+        stepsPerCase = sum((
+            bool(computeGLCMFeatures),
+            bool(computeGLRLMFeatures),
+            bool(computeBMFeatures),
+        ))
+
+        progress = self.interface.computationProgressBar
+        progress.value = 0
+        progress.minimum = 0
+        progress.maximum = len(caseDict) * stepsPerCase
+        progress.visible = True
+
         properties = {}
 
-        file = open( os.path.join(outputDirectory , "TexturalFeatureTable.csv"), 'w+')
-        print(file)
-        cw = csv.writer(file, delimiter=',')
-        for case in caseDict.values():
-            print('Computing case: %s' % (case))
-            properties['labelmap'] = False
-            inputScan = slicer.util.loadNodeFromFile(case.scanFilePath, 'VolumeFile', properties, returnNode=True)
-            inputScan = inputScan[1]
-            properties['labelmap'] = True
-            inputSegmentation = slicer.util.loadNodeFromFile(case.segmentationFilePath, 'VolumeFile', properties, returnNode=True)
-            inputSegmentation = inputSegmentation[1]
-            if not (self.inputDataVerification(inputScan, inputSegmentation)):
-                return
+        texturalFeaturesPath = os.path.join(outputDirectory, "TexturalFeatureTable.csv")
+        with open(texturalFeaturesPath, "w+") as file:
+            print(file)
+            cw = csv.writer(file, delimiter=',')
+            for case in caseDict.values():
+                print('Computing case: %s' % (case))
+                properties['labelmap'] = False
+                inputScan = slicer.util.loadNodeFromFile(case.scanFilePath, 'VolumeFile', properties, returnNode=True)
+                inputScan = inputScan[1]
+                properties['labelmap'] = True
+                inputSegmentation = slicer.util.loadNodeFromFile(case.segmentationFilePath, 'VolumeFile', properties, returnNode=True)
+                inputSegmentation = inputSegmentation[1]
+                if not (self.inputDataVerification(inputScan, inputSegmentation)):
+                    return
 
-            if computeGLCMFeatures:
-                case.GLCMFeatures = self.computeSingleFeatureSet(inputScan,
-                                                                 inputSegmentation,
-                                                                 slicer.modules.computeglcmfeatures,
-                                                                 GLCMFeaturesValueDict)
+                if computeGLCMFeatures:
+                    case.GLCMFeatures = self.computeSingleFeatureSet(inputScan,
+                                                                     inputSegmentation,
+                                                                     slicer.modules.computeglcmfeatures,
+                                                                     GLCMFeaturesValueDict)
+                    progress.value += 1
 
-            if computeGLRLMFeatures:
-                case.GLRLMFeatures = self.computeSingleFeatureSet(inputScan,
-                                                                  inputSegmentation,
-                                                                  slicer.modules.computeglrlmfeatures,
-                                                                  GLRLMFeaturesValueDict)
+                if computeGLRLMFeatures:
+                    case.GLRLMFeatures = self.computeSingleFeatureSet(inputScan,
+                                                                      inputSegmentation,
+                                                                      slicer.modules.computeglrlmfeatures,
+                                                                      GLRLMFeaturesValueDict)
+                    progress.value += 1
 
-            if computeBMFeatures:
-                case.BMFeatures = self.computeSingleFeatureSet(inputScan,
-                                                               inputSegmentation,
-                                                               slicer.modules.computebmfeatures,
-                                                               BMFeaturesValueDict)
+                if computeBMFeatures:
+                    case.BMFeatures = self.computeSingleFeatureSet(inputScan,
+                                                                   inputSegmentation,
+                                                                   slicer.modules.computebmfeatures,
+                                                                   BMFeaturesValueDict)
+                    progress.value += 1
 
-            slicer.mrmlScene.RemoveNode(inputScan)
-            slicer.mrmlScene.RemoveNode(inputSegmentation)
-            toWrite = [case.caseID]
-            if (case.GLCMFeatures):
-                toWrite += case.GLCMFeatures
-            if (case.GLRLMFeatures):
-                toWrite += case.GLRLMFeatures
-            if (case.BMFeatures):
-                toWrite += case.BMFeatures
-            cw.writerow(toWrite)
-        file.close()
+                slicer.mrmlScene.RemoveNode(inputScan)
+                slicer.mrmlScene.RemoveNode(inputSegmentation)
+                toWrite = [case.caseID]
+                if (case.GLCMFeatures):
+                    toWrite += case.GLCMFeatures
+                if (case.GLRLMFeatures):
+                    toWrite += case.GLRLMFeatures
+                if (case.BMFeatures):
+                    toWrite += case.BMFeatures
+                cw.writerow(toWrite)
+
+            progress.visible = False
 
     def computeSingleFeatureSet(self,
                                inputScan,
@@ -414,6 +432,18 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
         if not (computeGLCMFeatures or computeGLRLMFeatures or computeBMFeatures):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
             return
+
+        stepsPerCase = sum((
+            bool(computeGLCMFeatures),
+            bool(computeGLRLMFeatures),
+            bool(computeBMFeatures),
+        ))
+
+        progress = self.interface.computationProgressBar
+        progress.value = 0
+        progress.minimum = 0
+        progress.maximum = len(caseDict) * stepsPerCase
+        progress.visible = True
 
         properties = {}
         for case in caseDict.values():
@@ -450,6 +480,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                     slicer.util.saveNode(volumeNode, os.path.join(outputDirectory , case.caseID + "_GLCMFeatureMap.nhdr"))
 
                 storageforCSV["GLCM"] = volumeNode
+                progress.value += 1
 
             if computeGLRLMFeatures:
                 volumeNode = self.computeSingleColormap(inputScan,
@@ -469,6 +500,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                     slicer.util.saveNode(volumeNode, os.path.join(outputDirectory , case.caseID + "_GLRLMFeatureMap.nhdr"))
 
                 storageforCSV["GLRLM"] = volumeNode
+                progress.value += 1
 
             if computeBMFeatures:
                 volumeNode = self.computeSingleColormap(inputScan,
@@ -491,6 +523,7 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                                                       case.caseID + "_BMFeatureMap.nhdr"))
 
                 storageforCSV["BM"] = volumeNode
+                progress.value += 1
 
             import csv
 
@@ -586,6 +619,9 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                 slicer.mrmlScene.RemoveNode(inputSegmentation)
 
                 self.renameSeparatedFeatures(outputDirectory)
+
+        progress.visible = False
+
 
     def computeSingleColormap(self,
                               inputScan,
