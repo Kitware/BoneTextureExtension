@@ -399,6 +399,8 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                     toWrite += case.BMFeatures
                 cw.writerow(toWrite)
 
+                file.flush()  # so that intermediate results will be visible.
+
             progress.visible = False
 
     def computeSingleFeatureSet(self,
