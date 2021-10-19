@@ -314,13 +314,38 @@ class BoneTextureSerializerLogic(ScriptedLoadableModuleLogic):
                 elif fileName.startswith("Scan"):
                     caseID = re.search("Scan(.+?).nrrd", fileName).group(1)
                     if caseID in caseDict:
-                        caseDict[caseID].scanFilePath = os.path.join(inputDirectory , fileName)
+                        caseDict[caseID].scanFilePath = os.path.join(inputDirectory,
+                                                                     fileName)
                     else:
                         temp = case(caseID)
-                        temp.scanFilePath = os.path.join(inputDirectory , fileName )
+                        temp.scanFilePath = os.path.join(inputDirectory, fileName)
                         caseDict[caseID] = temp
         for key in caseDict:
-            print( caseDict[key] )
+            print(caseDict[key])
+
+        problems = []
+
+        if not caseDict:
+            problems.append("No cases were found in directory %s." % inputDirectory)
+        else:
+            scans = [case.scanFilePath for case in caseDict.values()]
+            segms = [case.segmentationFilePath for case in caseDict.values()]
+
+            if not all(scans):
+                problems.append("Some cases are missing Scan volumes.")
+
+            if any(segms) and not all(segms):
+                problems.append("Some, but not all, cases are missing Segmentations.")
+
+        if problems:
+            advice = (
+                "Files may be misnamed. Prefix volume files with 'Scan' and "
+                "segmentation files with 'Segm' for BoneTextureSerializer to find "
+                "them. Re-select this directory to load any changes. "
+            )
+
+            message = "\n\n".join(problems + [advice])
+            slicer.util.warningDisplay(message)
 
     # ---------------- Computation of the wanted features---------------------- #
 
