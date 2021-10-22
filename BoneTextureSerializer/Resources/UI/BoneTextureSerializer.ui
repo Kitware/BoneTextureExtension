@@ -492,6 +492,13 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QProgressBar" name="ComputationProgressBar">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
