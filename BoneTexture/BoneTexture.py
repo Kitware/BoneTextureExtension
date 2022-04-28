@@ -5,8 +5,9 @@ import qt
 import slicer
 from slicer.ScriptedLoadableModule import *
 from slicer.util import VTKObservationMixin
-# Use label statistics to compute good default parameters for texture modules.
-from LabelStatistics import LabelStatisticsLogic
+# Use segment statistics to compute good default parameters for texture modules.
+import SegmentStatistics
+
 import math  # for ceil
 import VectorToScalarVolume # For extra widget, handling input vector/RGB images.
 
@@ -440,14 +441,35 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
                 return False
         return True
 
-    def computeLabelStatistics(self, inputScan, inputSegmentation):
+    def computeLabelStatistics(self, inputScan, inputLabelMapNode):
         """ Use slicer core module to get the min/max intensity value inside the mask.
         Returns tuple (min, max) with intensity values inside the mask. """
-        # May take time
-        labelStatisticsLogic = LabelStatisticsLogic(inputScan, inputSegmentation)
-        insideSegmentationIndex = 1
-        minIntensityValue = labelStatisticsLogic.labelStats[(insideSegmentationIndex, 'Min')]
-        maxIntensityValue = labelStatisticsLogic.labelStats[(insideSegmentationIndex, 'Max')]
+        # Export lapel map node into a segmentation node
+        segmentationNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode")
+        slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(inputLabelMapNode, segmentationNode)
+
+        # Compute statistics (may take time)
+        segStatLogic = SegmentStatistics.SegmentStatisticsLogic()
+        segStatLogic.getParameterNode().SetParameter("Segmentation", segmentationNode.GetID())
+        segStatLogic.getParameterNode().SetParameter("ScalarVolume", inputScan.GetID())
+
+        # Disable all plugins
+        for plugin in segStatLogic.plugins:
+          pluginName = plugin.__class__.__name__
+          segStatLogic.getParameterNode().SetParameter(f"{pluginName}.enabled", str(False))
+
+        # Explicitly enable ScalarVolumeSegmentStatistics
+        segStatLogic.getParameterNode().SetParameter("ScalarVolumeSegmentStatisticsPlugin.enabled", str(True))
+        segStatLogic.computeStatistics()
+        stats = segStatLogic.getStatistics()
+
+        # Remove temporary segmentation node
+        slicer.mrmlScene.RemoveNode(segmentationNode)
+
+        segmentId = stats["SegmentIDs"][0]
+        minIntensityValue = stats[segmentId, "ScalarVolumeSegmentStatisticsPlugin.min"]
+        maxIntensityValue = stats[segmentId, "ScalarVolumeSegmentStatisticsPlugin.max"]
+
         return minIntensityValue, maxIntensityValue
 
     def computeBinsBasedOnIntensityRange(self, minIntensityValue, maxIntensityValue):
