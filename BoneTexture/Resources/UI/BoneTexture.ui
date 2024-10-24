@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>922</width>
-    <height>1210</height>
+    <width>920</width>
+    <height>1199</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -88,6 +88,32 @@
           <widget class="QLabel" name="InputScanLabel">
            <property name="text">
             <string>Input Scan</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="vectorToScalarVolumeGroupBox">
+        <property name="title">
+         <string>Conversion: Vector Input Scan to Scalar</string>
+        </property>
+        <layout class="QFormLayout" name="formLayout_8">
+         <item row="0" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
+           <item>
+            <widget class="QComboBox" name="vectorToScalarVolumeMethodSelectorComboBox"/>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="SingleComponentSpinBox"/>
+           </item>
+          </layout>
+         </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="vectorToScalarVolumePushButton">
+           <property name="text">
+            <string>Convert Input Scan to Scalar</string>
            </property>
           </widget>
          </item>
