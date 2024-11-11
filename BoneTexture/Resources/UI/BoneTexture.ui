@@ -27,7 +27,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayout">
          <item row="2" column="1">
-          <widget class="qMRMLNodeComboBox" name="InputSegmentationMRMLNodeComboBox">
+          <widget class="qMRMLNodeComboBox" name="InputSegmentationComboBox">
            <property name="enabled">
             <bool>true</bool>
            </property>
@@ -45,10 +45,13 @@
            <property name="removeEnabled">
             <bool>false</bool>
            </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>inputSegmentation</string>
+           </property>
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="qMRMLNodeComboBox" name="InputScanMRMLNodeComboBox">
+          <widget class="qMRMLNodeComboBox" name="InputScanComboBox">
            <property name="enabled">
             <bool>true</bool>
            </property>
@@ -75,6 +78,9 @@
            <property name="selectNodeUponCreation">
             <bool>true</bool>
            </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>inputVolume</string>
+           </property>
           </widget>
          </item>
          <item row="2" column="0">
@@ -96,6 +102,9 @@
       </item>
       <item>
        <widget class="QGroupBox" name="vectorToScalarVolumeGroupBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="title">
          <string>Conversion: Vector Input Scan to Scalar</string>
         </property>
@@ -1075,5 +1084,38 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>BoneTexture</sender>
+   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
+   <receiver>InputScanComboBox</receiver>
+   <slot>setMRMLScene(vtkMRMLScene*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>459</x>
+     <y>599</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>511</x>
+     <y>60</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>BoneTexture</sender>
+   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
+   <receiver>InputSegmentationComboBox</receiver>
+   <slot>setMRMLScene(vtkMRMLScene*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>459</x>
+     <y>599</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>511</x>
+     <y>85</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

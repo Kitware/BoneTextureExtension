@@ -1,8 +1,19 @@
-import csv
 import logging
+import os
+from typing import Annotated, Optional
+import csv
 import os
 import qt
 import slicer
+import vtk
+
+
+from slicer.i18n import tr as _
+from slicer.i18n import translate
+from slicer.parameterNodeWrapper import (
+    parameterNodeWrapper,
+    WithinRange,
+)
 from slicer.ScriptedLoadableModule import *
 from slicer.util import VTKObservationMixin
 # Use segment statistics to compute good default parameters for texture modules.
@@ -11,15 +22,18 @@ import SegmentStatistics
 import math  # for ceil
 import VectorToScalarVolume # For extra widget, handling input vector/RGB images.
 
-################################################################################
-############################  Bone Texture #####################################
-################################################################################
+from slicer import vtkMRMLScalarVolumeNode, vtkMRMLSegmentationNode, vtkMRMLVolumeNode
+
+
+#
+# Bone Texture
+#
 
 
 class BoneTexture(ScriptedLoadableModule):
     def __init__(self, parent):
         ScriptedLoadableModule.__init__(self, parent)
-        self.parent.title = "Bone Texture"
+        self.parent.title = "Bone Texture"  
         self.parent.categories = ["Quantification"]
         self.parent.dependencies = []
         self.parent.contributors = ["Jean-Baptiste VIMORT (Kitware Inc.)"]
@@ -41,7 +55,6 @@ class BoneTexture(ScriptedLoadableModule):
         Dental and Craniofacial Research (NIDCR) R01EB021391 (Textural Biomarkers of Arthritis for
         the Subchondral Bone in the Temporomandibular Joint)
         """
-
 
 class TableCopyFilter(qt.QWidget):
     def eventFilter(self, source, event):
@@ -68,230 +81,162 @@ class TableCopyFilter(qt.QWidget):
 
             slicer.app.clipboard().setText(text)
 
-################################################################################
-##########################  Bone Texture Widget ################################
-################################################################################
+#
+# BoneTextureParameterNode
+#
 
 
-class BoneTextureWidget(ScriptedLoadableModuleWidget):
+@parameterNodeWrapper
+class BoneTextureParameterNode:
+    pass
 
-    # ************************************************************************ #
-    # -------------------------- Initialisation ------------------------------ #
-    # ************************************************************************ #
 
-    def __init__(self, parent=None):
+#
+# BoneTextureWidget
+#
+
+
+class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
+    """Uses ScriptedLoadableModuleWidget base class, available at:
+    https://github.com/Slicer/Slicer/blob/main/Base/Python/slicer/ScriptedLoadableModule.py
+    """
+
+    def __init__(self, parent=None) -> None:
+        """Called when the user opens the module the first time and the widget is initialized."""
         ScriptedLoadableModuleWidget.__init__(self, parent)
-        self.logic = BoneTextureLogic(self)
+        VTKObservationMixin.__init__(self)  # needed for parameter node observation
+        self.logic = None
+        self._parameterNode = None
+        self._parameterNodeGuiTag = None
 
-        self.CFeatures = ["energy", "entropy",
-                          "correlation", "inverseDifferenceMoment",
-                          "inertia", "clusterShade",
-                          "clusterProminence", "haralickCorrelation"]
-        self.RLFeatures = ["shortRunEmphasis", "longRunEmphasis",
-                           "greyLevelNonuniformity", "runLengthNonuniformity",
-                           "lowGreyLevelRunEmphasis", "highGreyLevelRunEmphasis",
-                           "shortRunLowGreyLevelEmphasis", "shortRunHighGreyLevelEmphasis",
-                           "longRunLowGreyLevelEmphasis", "longRunHighGreyLevelEmphasis"]
-        self.BMFeatures = ["BVTV", "TbTh", "TbSp", "TbN", "BSBV"]
-
-
-    def setup(self):
+    def setup(self) -> None:
+        """Called when the user opens the module the first time and the widget is initialized."""
         ScriptedLoadableModuleWidget.setup(self)
-        logging.debug("-----  Bone Texture widget setup -----")
-        self.moduleName = 'BoneTexture'
-        scriptedModulesPath = eval('slicer.modules.%s.path' % self.moduleName.lower())
-        scriptedModulesPath = os.path.dirname(scriptedModulesPath)
 
-        # - Init parameters. - #
-        # TODO (EASY): a parameter node should be maintained instead of these dictionaries. - #
+        # Load widget from .ui file (created by Qt Designer).
+        # Additional widgets can be instantiated manually and added to self.layout.
+        uiWidget = slicer.util.loadUI(self.resourcePath("UI/BoneTexture.ui"))
+        self.layout.addWidget(uiWidget)
+        self.ui = slicer.util.childWidgetVariables(uiWidget)
 
-        self.GLCMFeaturesValueDict = {}
-        self.GLCMFeaturesValueDict["insideMask"] = 1
-        self.GLCMFeaturesValueDict["binNumber"] = 10
-        self.GLCMFeaturesValueDict["pixelIntensityMin"] = 0
-        self.GLCMFeaturesValueDict["pixelIntensityMax"] = 4000
-        self.GLCMFeaturesValueDict["neighborhoodRadius"] = 4
-        self.GLRLMFeaturesValueDict = {}
-        self.GLRLMFeaturesValueDict["insideMask"] = 1
-        self.GLRLMFeaturesValueDict["binNumber"] = 10
-        self.GLRLMFeaturesValueDict["pixelIntensityMin"] = 0
-        self.GLRLMFeaturesValueDict["pixelIntensityMax"] = 4000
-        self.GLRLMFeaturesValueDict["neighborhoodRadius"] = 4
-        self.GLRLMFeaturesValueDict["distanceMin"] = 0.00
-        self.GLRLMFeaturesValueDict["distanceMax"] = 1.00
-        self.BMFeaturesValueDict = {}
-        self.BMFeaturesValueDict["threshold"] = 1
-        self.BMFeaturesValueDict["neighborhoodRadius"] = 4
+        # Set scene in MRML widgets. Make sure that in Qt designer the top-level qMRMLWidget's
+        # "mrmlSceneChanged(vtkMRMLScene*)" signal in is connected to each MRML widget's.
+        # "setMRMLScene(vtkMRMLScene*)" slot.
+        uiWidget.setMRMLScene(slicer.mrmlScene)
 
-        # -------------------------------------------------------------------- #
-        # ----------------- Definition of the UI interface ------------------- #
-        # -------------------------------------------------------------------- #
+        # Create logic class. Logic implements all computations that should be possible to run
+        # in batch mode, without a graphical user interface.
+        self.logic = BoneTextureLogic()
 
-        # -------------------- Loading of the .ui file ----------------------- #
+        # Connections
 
-        loader = qt.QUiLoader()
-        path = os.path.join(scriptedModulesPath, 'Resources', 'UI', '%s.ui' % self.moduleName)
-        qfile = qt.QFile(path)
-        qfile.open(qt.QFile.ReadOnly)
-        widget = loader.load(qfile, self.parent)
-        self.layout = self.parent.layout()
-        self.widget = widget
-        self.layout.addWidget(widget)
+        # These connections ensure that we update parameter node when scene is closed
+        self.addObserver(slicer.mrmlScene, slicer.mrmlScene.StartCloseEvent, self.onSceneStartClose)
+        self.addObserver(slicer.mrmlScene, slicer.mrmlScene.EndCloseEvent, self.onSceneEndClose)
+        self.ui.InputScanComboBox.currentNodeChanged.connect(self.onInputScanChanged)
+        self.ui.vectorToScalarVolumeMethodSelectorComboBox.currentIndexChanged.connect(self.updateVectorToScalarVolumeGUI)
 
-        # ---------------- Input Data Collapsible Button --------------------- #
+        # Setup VectorToScalarConversion ComboBox
+        self.setupVectorToScalarConversion()
 
-        self.inputDataCollapsibleButton = self.logic.get("InputDataCollapsibleButton")
-        self.inputDataVerticalLayout = self.logic.get("InputDataVerticalLayout")
-        self.singleCaseGroupBox = self.logic.get("SingleCaseGroupBox")
-        self.inputScanMRMLNodeComboBox = self.logic.get("InputScanMRMLNodeComboBox")
-        self.inputScanMRMLNodeComboBox.setMRMLScene(slicer.mrmlScene)
-        self.inputSegmentationMRMLNodeComboBox = self.logic.get("InputSegmentationMRMLNodeComboBox")
-        self.inputSegmentationMRMLNodeComboBox.setMRMLScene(slicer.mrmlScene)
+        # Buttons
         
-        # Add a python widget from core slicer scripted module: VectorToScalarModule
-        # It works fine, but that module should be written in c++ to be truly reusable with qtdesigner,
-        self.vectorToScalarVolumeGroupBox = self.logic.get("vectorToScalarVolumeGroupBox")
-        self.vectorToScalarVolumeMethodSelectorComboBox = self.logic.get("vectorToScalarVolumeMethodSelectorComboBox")
-        self.SingleComponentSpinBox = self.logic.get("SingleComponentSpinBox")
-        self.vectorToScalarVolumePushButton = self.logic.get("vectorToScalarVolumePushButton")
-        
-        self.vectorToScalarVolumeConversionMethods = VectorToScalarVolume.ConversionMethods
-        # Set up Method ComboBox options
-        for i, method in enumerate(self.vectorToScalarVolumeConversionMethods):
-            title, tooltip = method.value
-            self.vectorToScalarVolumeMethodSelectorComboBox.addItem(title, method)
-            self.vectorToScalarVolumeMethodSelectorComboBox.setItemData(i, tooltip, qt.Qt.ToolTipRole)
-        self.SingleComponentSpinBox.visible = False # Only display for single component conversion method
-
-        vectorToScalarIndex = self.vectorToScalarVolumeMethodSelectorComboBox.findData(
-            self.vectorToScalarVolumeConversionMethods.LUMINANCE)
-        self.vectorToScalarVolumeMethodSelectorComboBox.setCurrentIndex(vectorToScalarIndex)
-        self.vectorToScalarVolumeGroupBox.enabled = False
-
-        # ---------------- Computation Collapsible Button -------------------- #
-
-        self.computationCollapsibleButton = self.logic.get("ComputationCollapsibleButton")
-        self.featureChoiceCollapsibleGroupBox = self.logic.get("FeatureChoiceCollapsibleGroupBox")
-        self.gLCMFeaturesCheckBox = self.logic.get("GLCMFeaturesCheckBox")
-        self.gLRLMFeaturesCheckBox = self.logic.get("GLRLMFeaturesCheckBox")
-        self.bMFeaturesCheckBox = self.logic.get("BMFeaturesCheckBox")
-        self.computeFeaturesPushButton = self.logic.get("ComputeFeaturesPushButton")
-        self.computeColormapsPushButton = self.logic.get("ComputeColormapsPushButton")
-        self.computeParametersBasedOnInputs = self.logic.get("ComputeParametersBasedOnInputsButton")
-        self.GLCMparametersCollapsibleGroupBox = self.logic.get("GLCMParametersCollapsibleGroupBox")
-        self.GLCMinsideMaskValueSpinBox = self.logic.get("GLCMInsideMaskValueSpinBox")
-        self.GLCMnumberOfBinsSpinBox = self.logic.get("GLCMNumberOfBinsSpinBox")
-        self.GLCMminVoxelIntensitySpinBox = self.logic.get("GLCMMinVoxelIntensitySpinBox")
-        self.GLCMmaxVoxelIntensitySpinBox = self.logic.get("GLCMMaxVoxelIntensitySpinBox")
-        self.GLCMneighborhoodRadiusSpinBox = self.logic.get("GLCMNeighborhoodRadiusSpinBox")
-        self.GLRLMparametersCollapsibleGroupBox = self.logic.get("GLRLMParametersCollapsibleGroupBox")
-        self.GLRLMinsideMaskValueSpinBox = self.logic.get("GLRLMInsideMaskValueSpinBox")
-        self.GLRLMnumberOfBinsSpinBox = self.logic.get("GLRLMNumberOfBinsSpinBox")
-        self.GLRLMminVoxelIntensitySpinBox = self.logic.get("GLRLMMinVoxelIntensitySpinBox")
-        self.GLRLMmaxVoxelIntensitySpinBox = self.logic.get("GLRLMMaxVoxelIntensitySpinBox")
-        self.GLRLMminDistanceSpinBox = self.logic.get("GLRLMMinDistanceSpinBox")
-        self.GLRLMmaxDistanceSpinBox = self.logic.get("GLRLMMaxDistanceSpinBox")
-        self.GLRLMneighborhoodRadiusSpinBox = self.logic.get("GLRLMNeighborhoodRadiusSpinBox")
-        self.bMparametersCollapsibleGroupBox = self.logic.get("BMParametersCollapsibleGroupBox")
-        self.BMthresholdSpinBox = self.logic.get("BMThresholdSpinBox")
-        self.BMneighborhoodRadiusSpinBox = self.logic.get("BMNeighborhoodRadiusSpinBox")
-
-        # ----------------- Results Collapsible Button ----------------------- #
-
-        self.resultsCollapsibleButton = self.logic.get("ResultsCollapsibleButton")
-        self.featureSetMRMLNodeComboBox = self.logic.get("featureSetMRMLNodeComboBox")
-        self.featureSetMRMLNodeComboBox.setMRMLScene(slicer.mrmlScene)
-        self.featureComboBox = self.logic.get("featureComboBox")
-        self.displayColormapsCollapsibleGroupBox = self.logic.get("DisplayColormapsCollapsibleGroupBox")
-        self.displayFeaturesTableWidget = self.logic.get("displayFeaturesTableWidget")
-        self.SaveTablePushButton = self.logic.get("SaveTablePushButton")
-        self.CSVPathLineEdit = self.logic.get("CSVPathLineEdit")
-
-        # -------------------------------------------------------------------- #
-        # ---------------------------- Connections --------------------------- #
-        # -------------------------------------------------------------------- #
-
-        # ------------------------- Input Images ----------------------------- #
-        self.inputScanMRMLNodeComboBox.connect("currentNodeChanged(vtkMRMLNode*)", self.onInputScanChanged)
-
-        self.vectorToScalarVolumeMethodSelectorComboBox.connect(
-            'currentIndexChanged(int)', self.updateVectorToScalarVolumeGUI)
-
-        self.vectorToScalarVolumePushButton.connect('clicked()', self.onVectorToScalarVolumePushButtonClicked)
-        # ---------------- Computation Collapsible Button --------------------- #
-
-        self.GLCMinsideMaskValueSpinBox.connect('valueChanged(int)',
-                                                lambda: self.onGLCMFeaturesValueDictModified("insideMask", self.GLCMinsideMaskValueSpinBox.value))
-        self.GLCMnumberOfBinsSpinBox.connect('valueChanged(int)',
-                                             lambda: self.onGLCMFeaturesValueDictModified("binNumber", self.GLCMnumberOfBinsSpinBox.value))
-        self.GLCMminVoxelIntensitySpinBox.connect('valueChanged(int)',
-                                                  lambda: self.onGLCMFeaturesValueDictModified("pixelIntensityMin", self.GLCMminVoxelIntensitySpinBox.value))
-        self.GLCMmaxVoxelIntensitySpinBox.connect('valueChanged(int)',
-                                                  lambda: self.onGLCMFeaturesValueDictModified("pixelIntensityMax", self.GLCMmaxVoxelIntensitySpinBox.value))
-        self.GLCMneighborhoodRadiusSpinBox.connect('valueChanged(int)',
-                                                   lambda: self.onGLCMFeaturesValueDictModified("neighborhoodRadius", self.GLCMneighborhoodRadiusSpinBox.value))
-        self.GLRLMinsideMaskValueSpinBox.connect('valueChanged(int)',
-                                                 lambda: self.onGLRLMFeaturesValueDictModified("insideMask", self.GLRLMinsideMaskValueSpinBox.value))
-        self.GLRLMnumberOfBinsSpinBox.connect('valueChanged(int)',
-                                              lambda: self.onGLRLMFeaturesValueDictModified("binNumber", self.GLRLMnumberOfBinsSpinBox.value))
-        self.GLRLMminVoxelIntensitySpinBox.connect('valueChanged(int)',
-                                                   lambda: self.onGLRLMFeaturesValueDictModified("pixelIntensityMin", self.GLRLMminVoxelIntensitySpinBox.value))
-        self.GLRLMmaxVoxelIntensitySpinBox.connect('valueChanged(int)',
-                                                   lambda: self.onGLRLMFeaturesValueDictModified("pixelIntensityMax", self.GLRLMmaxVoxelIntensitySpinBox.value))
-        self.GLRLMminDistanceSpinBox.connect('valueChanged(double)',
-                                             lambda: self.onGLRLMFeaturesValueDictModified("distanceMin", self.GLRLMminDistanceSpinBox.value))
-        self.GLRLMmaxDistanceSpinBox.connect('valueChanged(double)',
-                                             lambda: self.onGLRLMFeaturesValueDictModified("distanceMax", self.GLRLMmaxDistanceSpinBox.value))
-        self.GLRLMneighborhoodRadiusSpinBox.connect('valueChanged(int)',
-                                                    lambda: self.onGLRLMFeaturesValueDictModified("neighborhoodRadius", self.GLRLMneighborhoodRadiusSpinBox.value))
-        self.BMthresholdSpinBox.connect('valueChanged(int)',
-                                        lambda: self.onBMFeaturesValueDictModified("threshold", self.BMthresholdSpinBox.value))
-        self.BMneighborhoodRadiusSpinBox.connect('valueChanged(int)',
-                                                 lambda: self.onBMFeaturesValueDictModified("neighborhoodRadius", self.BMneighborhoodRadiusSpinBox.value))
-
         # ----------- Compute Parameters Based on Inputs Button -------------- #
-        self.computeParametersBasedOnInputs.connect('clicked()', self.onComputeParametersBasedOnInputs)
+        self.ui.ComputeParametersBasedOnInputsButton.connect('clicked()', self.onComputeParametersBasedOnInputs)
 
         # ---------------- Computation Collapsible Button -------------------- #
-        self.computeFeaturesPushButton.connect('clicked()', self.onComputeFeatures)
-        self.computeColormapsPushButton.connect('clicked()', self.onComputeColormaps)
+        self.ui.ComputeFeaturesPushButton.connect('clicked()', self.onComputeFeatures)
+        self.ui.ComputeColormapsPushButton.connect('clicked()', self.onComputeColormaps)
 
         # ----------------- Results Collapsible Button ----------------------- #
 
         self.featureSetMRMLNodeComboBox.connect("currentNodeChanged(vtkMRMLNode*)", self.onFeatureSetChanged)
         self.featureComboBox.connect("currentIndexChanged(int)", self.onFeatureChanged)
-        self.SaveTablePushButton.connect('clicked()', self.onSaveTable)
+        self.ui.SaveTablePushButton.connect('clicked()', self.onSaveTable)
         copy_filter = TableCopyFilter(self.displayFeaturesTableWidget)
         self.displayFeaturesTableWidget.installEventFilter(copy_filter)
 
-        # -------------------------------------------------------------------- #
-        # -------------------------- Initialisation -------------------------- #
-        # -------------------------------------------------------------------- #
+        # Make sure parameter node is initialized (needed for module reload)
+        self.initializeParameterNode()
 
-        # ******************************************************************** #
-        # ----------------------- Algorithm ---------------------------------- #
-        # ******************************************************************** #
+    def cleanup(self) -> None:
+        """Called when the application closes and the module widget is destroyed."""
+        self.removeObservers()
 
-        # ---------------- Input Data Collapsible Button --------------------- #
+    def enter(self) -> None:
+        """Called each time the user opens this module."""
+        # Make sure parameter node exists and observed
+        self.initializeParameterNode()
+
+    def exit(self) -> None:
+        """Called each time the user opens a different module."""
+        # Do not react to parameter node changes (GUI will be updated when the user enters into the module)
+        if self._parameterNode:
+            self._parameterNode.disconnectGui(self._parameterNodeGuiTag)
+            self._parameterNodeGuiTag = None
+            self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent)
+
+    def onSceneStartClose(self, caller, event) -> None:
+        """Called just before the scene is closed."""
+        # Parameter node will be reset, do not use it anymore
+        self.setParameterNode(None)
+
+    def onSceneEndClose(self, caller, event) -> None:
+        """Called just after the scene is closed."""
+        # If this module is shown while the scene is closed then recreate a new parameter node immediately
+        if self.parent.isEntered:
+            self.initializeParameterNode()
+
+    def initializeParameterNode(self) -> None:
+        """Ensure parameter node exists and observed."""
+        # Parameter node stores all user choices in parameter values, node selections, etc.
+        # so that when the scene is saved and reloaded, these settings are restored.
+
+        self.setParameterNode(self.logic.getParameterNode())
+
+
+    def setParameterNode(self, inputParameterNode: Optional[BoneTextureParameterNode]) -> None:
+        """
+        Set and observe parameter node.
+        Observation is needed because when the parameter node is changed then the GUI must be updated immediately.
+        """
+
+        if self._parameterNode:
+            self._parameterNode.disconnectGui(self._parameterNodeGuiTag)
+            # self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanApply)
+        self._parameterNode = inputParameterNode
+        if self._parameterNode:
+            # Note: in the .ui file, a Qt dynamic property called "SlicerParameterName" is set on each
+            # ui element that needs connection.
+            self._parameterNodeGuiTag = self._parameterNode.connectGui(self.ui)
+          
+    def setupVectorToScalarConversion(self):
+        self.vectorToScalarVolumeConversionMethods = VectorToScalarVolume.ConversionMethods
+        # Set up Method ComboBox options
+        for i, method in enumerate(self.vectorToScalarVolumeConversionMethods):
+            title, tooltip = method.value
+            self.ui.vectorToScalarVolumeMethodSelectorComboBox.addItem(title, method)
+            self.ui.vectorToScalarVolumeMethodSelectorComboBox.setItemData(i, tooltip, qt.Qt.ToolTipRole)
+        self.ui.SingleComponentSpinBox.visible = False # Only display for single component conversion method
 
     def updateVectorToScalarVolumeGUI(self):
-        """ When the conversion method is changed, display the component spinbox
-        if the single component method is selected"""
+            """ When the conversion method is changed, display the component spinbox
+            if the single component method is selected"""
 
-        conversionMethod = self.vectorToScalarVolumeMethodSelectorComboBox.currentData
-        isMethodSingleComponent = conversionMethod is self.vectorToScalarVolumeConversionMethods.SINGLE_COMPONENT
-        self.SingleComponentSpinBox.visible = isMethodSingleComponent
+            conversionMethod = self.ui.vectorToScalarVolumeMethodSelectorComboBox.currentData
+            isMethodSingleComponent = conversionMethod is self.ui.vectorToScalarVolumeConversionMethods.SINGLE_COMPONENT
+            self.ui.SingleComponentSpinBox.visible = isMethodSingleComponent
 
     def onInputScanChanged(self):
         """ Check if input is vector image, and allow conversion enabling VectorToScalarVolume widget """
-        inputScan = self.inputScanMRMLNodeComboBox.currentNode()
+        inputScan = self.ui.InputScanComboBox.currentNode()
         if inputScan is None:
-            self.vectorToScalarVolumeGroupBox.enabled = False
+            self.ui.vectorToScalarVolumeGroupBox.enabled = False
             return
         if inputScan.IsTypeOf('vtkMRMLVectorVolumeNode'):
-            self.vectorToScalarVolumeGroupBox.enabled = True
+            self.ui.vectorToScalarVolumeGroupBox.enabled = True
         else:
-            self.vectorToScalarVolumeGroupBox.enabled = False
+            self.ui.vectorToScalarVolumeGroupBox.enabled = False
 
     def onVectorToScalarVolumePushButtonClicked(self):
         """
@@ -299,14 +244,14 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         And set that ScalarVolume as the new input.
         """
         # create and add output node to scene (hide this selection from user)
-        inputVolumeNode = self.inputScanMRMLNodeComboBox.currentNode()
+        inputVolumeNode = self._parameterNode.inputVolume
         conversionMethod = self.vectorToScalarVolumeMethodSelectorComboBox.currentData
 
-        inputName = self.inputScanMRMLNodeComboBox.currentNode().GetName()
+        inputName = inputVolumeNode.GetName()
         methodName = '_ToScalarMethod_'
         outputName = inputName + methodName + conversionMethod.value[0].replace(" ","")
         if conversionMethod == self.vectorToScalarVolumeConversionMethods.SINGLE_COMPONENT:
-            componentToExtract = self.SingleComponentSpinBox.value
+            componentToExtract = self.ui.SingleComponentSpinBox.value
 
             # SINGLE_COMPONENT: Check that input has enough components for the given componentToExtract
             inputImage = inputVolumeNode.GetImageData()
@@ -348,7 +293,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         # ---------------- Computation Collapsible Button -------------------- #
 
     def onComputeParametersBasedOnInputs(self):
-        inputScan = self.inputScanMRMLNodeComboBox.currentNode()
+        inputScan = self._parameterNode.inputVolume
         inputSegmentation = self.inputSegmentationMRMLNodeComboBox.currentNode()
         isValid = self.logic.inputDataVerification(inputScan, inputSegmentation)
         if isValid is False:
@@ -366,7 +311,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
 
     def onComputeFeatures(self):
         # This will run async, and populate self.logic.featuresXXX
-        self.logic.computeFeatures(self.inputScanMRMLNodeComboBox.currentNode(),
+        self.logic.computeFeatures(self._parameterNode.inputScan,
                                    self.inputSegmentationMRMLNodeComboBox.currentNode(),
                                    self.gLCMFeaturesCheckBox.isChecked(),
                                    self.gLRLMFeaturesCheckBox.isChecked(),
@@ -434,26 +379,27 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget):
         pass
 
 
-################################################################################
-############################  Bone Texture Logic ###############################
-################################################################################
-class BoneTextureLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
-    # ************************************************************************ #
-    # ----------------------- Initialisation --------------------------------- #
-    # ************************************************************************ #
+#
+# BoneTextureLogic
+#
 
-    def __init__(self, interface):
-        logging.debug("----- Bone Texture logic init -----")
+
+class BoneTextureLogic(ScriptedLoadableModuleLogic):
+    """This class should implement all the actual
+    computation done by your module.  The interface
+    should be such that other python code can import
+    this class and make use of the functionality without
+    requiring an instance of the Widget.
+    Uses ScriptedLoadableModuleLogic base class, available at:
+    https://github.com/Slicer/Slicer/blob/main/Base/Python/slicer/ScriptedLoadableModule.py
+    """
+
+    def __init__(self) -> None:
+        """Called when the logic class is instantiated. Can be used for initializing member variables."""
         ScriptedLoadableModuleLogic.__init__(self)
-        VTKObservationMixin.__init__(self)
-        self.interface = interface
-        # Outputs:
-        self.featuresGLCM = None
-        self.featuresGLRLM = None
-        self.featuresBM = None
 
-    def __del__(self):
-        self.removeObservers()
+    def getParameterNode(self):
+        return BoneTextureParameterNode(super().getParameterNode())
 
     def isClose(self, a, b, rel_tol=0.0, abs_tol=0.0):
         for i in range(len(a)):
@@ -720,25 +666,23 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
             cw.writerow(row)
         file.close()
 
-################################################################################
-###########################  Bone Texture Test #################################
-################################################################################
+#
+# BoneTextureTest
+#
 
 
 class BoneTextureTest(ScriptedLoadableModuleTest):
-    # ************************************************************************ #
-    # -------------------------- Initialisation ------------------------------ #
-    # ************************************************************************ #
+    """
+    This is the test case for your scripted module.
+    Uses ScriptedLoadableModuleTest base class, available at:
+    https://github.com/Slicer/Slicer/blob/main/Base/Python/slicer/ScriptedLoadableModule.py
+    """
 
     def setUp(self):
         logging.debug("----- Bone Texture test setup -----")
         # reset the state - clear scene
         self.delayDisplay("Clear the scene")
-        slicer.mrmlScene.Clear(0)
-
-        # ******************************************************************** #
-        # -------------------- Testing of Bone Texture ----------------------- #
-        # ******************************************************************** #
+        slicer.mrmlScene.Clear()
 
     def runTest(self):
         self.setUp()
