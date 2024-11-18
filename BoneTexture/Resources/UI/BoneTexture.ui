@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>920</width>
-    <height>1199</height>
+    <width>918</width>
+    <height>1602</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,7 +37,7 @@
             </stringlist>
            </property>
            <property name="noneEnabled">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
            <property name="addEnabled">
             <bool>false</bool>
@@ -67,7 +67,7 @@
             </stringlist>
            </property>
            <property name="noneEnabled">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
            <property name="addEnabled">
             <bool>false</bool>
@@ -208,10 +208,10 @@
          <bool>true</bool>
         </property>
         <property name="checked">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="collapsed">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_9">
          <property name="sizeConstraint">
@@ -243,6 +243,9 @@
              <property name="value">
               <number>1</number>
              </property>
+             <property name="SlicerParameterName" stdset="0">
+              <string>GLCMFeaturesValue.insideMask</string>
+             </property>
             </widget>
            </item>
            <item row="1" column="0">
@@ -262,6 +265,9 @@
              </property>
              <property name="value">
               <number>10</number>
+             </property>
+             <property name="SlicerParameterName" stdset="0">
+              <string>GLCMFeaturesValue.binNumber</string>
              </property>
             </widget>
            </item>
@@ -299,6 +305,9 @@
                <property name="value">
                 <number>4000</number>
                </property>
+               <property name="SlicerParameterName" stdset="0">
+                <string>GLCMFeaturesValue.pixelIntensityMax</string>
+               </property>
               </widget>
              </item>
              <item row="0" column="1">
@@ -308,6 +317,9 @@
                </property>
                <property name="maximum">
                 <number>1000000</number>
+               </property>
+               <property name="SlicerParameterName" stdset="0">
+                <string>GLCMFeaturesValue.pixelIntensityMin</string>
                </property>
               </widget>
              </item>
@@ -328,6 +340,9 @@
              <property name="value">
               <number>4</number>
              </property>
+             <property name="SlicerParameterName" stdset="0">
+              <string>GLCMFeaturesValue.neighborhoodRadius</string>
+             </property>
             </widget>
            </item>
           </layout>
@@ -347,6 +362,9 @@
          <bool>true</bool>
         </property>
         <property name="checked">
+         <bool>true</bool>
+        </property>
+        <property name="collapsed">
          <bool>false</bool>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -409,6 +427,9 @@
                <property name="value">
                 <number>4000</number>
                </property>
+               <property name="SlicerParameterName" stdset="0">
+                <string>GLRLMFeaturesValue.pixelIntensityMax</string>
+               </property>
               </widget>
              </item>
              <item row="0" column="1">
@@ -418,6 +439,9 @@
                </property>
                <property name="maximum">
                 <number>1000000</number>
+               </property>
+               <property name="SlicerParameterName" stdset="0">
+                <string>GLRLMFeaturesValue.pixelIntensityMin</string>
                </property>
               </widget>
              </item>
@@ -453,6 +477,9 @@
                <property name="value">
                 <double>1.000000000000000</double>
                </property>
+               <property name="SlicerParameterName" stdset="0">
+                <string>GLRLMFeaturesValue.distanceMax</string>
+               </property>
               </widget>
              </item>
              <item row="0" column="1">
@@ -462,6 +489,9 @@
                </property>
                <property name="singleStep">
                 <double>0.100000000000000</double>
+               </property>
+               <property name="SlicerParameterName" stdset="0">
+                <string>GLRLMFeaturesValue.distanceMin</string>
                </property>
               </widget>
              </item>
@@ -477,6 +507,9 @@
              </property>
              <property name="value">
               <number>10</number>
+             </property>
+             <property name="SlicerParameterName" stdset="0">
+              <string>GLRLMFeaturesValue.binNumber</string>
              </property>
             </widget>
            </item>
@@ -494,6 +527,9 @@
              </property>
              <property name="value">
               <number>4</number>
+             </property>
+             <property name="SlicerParameterName" stdset="0">
+              <string>GLRLMFeaturesValue.neighborhoodRadius</string>
              </property>
             </widget>
            </item>
@@ -515,6 +551,9 @@
              <property name="value">
               <number>1</number>
              </property>
+             <property name="SlicerParameterName" stdset="0">
+              <string>GLRLMFeaturesValue.insideMask</string>
+             </property>
             </widget>
            </item>
           </layout>
@@ -523,11 +562,14 @@
        </widget>
       </item>
       <item>
-       <widget class="ctkCollapsibleGroupBox" name="CollapsibleGroupBox_2">
+       <widget class="ctkCollapsibleGroupBox" name="BMParametersCollapsibleGroupBox">
         <property name="title">
          <string>BM parameters</string>
         </property>
         <property name="checked">
+         <bool>true</bool>
+        </property>
+        <property name="collapsed">
          <bool>false</bool>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -561,6 +603,9 @@
              <property name="value">
               <number>1</number>
              </property>
+             <property name="SlicerParameterName" stdset="0">
+              <string>BMFeaturesValue.threshold</string>
+             </property>
             </widget>
            </item>
            <item row="1" column="1">
@@ -570,6 +615,9 @@
              </property>
              <property name="value">
               <number>4</number>
+             </property>
+             <property name="SlicerParameterName" stdset="0">
+              <string>BMFeaturesValue.neighborhoodRadius</string>
              </property>
             </widget>
            </item>
@@ -601,6 +649,9 @@
       <string>Results</string>
      </property>
      <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="collapsed">
       <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
@@ -609,32 +660,14 @@
         <property name="title">
          <string>Display Colormaps</string>
         </property>
+        <property name="collapsed">
+         <bool>true</bool>
+        </property>
         <layout class="QFormLayout" name="formLayout_4">
          <item row="0" column="0">
           <widget class="QLabel" name="featureSetLabel">
            <property name="text">
             <string>Feature set:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="qMRMLNodeComboBox" name="featureSetMRMLNodeComboBox">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="nodeTypes">
-            <stringlist>
-             <string>vtkMRMLDiffusionWeightedVolumeNode</string>
-            </stringlist>
-           </property>
-           <property name="noneEnabled">
-            <bool>true</bool>
-           </property>
-           <property name="editEnabled">
-            <bool>true</bool>
-           </property>
-           <property name="renameEnabled">
-            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -648,6 +681,9 @@
          <item row="1" column="1">
           <widget class="QComboBox" name="featureComboBox"/>
          </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="featureSetComboBox"/>
+         </item>
         </layout>
        </widget>
       </item>
@@ -655,6 +691,9 @@
        <widget class="ctkCollapsibleGroupBox" name="CollapsibleGroupBox">
         <property name="title">
          <string>Feature Values</string>
+        </property>
+        <property name="collapsed">
+         <bool>true</bool>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
@@ -1015,9 +1054,6 @@
          </item>
          <item>
           <widget class="ctkPathLineEdit" name="CSVPathLineEdit">
-           <property name="filters">
-            <set>ctkPathLineEdit::AllEntries|ctkPathLineEdit::Dirs|ctkPathLineEdit::Drives|ctkPathLineEdit::Files|ctkPathLineEdit::NoDot|ctkPathLineEdit::NoDotDot|ctkPathLineEdit::Readable|ctkPathLineEdit::Writable</set>
-           </property>
            <property name="nameFilters">
             <stringlist>
              <string>*.csv</string>
@@ -1118,4 +1154,7 @@
    </hints>
   </connection>
  </connections>
+ <slots>
+  <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
+ </slots>
 </ui>
