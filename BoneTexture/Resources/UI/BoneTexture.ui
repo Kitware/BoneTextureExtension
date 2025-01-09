@@ -25,76 +25,98 @@
         <property name="title">
          <string/>
         </property>
-        <layout class="QGridLayout" name="gridLayout">
-         <item row="2" column="1">
-          <widget class="qMRMLNodeComboBox" name="InputSegmentationComboBox">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="nodeTypes">
-            <stringlist>
-             <string>vtkMRMLLabelMapVolumeNode</string>
-            </stringlist>
-           </property>
-           <property name="noneEnabled">
-            <bool>false</bool>
-           </property>
-           <property name="addEnabled">
-            <bool>false</bool>
-           </property>
-           <property name="removeEnabled">
-            <bool>false</bool>
-           </property>
-           <property name="SlicerParameterName" stdset="0">
-            <string>inputSegmentation</string>
-           </property>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <widget class="QWidget" name="widget" native="true">
+           <layout class="QFormLayout" name="formLayout_9">
+            <item row="0" column="0">
+             <widget class="QLabel" name="InputScanLabel">
+              <property name="text">
+               <string>Input Scan:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="qMRMLNodeComboBox" name="InputScanComboBox">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="nodeTypes">
+               <stringlist>
+                <string>vtkMRMLScalarVolumeNode</string>
+               </stringlist>
+              </property>
+              <property name="hideChildNodeTypes">
+               <stringlist>
+                <string>vtkMRMLLabelMapVolumeNode</string>
+                <string>vtkMRMLDiffusionWeightedVolumeNode</string>
+               </stringlist>
+              </property>
+              <property name="noneEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="addEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="removeEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="selectNodeUponCreation">
+               <bool>true</bool>
+              </property>
+              <property name="SlicerParameterName" stdset="0">
+               <string>inputVolume</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="qMRMLNodeComboBox" name="InputScanComboBox">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="nodeTypes">
-            <stringlist>
-             <string>vtkMRMLScalarVolumeNode</string>
-            </stringlist>
-           </property>
-           <property name="hideChildNodeTypes">
-            <stringlist>
-             <string>vtkMRMLLabelMapVolumeNode</string>
-             <string>vtkMRMLDiffusionWeightedVolumeNode</string>
-            </stringlist>
-           </property>
-           <property name="noneEnabled">
-            <bool>false</bool>
-           </property>
-           <property name="addEnabled">
-            <bool>false</bool>
-           </property>
-           <property name="removeEnabled">
-            <bool>false</bool>
-           </property>
-           <property name="selectNodeUponCreation">
-            <bool>true</bool>
-           </property>
-           <property name="SlicerParameterName" stdset="0">
-            <string>inputVolume</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="InputSegmentationLabel">
+         <item>
+          <widget class="QCheckBox" name="defineMaskCheckBox">
            <property name="text">
-            <string>Input Segmentation</string>
+            <string> Specify mask to define region over which texture features will be computed (Note: This option will greatly improve computation time)</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="InputScanLabel">
-           <property name="text">
-            <string>Input Scan</string>
-           </property>
+         <item>
+          <widget class="QWidget" name="widget_2" native="true">
+           <layout class="QFormLayout" name="formLayout_10">
+            <item row="0" column="0">
+             <widget class="QLabel" name="InputSegmentationLabel">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Input Labelmap:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="qMRMLNodeComboBox" name="InputSegmentationComboBox">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="nodeTypes">
+               <stringlist>
+                <string>vtkMRMLLabelMapVolumeNode</string>
+               </stringlist>
+              </property>
+              <property name="noneEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="addEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="removeEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="SlicerParameterName" stdset="0">
+               <string>inputSegmentation</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
         </layout>

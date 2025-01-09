@@ -172,7 +172,10 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # These connections ensure that we update parameter node when scene is closed
         self.addObserver(slicer.mrmlScene, slicer.mrmlScene.StartCloseEvent, self.onSceneStartClose)
         self.addObserver(slicer.mrmlScene, slicer.mrmlScene.EndCloseEvent, self.onSceneEndClose)
-        # self.ui.InputScanComboBox.currentNodeChanged.connect(self.onInputScanChanged)
+
+        self.setMaskRelatedOptions(False)
+
+        self.ui.defineMaskCheckBox.stateChanged.connect(self.defineMaskCheckStateChanged)
         self.ui.vectorToScalarVolumeMethodSelectorComboBox.currentIndexChanged.connect(self.updateVectorToScalarVolumeGUI)
 
         # Setup VectorToScalarConversion ComboBox
@@ -249,6 +252,18 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self.onInputScanChanged)
             self.onInputScanChanged()
           
+    def setMaskRelatedOptions(self, bool = False):
+        self.ui.InputSegmentationComboBox.enabled = bool
+        self.ui.InputSegmentationLabel.enabled = bool
+
+        self.ui.GLCMInsideMaskValueSpinBox.enabled = bool
+        self.ui.GLCMMaskInsideValueLabel.enabled = bool
+        self.ui.GLRLMInsideMaskValueSpinBox.enabled = bool
+        self.ui.GLRLMMaskInsideValueLabel.enabled = bool
+
+    def defineMaskCheckStateChanged(self):
+        self.setMaskRelatedOptions(self.ui.defineMaskCheckBox.isChecked())
+        
     def setupVectorToScalarConversion(self):
         self.vectorToScalarVolumeConversionMethods = VectorToScalarVolume.ConversionMethods
         # Set up Method ComboBox options
@@ -331,18 +346,33 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # ---------------- Computation Collapsible Button -------------------- #
 
+    def getAlgorithmInputs(self):
+        
+        use_image_mask = self.ui.defineMaskCheckBox.isChecked()
+
+        if use_image_mask:
+            return (self._parameterNode.inputVolume, self._parameterNode.inputSegmentation)
+        else:
+            return (self._parameterNode.inputVolume, None)
+
     def onComputeParametersBasedOnInputs(self):
-        inputScan = self._parameterNode.inputVolume
-        inputSegmentation = self._parameterNode.inputSegmentation
+
+        inputScan, inputSegmentation = self.getAlgorithmInputs()
+        use_image_mask = self.ui.defineMaskCheckBox.isChecked()
         isValid = self.logic.inputDataVerification(inputScan, inputSegmentation)
-        if isValid is False:
+        if not isValid:
             return
 
-        minIntensityValue, maxIntensityValue = self.logic.computeLabelStatistics(inputScan, inputSegmentation)
+        if use_image_mask:
+            minIntensityValue, maxIntensityValue = self.logic.computeLabelStatistics(inputScan, inputSegmentation)
+        else:
+            imageArray = slicer.util.arrayFromVolume(inputScan)
+            minIntensityValue = imageArray.min()
+            maxIntensityValue = imageArray.max()
+
         numBins = self.logic.computeBinsBasedOnIntensityRange(minIntensityValue, maxIntensityValue)
 
         self._parameterNode.GLCMFeaturesValue.binNumber = numBins
-        # self.ui.GLCMNumberOfBinsSpinBox.value = numBins
         self.ui.GLCMMinVoxelIntensitySpinBox.value = minIntensityValue
         self.ui.GLCMMaxVoxelIntensitySpinBox.value = maxIntensityValue
         self.ui.GLRLMNumberOfBinsSpinBox.value = numBins
@@ -351,7 +381,9 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     def onComputeFeatures(self):
 
-        if not (self.logic.inputDataVerification(self._parameterNode.inputVolume, self._parameterNode.inputSegmentation)):
+        inputScan, inputSegmentation = self.getAlgorithmInputs()
+        isValid = self.logic.inputDataVerification(inputScan, inputSegmentation)
+        if not isValid:
             return
         if not (self.ui.GLCMFeaturesCheckBox.isChecked() or self.ui.GLRLMFeaturesCheckBox.isChecked() or self.ui.BMFeaturesCheckBox.isChecked()):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
@@ -361,19 +393,19 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         if self.ui.GLCMFeaturesCheckBox.isChecked():
             GLCMFeaturesNode = self.logic.computeSingleFeature(slicer.modules.computeglcmfeatures,
                                        self.logic.getParameterNode().GLCMFeaturesValue,
-                                       "GLCMFeatures")
+                                       "GLCMFeatures", use_image_mask = self.ui.defineMaskCheckBox.isChecked())
             self.addObserver(GLCMFeaturesNode, slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent, self.onFeatureSetNodeModified)
 
         if self.ui.GLRLMFeaturesCheckBox.isChecked():
             GLRLMFeaturesNode = self.logic.computeSingleFeature(slicer.modules.computeglrlmfeatures,
                                        self.logic.getParameterNode().GLCMFeaturesValue,
-                                       "GLRLMFeatures")
+                                       "GLRLMFeatures", use_image_mask = self.ui.defineMaskCheckBox.isChecked())
             self.addObserver(GLRLMFeaturesNode, slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent, self.onFeatureSetNodeModified)
 
         if self.ui.BMFeaturesCheckBox.isChecked():
             BMFeaturesNode = self.logic.computeSingleFeature(slicer.modules.computebmfeatures,
                                        self.logic.getParameterNode().GLCMFeaturesValue,
-                                       "BMFeatures")
+                                       "BMFeatures", use_image_mask = self.ui.defineMaskCheckBox.isChecked())
             self.addObserver(BMFeaturesNode, slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent, self.onFeatureSetNodeModified)
 
         self.ui.ResultsCollapsibleButton.collapsed = False
@@ -414,7 +446,9 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     def onComputeColormaps(self):
 
-        if not (self.logic.inputDataVerification(self._parameterNode.inputVolume, self._parameterNode.inputSegmentation)):
+        inputScan, inputSegmentation = self.getAlgorithmInputs()
+        isValid = self.logic.inputDataVerification(inputScan, inputSegmentation)
+        if not isValid:
             return
         if not (self.ui.GLCMFeaturesCheckBox.isChecked() or self.ui.GLRLMFeaturesCheckBox.isChecked() or self.ui.BMFeaturesCheckBox.isChecked()):
             slicer.util.warningDisplay("Please select at least one type of features to compute")
@@ -518,12 +552,12 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
                 return False
         return True
 
-    def computeLabelStatistics(self, inputScan, inputLabelMapNode):
+    def computeLabelStatistics(self, inputScan, inputLabelMap):
         """ Use slicer core module to get the min/max intensity value inside the mask.
         Returns tuple (min, max) with intensity values inside the mask. """
         # Export lapel map node into a segmentation node
         segmentationNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode")
-        slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(inputLabelMapNode, segmentationNode)
+        slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(inputLabelMap, segmentationNode)
 
         # Compute statistics (may take time)
         segStatLogic = SegmentStatistics.SegmentStatisticsLogic()
@@ -566,7 +600,8 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
 
     # ------- Test to ensure that the input data exist and are conform ------- #
 
-    def inputDataVerification(self, inputScan, inputSegmentation):
+    def inputDataVerification(self, inputScan, inputLabelMap = None):
+        
         if not(inputScan):
             slicer.util.warningDisplay("Please specify an input scan")
             return False
@@ -574,13 +609,13 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
             if inputScan.IsTypeOf('vtkMRMLVectorVolumeNode'):
                 slicer.util.warningDisplay("The input scan has a vector pixel type, please transform it to a scalar type first.")
                 return False
-
-        if inputScan and inputSegmentation:
-            if inputScan.GetImageData().GetDimensions() != inputSegmentation.GetImageData().GetDimensions():
+        
+        if inputScan and inputLabelMap:
+            if inputScan.GetImageData().GetDimensions() != inputLabelMap.GetImageData().GetDimensions():
                 slicer.util.warningDisplay("The input scan and the input segmentation must be the same size")
                 return False
-            if not self.isClose(inputScan.GetSpacing(), inputSegmentation.GetSpacing(), 0.0, 1e-04) or \
-                    not self.isClose(inputScan.GetOrigin(), inputSegmentation.GetOrigin(), 0.0, 1e-04):
+            if not self.isClose(inputScan.GetSpacing(), inputLabelMap.GetSpacing(), 0.0, 1e-04) or \
+                    not self.isClose(inputScan.GetOrigin(), inputLabelMap.GetOrigin(), 0.0, 1e-04):
                 slicer.util.warningDisplay("The input scan and the input segmentation must overlap: same origin, spacing and orientation")
                 return False
         return True
@@ -605,11 +640,15 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
     def computeSingleFeature(self,
                               CLIname,
                               parameterPack,
-                              outputName):
+                              outputName, use_image_mask: bool = False):
+        """
+        image_mask
+        """
         logging.info('Computing %s Features ...' % outputName)
         parameters = self.convertParameterPackToDict(parameterPack)
         parameters["inputVolume"] = self.getParameterNode().inputVolume
-        parameters["inputMask"] = self.getParameterNode().inputSegmentation
+        if use_image_mask:
+            parameters["inputMask"] = self.getParameterNode().inputSegmentation
         run_node = slicer.cli.createNode(CLIname, parameters)
         run_node.SetName(outputName)
         run_node = slicer.cli.run(CLIname, node=run_node, parameters=parameters, wait_for_completion=False)
@@ -619,11 +658,12 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
     def computeSingleColormap(self,
                               CLIname,
                               parameterPack,
-                              outputName):
+                              outputName, use_image_mask: bool = False):
         """ Returns the feature set node with rainbow colormap"""
         parameters = self.convertParameterPackToDict(parameterPack)
         parameters["inputVolume"] = self.getParameterNode().inputVolume
-        parameters["inputMask"] = self.getParameterNode().inputSegmentation
+        if use_image_mask:
+            parameters["inputMask"] = self.getParameterNode().inputSegmentation
         volumeNode = vtkMRMLDiffusionWeightedVolumeNode()
         slicer.mrmlScene.AddNode(volumeNode)
         displayNode = slicer.vtkMRMLDiffusionWeightedVolumeDisplayNode()
