@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>918</width>
-    <height>1602</height>
+    <width>810</width>
+    <height>1613</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,105 +21,193 @@
      </property>
      <layout class="QVBoxLayout" name="InputDataVerticalLayout">
       <item>
-       <widget class="QGroupBox" name="SingleCaseGroupBox">
-        <property name="title">
-         <string/>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
+       <widget class="QWidget" name="widget" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QWidget" name="widget" native="true">
-           <layout class="QFormLayout" name="formLayout_9">
-            <item row="0" column="0">
-             <widget class="QLabel" name="InputScanLabel">
-              <property name="text">
-               <string>Input Scan:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="qMRMLNodeComboBox" name="InputScanComboBox">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="nodeTypes">
-               <stringlist>
-                <string>vtkMRMLScalarVolumeNode</string>
-               </stringlist>
-              </property>
-              <property name="hideChildNodeTypes">
-               <stringlist>
-                <string>vtkMRMLLabelMapVolumeNode</string>
-                <string>vtkMRMLDiffusionWeightedVolumeNode</string>
-               </stringlist>
-              </property>
-              <property name="noneEnabled">
-               <bool>false</bool>
-              </property>
-              <property name="addEnabled">
-               <bool>false</bool>
-              </property>
-              <property name="removeEnabled">
-               <bool>false</bool>
-              </property>
-              <property name="selectNodeUponCreation">
-               <bool>true</bool>
-              </property>
-              <property name="SlicerParameterName" stdset="0">
-               <string>inputVolume</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="defineMaskCheckBox">
+          <widget class="QPushButton" name="singleImagePushButton">
            <property name="text">
-            <string> Specify mask to define region over which texture features will be computed (Note: This option will greatly improve computation time)</string>
+            <string>Single Image Mode</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QWidget" name="widget_2" native="true">
-           <layout class="QFormLayout" name="formLayout_10">
-            <item row="0" column="0">
-             <widget class="QLabel" name="InputSegmentationLabel">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Input Labelmap:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="qMRMLNodeComboBox" name="InputSegmentationComboBox">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="nodeTypes">
-               <stringlist>
-                <string>vtkMRMLLabelMapVolumeNode</string>
-               </stringlist>
-              </property>
-              <property name="noneEnabled">
-               <bool>false</bool>
-              </property>
-              <property name="addEnabled">
-               <bool>false</bool>
-              </property>
-              <property name="removeEnabled">
-               <bool>false</bool>
-              </property>
-              <property name="SlicerParameterName" stdset="0">
-               <string>inputSegmentation</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+          <widget class="QPushButton" name="serializerPushButton">
+           <property name="text">
+            <string>Serializer Mode</string>
+           </property>
           </widget>
          </item>
         </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QStackedWidget" name="inputDataStackedWidget">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="singleImageMode">
+         <layout class="QFormLayout" name="formLayout_11">
+          <item row="0" column="0" colspan="2">
+           <widget class="QGroupBox" name="groupBox_2">
+            <property name="title">
+             <string/>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_8">
+             <item>
+              <widget class="QWidget" name="inputScan" native="true">
+               <layout class="QFormLayout" name="formLayout_9">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="InputScanLabel">
+                  <property name="text">
+                   <string>Input Scan:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="qMRMLNodeComboBox" name="InputScanComboBox">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="nodeTypes">
+                   <stringlist>
+                    <string>vtkMRMLScalarVolumeNode</string>
+                   </stringlist>
+                  </property>
+                  <property name="hideChildNodeTypes">
+                   <stringlist>
+                    <string>vtkMRMLLabelMapVolumeNode</string>
+                    <string>vtkMRMLDiffusionWeightedVolumeNode</string>
+                   </stringlist>
+                  </property>
+                  <property name="noneEnabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="addEnabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="removeEnabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="selectNodeUponCreation">
+                   <bool>true</bool>
+                  </property>
+                  <property name="SlicerParameterName" stdset="0">
+                   <string>inputVolume</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="defineMaskCheckBox">
+               <property name="text">
+                <string> Specify mask to define region over which texture features will be computed (Note: This option will greatly improve computation time)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QWidget" name="inputSegmentation" native="true">
+               <layout class="QFormLayout" name="formLayout_8">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="InputSegmentationLabel">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="text">
+                   <string>Input Labelmap:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="qMRMLNodeComboBox" name="InputSegmentationComboBox">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="nodeTypes">
+                   <stringlist>
+                    <string>vtkMRMLLabelMapVolumeNode</string>
+                   </stringlist>
+                  </property>
+                  <property name="noneEnabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="addEnabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="removeEnabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="SlicerParameterName" stdset="0">
+                   <string>inputLabelMap</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="serializeMode">
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QGroupBox" name="groupBox">
+            <property name="title">
+             <string/>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_6">
+             <item>
+              <widget class="QWidget" name="widget_2" native="true">
+               <layout class="QFormLayout" name="formLayout_10">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="InputFolderLabel">
+                  <property name="text">
+                   <string>Input data folder:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="ctkPathLineEdit" name="InputFolderDirectoryPathLineEdit">
+                  <property name="filters">
+                   <set>ctkPathLineEdit::Dirs|ctkPathLineEdit::Executable|ctkPathLineEdit::NoDot|ctkPathLineEdit::NoDotDot|ctkPathLineEdit::Readable</set>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="inputRequirements">
+               <property name="text">
+                <string>Note: The input data should be named: Scan_{ID} for the input scan and Seg_{ID} for the corresponding label map (if a region mask exists)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="processInputsPushButton">
+               <property name="text">
+                <string>Process Inputs</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="inputsDisplayMessage">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </item>
       <item>
@@ -130,25 +218,91 @@
         <property name="title">
          <string>Conversion: Vector Input Scan to Scalar</string>
         </property>
-        <layout class="QFormLayout" name="formLayout_8">
-         <item row="0" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
-           <item>
-            <widget class="QComboBox" name="vectorToScalarVolumeMethodSelectorComboBox"/>
-           </item>
+        <layout class="QFormLayout" name="formLayout_13">
+         <item row="1" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0">
            <item>
             <widget class="QSpinBox" name="SingleComponentSpinBox"/>
            </item>
           </layout>
          </item>
-         <item row="1" column="1">
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="SerializerConvertToScalarCheckBox">
+           <property name="text">
+            <string>Convert Input Scan to Scalar</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
           <widget class="QPushButton" name="vectorToScalarVolumePushButton">
            <property name="text">
             <string>Convert Input Scan to Scalar</string>
            </property>
           </widget>
          </item>
+         <item row="3" column="1">
+          <widget class="QComboBox" name="vectorToScalarVolumeMethodSelectorComboBox"/>
+         </item>
         </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="ctkCollapsibleButton" name="ExportCollapsibleButton">
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
+     <property name="text">
+      <string>Export</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_10">
+      <item>
+       <widget class="QWidget" name="widget_3" native="true">
+        <layout class="QFormLayout" name="formLayout_12">
+         <item row="0" column="0">
+          <widget class="QLabel" name="OutputPathLabel">
+           <property name="text">
+            <string>Output folder:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="ctkPathLineEdit" name="OutputFolderDirectoryPathLineEdit">
+           <property name="filters">
+            <set>ctkPathLineEdit::Dirs|ctkPathLineEdit::Drives|ctkPathLineEdit::Executable|ctkPathLineEdit::NoDot|ctkPathLineEdit::NoDotDot|ctkPathLineEdit::PermissionMask|ctkPathLineEdit::Readable|ctkPathLineEdit::Writable</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="separateFeaturesCheckBox">
+        <property name="text">
+         <string>Separate feature maps</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="saveAsCSVCheckBox">
+        <property name="text">
+         <string>Save As CSV</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="writeCSVHeaderCheckBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Write CSV Header</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
      </layout>
@@ -166,17 +320,24 @@
          <string>Features choice</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
-         <item row="0" column="0">
-          <widget class="QLabel" name="GLCMFeaturesLabel">
-           <property name="text">
-            <string>Gray Level Co-occurrences (GLCM) features</string>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="1">
           <widget class="QCheckBox" name="GLRLMFeaturesCheckBox">
            <property name="text">
             <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QCheckBox" name="BMFeaturesCheckBox">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="GLCMFeaturesLabel">
+           <property name="text">
+            <string>Gray Level Co-occurrences (GLCM) features</string>
            </property>
           </widget>
          </item>
@@ -198,13 +359,6 @@
           <widget class="QLabel" name="BMFeaturesLabel">
            <property name="text">
             <string>Bone Morphometry (BM) features</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QCheckBox" name="BMFeaturesCheckBox">
-           <property name="text">
-            <string/>
            </property>
           </widget>
          </item>
