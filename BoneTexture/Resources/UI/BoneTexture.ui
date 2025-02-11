@@ -285,26 +285,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QCheckBox" name="saveAsCSVCheckBox">
-        <property name="text">
-         <string>Save As CSV</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="writeCSVHeaderCheckBox">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Write CSV Header</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
