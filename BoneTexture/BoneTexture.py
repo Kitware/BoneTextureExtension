@@ -23,7 +23,12 @@ import SegmentStatistics
 import math  # for ceil
 import VectorToScalarVolume # For extra widget, handling input vector/RGB images.
 
-from slicer import vtkMRMLScalarVolumeNode, vtkMRMLLabelMapVolumeNode, vtkMRMLDiffusionWeightedVolumeNode
+from slicer import (
+    vtkMRMLScalarVolumeNode, 
+    vtkMRMLLabelMapVolumeNode, 
+    vtkMRMLDiffusionWeightedVolumeNode,
+    vtkMRMLCommandLineModuleNode
+)
 
 
 
@@ -195,7 +200,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.serializerPushButton.clicked.connect(self.activateSeralizerMode)
         self.activateSingleImageMode()
         self.ui.SerializerConvertToScalarCheckBox.stateChanged.connect(self.enableVectorToScalarComboBox)
-        self.ui.saveAsCSVCheckBox.stateChanged.connect(self.ui.writeCSVHeaderCheckBox.setEnabled)
+        # self.ui.saveAsCSVCheckBox.stateChanged.connect(self.ui.writeCSVHeaderCheckBox.setEnabled)
 
         self.ui.defineMaskCheckBox.stateChanged.connect(self.defineMaskCheckStateChanged)
         self.ui.vectorToScalarVolumeMethodSelectorComboBox.currentIndexChanged.connect(self.updateVectorToScalarVolumeGUI)
@@ -289,10 +294,15 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.serializerModeActive = False
         self.ui.inputDataStackedWidget.setCurrentIndex(0)
         self.setButtonColorSingleOrSerializerMode(isSerializerMode = self.serializerModeActive)
+        
+        # Hide serializer mode only widgets
         self.ui.ExportCollapsibleButton.hide()
-        self.ui.ResultsCollapsibleButton.show()
         self.ui.inputsDisplayMessage.hide()
         self.ui.processInputsPushButton.hide()
+
+        # show single mode only widgets
+        self.ui.ComputeParametersBasedOnInputsButton.show()
+        self.ui.ResultsCollapsibleButton.show()
 
         # Convert vector to scalar options
         self.ui.vectorToScalarVolumePushButton.show()
@@ -473,16 +483,17 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                         {'labelmap': False, 'show': False})
 
             if inputScan.IsTypeOf('vtkMRMLVectorVolumeNode'):
-
                 # Check for vector to scalar conversion
                 if not self.ui.SerializerConvertToScalarCheckBox.isChecked():
                     slicer.util.warningDisplay("Detected an input scan that has a vector pixel type. Please enable the vector to scalar conversion option and select a method to transform the image to a scalar type first.")
+                    slicer.mrmlScene.RemoveNode(inputScan)
                     return
 
         display_message += f"Corresponding segmentation masks were found for {mask_count}/{len(input_scans)} scans."
 
         self.serializer_input_data = input_data
         self.ui.inputsDisplayMessage.setText(display_message)
+        slicer.mrmlScene.RemoveNode(inputScan)
 
     def onComputeParametersBasedOnInputs(self):
         """ Populate the input parameters for computing the textue features 
@@ -538,6 +549,9 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             conversionMethod,
             componentToExtract)
     
+        # Remove original node
+        slicer.mrmlScene.RemoveNode(inputScan)
+
         return outputVolumeNode
 
     def onComputeFeatures(self):
@@ -557,6 +571,9 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.ComputeFeaturesSingleMode(inputData)
 
     def ComputeFeaturesSingleMode(self, inputData: List[Tuple[vtkMRMLScalarVolumeNode, vtkMRMLLabelMapVolumeNode]]):
+
+        # Hide progress bar
+        self.ui.ComputeFeaturesProgressBar.visible = False
 
         for input in inputData:
 
@@ -600,8 +617,16 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             slicer.util.errorDisplay("Please specify an output directory for saving results")
             return
 
-        output_csv = Path(self.ui.OutputFolderDirectoryPathLineEdit.currentPath)/"TextureFeaturesTable.csv"
-        
+        def uniquify(path, counter):
+            filename, extension = os.path.splitext(path)
+            path = filename + " (" + str(counter) + ")" + extension
+            return path
+
+        counter = 1
+        output_csv = os.path.join(self.ui.OutputFolderDirectoryPathLineEdit.currentPath,"TextureFeaturesTable.csv")
+        while os.path.isfile(output_csv):
+            output_csv = uniquify(output_csv, counter)
+            counter += 1
 
         stepsPerCase = sum((
             self.ui.GLCMFeaturesCheckBox.isChecked(),
@@ -615,7 +640,6 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.ComputeFeaturesProgressBar.visible = True
 
         with open(output_csv, "w+") as file:
-            print(file)
             cw = csv.writer(file, delimiter=',')
 
             # Write header information
@@ -688,6 +712,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
                 slicer.mrmlScene.RemoveNode(inputScan)
                 slicer.mrmlScene.RemoveNode(inputLabelMap)
+
                 toWrite = [case_id]
                 if self.ui.GLCMFeaturesCheckBox.isChecked():
                     toWrite += GLCMfeatures
@@ -698,27 +723,18 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                 cw.writerow(toWrite)
 
                 file.flush()  
-                self.ui.ComputeFeaturesProgressBar.visible = False
             
-    def onColorMapNodeModifiedSerializer(self, cliMapNode, event):
-        if not cliMapNode.IsBusy():
-            self.removeObserver(cliMapNode, slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent, self.onColorMapNodeModified)
-            logging.info('%s Status: %s' % (cliMapNode.GetName(), cliMapNode.GetStatusString()))
-            if cliMapNode.GetStatusString() == 'Completed':
-                # Update progress bar
-                self.ui.ComputeTextureMapsProgressBar.value += 1
-                if self.ui.ComputeTextureMapsProgressBar.value == self.ui.ComputeTextureMapsProgressBar.maximum:
-                    self.ui.ComputeTextureMapsProgressBar.visible = False
+    def onCLINodeCompletedSerializerMode(self, cliMapNode):
 
-                outputDifussionWeightedVolumeNode = slicer.mrmlScene.GetNodeByID(cliMapNode.GetParameterValue(0,1))
-                outputDir = self.ui.OutputFolderDirectoryPathLineEdit.currentPath
-                self.exportVolumeToFile(outputDifussionWeightedVolumeNode, outputDir)
-                
-                # clear nodes from slicer
-                slicer.mrmlScene.RemoveNode(outputDifussionWeightedVolumeNode)
-                slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetNodeByID(cliMapNode.GetParameterValue(0,0))) # inputScan
-                slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetNodeByID(cliMapNode.GetParameterValue(0,2))) #inputLabelMap
-    
+        # Update progress bar
+        self.ui.ComputeTextureMapsProgressBar.value += 1
+        outputDifussionWeightedVolumeNode = slicer.mrmlScene.GetNodeByID(cliMapNode.GetParameterValue(0,1))
+        outputDir = self.ui.OutputFolderDirectoryPathLineEdit.currentPath
+        self.exportVolumeToFile(outputDifussionWeightedVolumeNode, outputDir)
+        
+        # clear nodes from slicer
+        slicer.mrmlScene.RemoveNode(outputDifussionWeightedVolumeNode)
+
     def onColorMapNodeModified(self, cliMapNode, event):
         if not cliMapNode.IsBusy():
             self.removeObserver(cliMapNode, slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent, self.onColorMapNodeModified)
@@ -742,13 +758,14 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         if self.ui.separateFeaturesCheckBox.isChecked():
             parameters = dict()
             parameters["inputVolume"] = volumeNode
-            parameters["outputFileBaseName"] = Path(outputDir)/volumeNode.GetName()
+            parameters["outputFileBaseName"] = os.path.join(outputDir,volumeNode.GetName())
             slicer.cli.run(slicer.modules.separatevectorimage,
                         None,
                         parameters,
                         wait_for_completion=True)
         else:
-            slicer.util.saveNode(volumeNode, Path(outputDir)/(volumeNode.GetName() + ".nhdr"))
+            output_filename = os.path.join(outputDir, volumeNode.GetName() + ".nrrd")
+            slicer.util.saveNode(volumeNode, output_filename)
 
     def onDisplayFeatures(self):
         if self.computedFeatures['GLCMFeatures'] is not None:
@@ -786,6 +803,9 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         
     def ComputeTextureMapsSingleMode(self, inputData):
         
+        # Hide progress bar
+        self.ui.ComputeTextureMapsProgressBar.visible = False
+
         input = inputData[0] # In single mode, cannot be a list with len > 0
         inputScan, inputLabelMap = input
         case_id = inputScan.GetName()
@@ -879,26 +899,31 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                                         inputScan,
                                         parameters,
                                         f"GLCMFeatureMaps_{case_id}",
-                                        inputLabelMap)
-                self.addObserver(GLCMMapNode, slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent, self.onColorMapNodeModifiedSerializer)
-
+                                        inputLabelMap, wait_for_completion=True)
+                self.onCLINodeCompletedSerializerMode(GLCMMapNode)
+    
             if self.ui.GLRLMFeaturesCheckBox.isChecked():
                 parameters = self.logic.convertParameterPackToDict(self.logic.getParameterNode().GLRLMFeaturesValue)
                 GLRLMMapNode = self.logic.computeSingleTextureMap(slicer.modules.computeglrlmfeaturemaps,
                                         inputScan,
                                         parameters,
                                         f"GLRLMFeatureMaps_{case_id}",
-                                        inputLabelMap)
-                self.addObserver(GLRLMMapNode, slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent, self.onColorMapNodeModifiedSerializer)
-
+                                        inputLabelMap, wait_for_completion=True)
+                self.onCLINodeCompletedSerializerMode(GLRLMMapNode)
+            
             if self.ui.BMFeaturesCheckBox.isChecked():
                 parameters = self.logic.convertParameterPackToDict(self.logic.getParameterNode().BMFeaturesValue)
                 BMMapNode = self.logic.computeSingleTextureMap(slicer.modules.computebmfeaturemaps,
                                         inputScan,
                                         parameters,
                                         f"BMFeatureMaps_{case_id}",
-                                        inputLabelMap)
-                self.addObserver(BMMapNode, slicer.vtkMRMLCommandLineModuleNode().StatusModifiedEvent, self.onColorMapNodeModifiedSerializer)
+                                        inputLabelMap, wait_for_completion=True)
+                self.onCLINodeCompletedSerializerMode(BMMapNode)
+               
+            slicer.mrmlScene.RemoveNode(inputScan) # inputScan
+            if inputLabelMap:
+                slicer.mrmlScene.RemoveNode(inputLabelMap) #inputLabelMap
+    
 
         # ----------------- Results Collapsible Button ----------------------- #
 
@@ -1077,7 +1102,7 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
                               parameters: dict,
                               outputName: str, 
                               inputLabelMap: Optional[vtkMRMLLabelMapVolumeNode] = None, 
-                              wait_for_completion: bool = False):
+                              wait_for_completion: bool = False) -> vtkMRMLCommandLineModuleNode:
         """
         Args: 
         Returns the feature set node with rainbow colormap

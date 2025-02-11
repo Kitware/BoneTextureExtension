@@ -790,9 +790,23 @@
        </widget>
       </item>
       <item>
+       <widget class="QProgressBar" name="ComputeTextureMapsProgressBar">
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="ComputeFeaturesPushButton">
         <property name="text">
          <string>Compute Texture Feature Set</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="ComputeFeaturesProgressBar">
+        <property name="value">
+         <number>24</number>
         </property>
        </widget>
       </item>
