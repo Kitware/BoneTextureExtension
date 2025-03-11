@@ -1122,6 +1122,22 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
 
         return feature_dict
     
+    def castVolumeToFloat(self, volume: vtkMRMLScalarVolumeNode):
+
+        parameters = {}
+        CastScalarVolume_CLI = slicer.modules.castscalarvolume
+        parameters["InputVolume"] = volume
+        parameters["OutputVolume"] = volume
+        parameters["Type"] = 'Float'
+        run_cast_node = slicer.cli.createNode(CastScalarVolume_CLI)
+        run_cast_node.SetName('cast-runnode')
+        run_cast_node = slicer.cli.run(CastScalarVolume_CLI,
+                    node = run_cast_node,
+                    parameters = parameters,
+                    wait_for_completion=True)
+        
+        return volume
+
     def computeSingleFeature(self,
                              inputScan: vtkMRMLScalarVolumeNode,
                              parameters: dict,
@@ -1146,6 +1162,12 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
             CLIname = slicer.modules.computebmfeatures
         else:
             raise ValueError("Invalid 'feature_type' option. Use 'GLCM', 'GLRM' or 'BM'")
+        
+        # Cast the inputScan to float if double type. ITK texture features does
+        # not work on double scalar volumes
+        if slicer.util.arrayFromVolume(inputScan).dtype == 'double':
+            logging.info('Casting %s to Float data type ...' % inputScan.GetName())
+            inputScan = self.castVolumeToFloat(inputScan)
         
         logging.info('Computing %s Features ...' % feature_type)
         parameters["inputVolume"] = inputScan
@@ -1181,6 +1203,12 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
             CLIname = slicer.modules.computebmfeaturemaps
         else:
             raise ValueError("Invalid 'feature_type' option. Use 'GLCM', 'GLRM' or 'BM'")
+        
+        # Cast the inputScan to float if double type. ITK texture features does
+        # not work on double scalar volumes
+        if slicer.util.arrayFromVolume(inputScan).dtype == 'double':
+            logging.info('Casting %s to Float data type ...' % inputScan.GetName())
+            inputScan = self.castVolumeToFloat(inputScan)
         
         parameters["inputVolume"] = inputScan
         if inputLabelMap:
