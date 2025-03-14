@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>416</width>
-    <height>1394</height>
+    <width>418</width>
+    <height>1448</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -932,7 +932,7 @@
            </column>
            <item row="0" column="0">
             <property name="text">
-             <string>energy</string>
+             <string>Energy</string>
             </property>
            </item>
            <item row="0" column="1">
@@ -942,7 +942,7 @@
            </item>
            <item row="0" column="2">
             <property name="text">
-             <string>shortRunEmphasis</string>
+             <string>Short Run Emphasis</string>
             </property>
            </item>
            <item row="0" column="3">
@@ -952,7 +952,7 @@
            </item>
            <item row="0" column="4">
             <property name="text">
-             <string>BVTV</string>
+             <string>Bone Volume Density</string>
             </property>
            </item>
            <item row="0" column="5">
@@ -962,7 +962,7 @@
            </item>
            <item row="1" column="0">
             <property name="text">
-             <string>entropy</string>
+             <string>Entropy</string>
             </property>
            </item>
            <item row="1" column="1">
@@ -972,7 +972,7 @@
            </item>
            <item row="1" column="2">
             <property name="text">
-             <string>longRunEmphasis</string>
+             <string>Long Run Emphasis</string>
             </property>
            </item>
            <item row="1" column="3">
@@ -982,7 +982,7 @@
            </item>
            <item row="1" column="4">
             <property name="text">
-             <string>TbTh</string>
+             <string>Trabecular Thickness</string>
             </property>
            </item>
            <item row="1" column="5">
@@ -992,7 +992,7 @@
            </item>
            <item row="2" column="0">
             <property name="text">
-             <string>correlation</string>
+             <string>Correlation</string>
             </property>
            </item>
            <item row="2" column="1">
@@ -1002,7 +1002,7 @@
            </item>
            <item row="2" column="2">
             <property name="text">
-             <string>greyLevelNonuniformity</string>
+             <string>Grey Level Nonuniformity</string>
             </property>
            </item>
            <item row="2" column="3">
@@ -1012,7 +1012,7 @@
            </item>
            <item row="2" column="4">
             <property name="text">
-             <string>TbSp</string>
+             <string>Trabecular Separation</string>
             </property>
            </item>
            <item row="2" column="5">
@@ -1022,7 +1022,7 @@
            </item>
            <item row="3" column="0">
             <property name="text">
-             <string>inverseDifferenceMoment</string>
+             <string>Inverse Difference Moment</string>
             </property>
            </item>
            <item row="3" column="1">
@@ -1032,7 +1032,7 @@
            </item>
            <item row="3" column="2">
             <property name="text">
-             <string>runLengthNonuniformity</string>
+             <string>Run Length Nonuniformity</string>
             </property>
            </item>
            <item row="3" column="3">
@@ -1042,7 +1042,7 @@
            </item>
            <item row="3" column="4">
             <property name="text">
-             <string>TbN</string>
+             <string>Trabecular Number</string>
             </property>
            </item>
            <item row="3" column="5">
@@ -1052,7 +1052,7 @@
            </item>
            <item row="4" column="0">
             <property name="text">
-             <string>inertia</string>
+             <string>Inertia</string>
             </property>
            </item>
            <item row="4" column="1">
@@ -1062,7 +1062,7 @@
            </item>
            <item row="4" column="2">
             <property name="text">
-             <string>lowGreyLevelRunEmphasis</string>
+             <string>Low Grey Level Run Emphasis</string>
             </property>
            </item>
            <item row="4" column="3">
@@ -1072,7 +1072,7 @@
            </item>
            <item row="4" column="4">
             <property name="text">
-             <string>BSBV</string>
+             <string>Bone Surface Density</string>
             </property>
            </item>
            <item row="4" column="5">
@@ -1082,7 +1082,7 @@
            </item>
            <item row="5" column="0">
             <property name="text">
-             <string>clusterShade</string>
+             <string>Cluster Shade</string>
             </property>
            </item>
            <item row="5" column="1">
@@ -1092,7 +1092,7 @@
            </item>
            <item row="5" column="2">
             <property name="text">
-             <string>highGreyLevelRunEmphasis</string>
+             <string>High Grey Level Run Emphasis</string>
             </property>
            </item>
            <item row="5" column="3">
@@ -1102,7 +1102,7 @@
            </item>
            <item row="6" column="0">
             <property name="text">
-             <string>clusterProminence</string>
+             <string>Cluster Prominence</string>
             </property>
            </item>
            <item row="6" column="1">
@@ -1112,7 +1112,7 @@
            </item>
            <item row="6" column="2">
             <property name="text">
-             <string>shortRunLowGreyLevelEmphasis</string>
+             <string>Short Run Low Grey Level Emphasis</string>
             </property>
            </item>
            <item row="6" column="3">
@@ -1122,7 +1122,7 @@
            </item>
            <item row="7" column="0">
             <property name="text">
-             <string>haralickCorrelation</string>
+             <string>Haralick Correlation</string>
             </property>
            </item>
            <item row="7" column="1">
@@ -1132,7 +1132,7 @@
            </item>
            <item row="7" column="2">
             <property name="text">
-             <string>shortRunHighGreyLevelEmphasis</string>
+             <string>Short Run High Grey Level Emphasis</string>
             </property>
            </item>
            <item row="7" column="3">
@@ -1142,7 +1142,7 @@
            </item>
            <item row="8" column="2">
             <property name="text">
-             <string>longRunLowGreyLevelEmphasis</string>
+             <string>Long Run Low Grey Level Emphasis</string>
             </property>
            </item>
            <item row="8" column="3">
@@ -1152,7 +1152,7 @@
            </item>
            <item row="9" column="2">
             <property name="text">
-             <string>longRunHighGreyLevelEmphasis</string>
+             <string>Long Run High Grey Level Emphasis</string>
             </property>
            </item>
            <item row="9" column="3">

@@ -214,6 +214,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # ----------- Compute Parameters Based on Inputs Button -------------- #
         self.ui.ComputeParametersBasedOnInputsButton.clicked.connect(self.onComputeParametersBasedOnInputs)
+        self.setToolTips()
 
         # ---------------- Computation Collapsible Button -------------------- #
         self.ui.ComputeFeaturesPushButton.clicked.connect(self.onComputeFeatures)
@@ -228,6 +229,9 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.ExportResultsButton.clicked.connect(self.onExportResults)
         copy_filter = TableCopyFilter(self.ui.displayFeaturesTableWidget)
         self.ui.displayFeaturesTableWidget.installEventFilter(copy_filter)
+        self.addObserver(slicer.mrmlScene, slicer.vtkMRMLScene.NodeRemovedEvent, self.onNodeRemoved)
+
+
         
     def cleanup(self) -> None:
         """Called when the application closes and the module widget is destroyed."""
@@ -284,6 +288,15 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     def onParameterNodeModified(self,caller = None, event = None) -> None:
 
         self.onInputScanChanged()
+    
+    @vtk.calldata_type(vtk.VTK_OBJECT)
+    def onNodeRemoved(self, caller, event, node : slicer.vtkMRMLNode) -> None:
+
+        # If the node was a bone texture extension colormap result
+        if node.IsA('vtkMRMLDiffusionWeightedVolumeNode'):
+            if node.GetName() in self._parameterNode.computedTextureFeatureMaps:
+                self._parameterNode.computedTextureFeatureMaps.pop(node.GetName())
+
         self.onComputedFeaturesChanged()
     
     def onComputedFeaturesChanged(self):
@@ -307,6 +320,30 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.enableVectorToScalarComboBox(True)
         else:
             self.enableVectorToScalarComboBox(False)
+    
+    def setToolTips(self):
+
+        self.ui.BMNeighborhoodRadiusSpinBox.setToolTip("Radius (in voxels) defining the local region for BM analysis.")
+        self.ui.BMThresholdSpinBox.setToolTip("Intensity threshold to binarize the image (values >= threshold become foreground).")
+
+        self.ui.GLCMMaxVoxelIntensitySpinBox.setToolTip("Maximum voxel intensity to consider for GLCM calculation.")
+        self.ui.GLCMMinVoxelIntensitySpinBox.setToolTip("Minimum voxel intensity to consider for GLCM calculation.")
+        
+        
+        self.ui.GLCMInsideMaskValueSpinBox.setToolTip("Voxel value considered 'inside' the mask (if a mask is used).")
+        self.ui.GLCMNeighborhoodRadiusSpinBox.setToolTip("Radius (in voxels) defining the local region for GLCM analysis")
+        self.ui.GLCMNumberOfBinsSpinBox.setToolTip("Number of discrete intensity levels (bins) for texture calculation. "
+        "Fewer bins are faster but lose fine detail; more bins capture more detail but increase computation.")
+
+        self.ui.GLRLMMaxVoxelIntensitySpinBox.setToolTip("Maximum voxel intensity to consider for GLRLM calculation.")
+        self.ui.GLRLMMinVoxelIntensitySpinBox.setToolTip("Minimum voxel intensity to consider for GLRLM calculation.")
+        self.ui.GLRLMMaxDistanceSpinBox.setToolTip("Maximum pixel distance to consider for defining a run. Larger distances capture coarser textures.")
+        self.ui.GLRLMMinDistanceSpinBox.setToolTip("Minimum pixel distance to consider for defining a run")
+
+        self.ui.GLRLMInsideMaskValueSpinBox.setToolTip("Voxel value considered 'inside' the mask (if a mask is used).")
+        self.ui.GLRLMNeighborhoodRadiusSpinBox.setToolTip("Radius (in voxels) defining the local region for GLRLM analysis")
+        self.ui.GLRLMNumberOfBinsSpinBox.setToolTip("Number of discrete intensity levels (bins) for texture calculation. "
+        "Fewer bins are faster but lose fine detail; more bins capture more detail but increase computation.")
 
     def setButtonColorSingleOrSerializerMode(self, isSerializerMode = False):
         if isSerializerMode:
@@ -324,7 +361,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # Hide serializer mode only widgets
         self.ui.inputsDisplayMessage.hide()
         self.ui.processInputsPushButton.hide()
-        self.ui.ComputeFeaturesProgressBar.visible = False
+        self.ui.ComputeFeaturesProgressBar.visible = False  
         self.ui.ComputeTextureMapsProgressBar.visible = False
 
         # show single mode only widgets
@@ -361,6 +398,9 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.ExportResultsButton.hide()
         self.ui.saveFeaturesCheckBox.checked = True
         self.ui.saveFeaturesCheckBox.enabled = False
+
+        self.ui.ComputeFeaturesProgressBar.visible = False
+        self.ui.ComputeTextureMapsProgressBar.visible = False
 
     def setMaskRelatedOptions(self, bool = False):
 
@@ -590,8 +630,16 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     def ComputeFeaturesSingleMode(self, inputData: List[Tuple[vtkMRMLScalarVolumeNode, vtkMRMLLabelMapVolumeNode]]):
 
-        # Hide progress bar
-        self.ui.ComputeFeaturesProgressBar.visible = False
+        #Setup progress bar
+        numSteps = sum((
+            self.ui.GLCMFeaturesCheckBox.isChecked(),
+            self.ui.GLRLMFeaturesCheckBox.isChecked(),
+            self.ui.BMFeaturesCheckBox.isChecked(),
+        ))
+        self.ui.ComputeFeaturesProgressBar.value = 0
+        self.ui.ComputeFeaturesProgressBar.minimum = 0 
+        self.ui.ComputeFeaturesProgressBar.maximum = numSteps
+        self.ui.ComputeFeaturesProgressBar.visible = True
 
         for input in inputData:
 
@@ -599,6 +647,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
             isValid = self.logic.inputDataVerification(inputScan, inputLabelMap)
             if not isValid:
+                self.ui.ComputeFeaturesProgressBar.visible = False
                 return
 
             # This will run async, and populate self.computedFeatures
@@ -768,6 +817,8 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             if cliMapNode.GetStatusString() == 'Completed':
                 outputDifussionWeightedVolumeNode = slicer.mrmlScene.GetNodeByID(cliMapNode.GetParameterValue(0,1))
                 self._parameterNode.computedTextureFeatureMaps[outputDifussionWeightedVolumeNode.GetName()] = outputDifussionWeightedVolumeNode  
+                self.ui.ComputeTextureMapsProgressBar.value += 1
+                self.onComputedFeaturesChanged()
     
     def onFeatureSetNodeModified(self, cliNode, event):
         """ Only called in single image mode """
@@ -777,6 +828,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
           if cliNode.GetStatusString() == 'Completed':
             self.computedFeatures[cliNode.GetName()] = list(map(float, cliNode.GetParameterValue(2, 0).split(",")))
             self.DisplayFeatures()
+            self.ui.ComputeFeaturesProgressBar.value += 1
 
     def exportVolumeToFile(self, volumeNode: vtkMRMLDiffusionWeightedVolumeNode, outputDir: str):
         if self.ui.separateFeaturesCheckBox.isChecked():
@@ -827,14 +879,23 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         
     def ComputeTextureMapsSingleMode(self, inputData):
         
-        # Hide progress bar
-        self.ui.ComputeTextureMapsProgressBar.visible = False
+        # Setup proress bar
+        numSteps = sum((
+            self.ui.GLCMFeaturesCheckBox.isChecked(),
+            self.ui.GLRLMFeaturesCheckBox.isChecked(),
+            self.ui.BMFeaturesCheckBox.isChecked(),
+        ))
+        self.ui.ComputeTextureMapsProgressBar.value = 0
+        self.ui.ComputeTextureMapsProgressBar.minimum = 0 
+        self.ui.ComputeTextureMapsProgressBar.maximum = numSteps
+        self.ui.ComputeTextureMapsProgressBar.visible = True
 
         input = inputData[0] # In single mode, cannot be a list with len > 0
         inputScan, inputLabelMap = input
 
         isValid = self.logic.inputDataVerification(inputScan, inputLabelMap)
         if not isValid:
+            self.ui.ComputeTextureMapsProgressBar.visible = False
             return
 
         if self.ui.GLCMFeaturesCheckBox.isChecked():
@@ -969,7 +1030,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         elif currentFeatureMapNode.GetDisplayNode().GetInputImageData().GetNumberOfScalarComponents() == 5:
             self.ui.featureComboBox.addItems(self.BMFeatures)
 
-        # # Set the feature Set displayed in Slicer to the selected module
+        # Set the feature Set displayed in Slicer to the selected module
         slicer.util.setSliceViewerLayers(background = currentFeatureMapNode.GetID())
 
     def onFeatureChanged(self, index):
