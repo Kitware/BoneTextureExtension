@@ -365,7 +365,7 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.ComputeTextureMapsProgressBar.visible = False
 
         # show single mode only widgets
-        self.ui.ComputeParametersBasedOnInputsButton.show()
+        self.ui.ComputeParametersBasedOnInputsButton.enabled = True
         self.ui.ResultsCollapsibleButton.show()
 
         # Convert vector to scalar options
@@ -378,12 +378,14 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.saveFeaturesCheckBox.checked = False
         self.ui.saveFeaturesCheckBox.enabled = True
 
+        self.toggleInputIntensityParameters()
+
     def activateSerializerMode(self):
         self.serializerModeActive = True
         self.ui.inputDataStackedWidget.setCurrentIndex(0)
         self.setButtonColorSingleOrSerializerMode(isSerializerMode = self.serializerModeActive)
         self.ui.ResultsCollapsibleButton.hide()
-        self.ui.ComputeParametersBasedOnInputsButton.hide()
+        self.ui.ComputeParametersBasedOnInputsButton.enabled = False
         self.ui.inputsDisplayMessage.show()
         self.ui.processInputsPushButton.show()
         self.setMaskRelatedOptions(True)
@@ -401,6 +403,33 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         self.ui.ComputeFeaturesProgressBar.visible = False
         self.ui.ComputeTextureMapsProgressBar.visible = False
+
+        self.toggleInputIntensityParameters()
+
+    def toggleInputIntensityParameters(self):
+
+        if self.serializerModeActive:
+            enabled = False
+            tooltip = "In serializer mode, the voxel intensity range for each input image" \
+            " will be set to the pixel" \
+            " intensity range of the input image by default."
+        else:
+            enabled = True
+            tooltip = ""
+
+        self.ui.GLCMMaxVoxelIntensitySpinBox.enabled = enabled
+        self.ui.GLCMMin.enabled = enabled
+        self.ui.GLCMMax.enabled = enabled
+        self.ui.GLCMMinVoxelIntensitySpinBox.enabled = enabled
+        self.ui.GLCMVoxelIntensityRangeLabel.enabled = enabled
+        
+        self.ui.GLRLMMaxVoxelIntensitySpinBox.enabled = enabled
+        self.ui.GLRLMMin.enabled = enabled
+        self.ui.GLRLMMax.enabled = enabled
+        self.ui.GLRLMMinVoxelIntensitySpinBox.enabled = enabled
+        self.ui.GLRLMVoxelIntensityRangeLabel.enabled = enabled
+
+        self.ui.ComputeParametersBasedOnInputsButton.setToolTip(tooltip)
 
     def setMaskRelatedOptions(self, bool = False):
 
@@ -486,7 +515,10 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # ---------------- Computation Collapsible Button -------------------- #
 
-    def getAlgorithmInputs(self) -> List[Tuple[vtkMRMLScalarVolumeNode, vtkMRMLLabelMapVolumeNode]]:
+    def getAlgorithmInputs(self):
+        """For single image:
+        TODO: Returns: List[Tuple[vtkMRMLScalarVolumeNode, vtkMRMLLabelMapVolumeNode]]
+        For serializer mode: returns the filenames. """
         
         if self.serializerModeActive:
             if self.serializer_input_data:
@@ -975,8 +1007,20 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                 self.ui.ComputeTextureMapsProgressBar.visible = False
                 return
 
+            # Compute the min and max intensity for the image
+            if inputLabelMap:
+                minIntensityValue, maxIntensityValue = self.logic.computeLabelStatistics(
+                    inputScan=inputScan,
+                    inputLabelMap=inputLabelMap)
+            else:
+                imageArray = slicer.util.arrayFromVolume(inputScan)
+                minIntensityValue = imageArray.min()
+                maxIntensityValue = imageArray.max()
+
             if self.ui.GLCMFeaturesCheckBox.isChecked():
                 parameters = self.logic.convertParameterPackToDict(self.logic.getParameterNode().GLCMFeaturesValue)
+                parameters['pixelIntensityMin'] = minIntensityValue
+                parameters['pixelIntensityMax'] = maxIntensityValue
                 GLCMMapNode = self.logic.computeSingleTextureMap(
                     inputScan,
                     parameters,
@@ -986,6 +1030,8 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                 self.onCLINodeCompletedSerializerMode(GLCMMapNode)
     
             if self.ui.GLRLMFeaturesCheckBox.isChecked():
+                parameters['pixelIntensityMin'] = minIntensityValue
+                parameters['pixelIntensityMax'] = maxIntensityValue
                 parameters = self.logic.convertParameterPackToDict(self.logic.getParameterNode().GLRLMFeaturesValue)
                 GLRLMMapNode = self.logic.computeSingleTextureMap(
                     inputScan,

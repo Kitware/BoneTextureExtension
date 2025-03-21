@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>418</width>
-    <height>1448</height>
+    <width>416</width>
+    <height>1437</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -367,14 +367,14 @@
            <item row="2" column="1">
             <layout class="QFormLayout" name="formLayout_8">
              <item row="0" column="0">
-              <widget class="QLabel" name="label_9">
+              <widget class="QLabel" name="GLCMMin">
                <property name="text">
                 <string>min:</string>
                </property>
               </widget>
              </item>
              <item row="1" column="0">
-              <widget class="QLabel" name="label_10">
+              <widget class="QLabel" name="GLCMMax">
                <property name="text">
                 <string>max:</string>
                </property>
@@ -489,14 +489,14 @@
            <item row="3" column="1">
             <layout class="QFormLayout" name="formLayout_10">
              <item row="0" column="0">
-              <widget class="QLabel" name="label_7">
+              <widget class="QLabel" name="GLRLMMin">
                <property name="text">
                 <string>min:</string>
                </property>
               </widget>
              </item>
              <item row="1" column="0">
-              <widget class="QLabel" name="label_8">
+              <widget class="QLabel" name="GLRLMMax">
                <property name="text">
                 <string>max:</string>
                </property>
