@@ -571,7 +571,8 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             minIntensityValue = imageArray.min()
             maxIntensityValue = imageArray.max()
 
-        numBins = self.logic.computeBinsBasedOnIntensityRange(minIntensityValue, maxIntensityValue)
+        # Set the default number of bins to 32. 
+        numBins = 32 
 
         self._parameterNode.GLCMFeaturesValue.binNumber = numBins
         self.ui.GLCMMinVoxelIntensitySpinBox.value = minIntensityValue
@@ -949,9 +950,6 @@ class BoneTextureWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
             inputScan, inputLabelMap = input
 
-            # Get case ID
-            case_id = self.getCaseID(inputScan)
-
             # Load in the input files
             inputScan = slicer.util.loadNodeFromFile(inputScan,
                 'VolumeFile',
@@ -1124,17 +1122,6 @@ class BoneTextureLogic(ScriptedLoadableModuleLogic):
         maxIntensityValue = stats[segmentId, "ScalarVolumeSegmentStatisticsPlugin.max"]
 
         return minIntensityValue, maxIntensityValue
-
-    def computeBinsBasedOnIntensityRange(self, minIntensityValue, maxIntensityValue):
-        """ Compute number of bins based on the intensity range min/max.
-        The formula is ad-hoc, and add 100 bins for each 1000 value difference between min and max.
-        Example: min = -500,  max = 3000, numBins = 400
-        The minimum number of bins is 100, indepedently of the input.
-        Returns integer number of bins.
-        """
-        numBins = 100 * int(math.ceil(abs(maxIntensityValue - minIntensityValue)/1000.0))
-        return numBins
-
 
     # ************************************************************************ #
     # ------------------------ Algorithm ------------------------------------- #
