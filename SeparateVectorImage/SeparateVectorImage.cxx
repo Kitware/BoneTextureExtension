@@ -38,6 +38,19 @@
 
 #include "SeparateVectorImageCLP.h"
 
+// Feature name lists for GLCM, GLRM, and BM
+std::vector<std::string> GLCMFeatures = {"Energy", "Entropy", "Correlation", "InverseDifferenceMoment", 
+  "Inertia", "ClusterShade", "ClusterProminence", "HaralickCorrelation"};
+
+std::vector<std::string> RLFeatures = {"ShortRunEmphasis", "LongRunEmphasis", 
+"GreyLevelNonuniformity", "RunLengthNonuniformity", 
+"LowGreyLevelRunEmphasis", "HighGreyLevelRunEmphasis", 
+"ShortRunLowGreyLevelEmphasis", "ShortRunHighGreyLevelEmphasis", 
+"LongRunLowGreyLevelEmphasis", "LongRunHighGreyLevelEmphasis"};
+
+std::vector<std::string> BMFeatures = {"BoneVolumeDensity", "TrabecularThickness", 
+"TrabecularSeparation", "TrabecularNumber", "BoneSurfaceDensity"};
+
 namespace
 {
 
@@ -63,6 +76,23 @@ int DoIt( int argc, char * argv[] )
   typename IndexSelectionType::Pointer indexSelectionFilter = IndexSelectionType::New();
   indexSelectionFilter->SetInput( reader->GetOutput() );
 
+  // Select the appropriate feature name list based on VectorComponentDimension
+  std::vector<std::string> featureNames;
+
+  if (VectorComponentDimension == 8) {
+    featureNames = GLCMFeatures;
+  } else if (VectorComponentDimension == 10) {
+    featureNames = RLFeatures;
+  } else if (VectorComponentDimension == 5) {
+    featureNames = BMFeatures;
+  } else {
+      for (unsigned int i = 1; i <= VectorComponentDimension; ++i) {
+        std::ostringstream ss;
+        ss << i;
+        featureNames.push_back(ss.str());
+      }
+  }
+
   for( unsigned int i = 0; i < VectorComponentDimension; i++ )
     {
     indexSelectionFilter->SetIndex(i);
@@ -71,10 +101,8 @@ int DoIt( int argc, char * argv[] )
     typedef itk::ImageFileWriter< OutputImageType > WriterType;
     typename WriterType::Pointer writer = WriterType::New();
     std::string outputFilename = outputFileBaseName.c_str();;
-    std::ostringstream ss;
-    ss << i + 1;
-    std::string s = ss.str();
-    writer->SetFileName( outputFilename + "_" + s + ".nrrd" );
+    std::string suffix = featureNames[i];
+    writer->SetFileName( outputFilename + "_" + suffix + ".nrrd" );
     writer->SetInput( indexSelectionFilter->GetOutput() );
 
     writer->Update();
